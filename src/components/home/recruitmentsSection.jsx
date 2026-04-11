@@ -17,7 +17,7 @@ export default function RecruitmentsSection({ recentRecruitments = [] }) {
   const [displayedRecruitments, setDisplayedRecruitments] = useState(recentRecruitments);
   const [currentCategory, setCurrentCategory] = useState('All');
 
-  console.log({keys: Object.keys(statusConfig)});
+  console.log({ keys: Object.keys(statusConfig) });
 
   useEffect(() => {
     currentCategory === 'All' ?
@@ -29,24 +29,22 @@ export default function RecruitmentsSection({ recentRecruitments = [] }) {
     <section className="py-16 bg-white dark:bg-neutral-900">
       <div className="max-w-6xl mx-auto px-4">
         {/* Section header */}
-        <div className="flex flex-col items-center sm:flex-row sm:items-end justify-between gap-4 mb-10">
+        <div className="flex flex-col items-center sm:flex-row justify-between gap-4 mb-10">
           <div>
             <h2 className="text-3xl font-bold text-brand" style={{ fontFamily: "'Syne', sans-serif" }}>
-              Recent Recruitments
+              Ongoing Recruitments
             </h2>
             <p className="text-muted-foreground mt-1 text-sm">
               Exam schedules, eligibility criteria, application links, admit cards & results — all in one place.
             </p>
           </div>
-          <Link href="/recruitments">
-            <Button variant="outline" className="shrink-0 border text-white !bg-brand dark:hover:bg-brand hover:text-white cursor-pointer">
-              All Recruitments <ArrowRight className="w-4 h-4 ml-1.5" />
-            </Button>
+          <Link href="/recruitments" className="link-btn group">
+            All Recruitments <ArrowRight className="w-4 h-4 transition-all duration-150 group-hover:translate-x-1" />
           </Link>
         </div>
 
         {/* Category filter pills */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        {/* <div className="flex flex-wrap gap-2 mb-8">
           {categories.map((cat, i) => (
             <button
               key={cat}
@@ -59,7 +57,7 @@ export default function RecruitmentsSection({ recentRecruitments = [] }) {
               {cat}
             </button>
           ))}
-        </div>
+        </div> */}
 
         {/* Recruitment cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

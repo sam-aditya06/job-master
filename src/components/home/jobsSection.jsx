@@ -34,15 +34,13 @@ export default function JobsSection({ popularJobs = [] }) {
               Detailed breakdowns of roles, responsibilities, pay scales, perks & career growth — before you prepare.
             </p>
           </div>
-          <Link href="/jobs">
-            <Button variant="outline" className="shrink-0 border text-white !bg-brand hover:text-white cursor-pointer">
-              All Job Profiles <ArrowRight className="w-4 h-4 ml-1.5" />
-            </Button>
+          <Link href="/jobs" className="link-btn group">
+            All Job Profiles <ArrowRight className="w-4 h-4 transition-all duration-150 group-hover:translate-x-1" />
           </Link>
         </div>
 
         {/* Category filter pills */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        {/* <div className="flex flex-wrap gap-2 mb-8">
           {categories.map((cat, i) => (
             <button
               key={cat}
@@ -55,7 +53,7 @@ export default function JobsSection({ popularJobs = [] }) {
               {cat}
             </button>
           ))}
-        </div>
+        </div> */}
 
         {/* Job profile cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

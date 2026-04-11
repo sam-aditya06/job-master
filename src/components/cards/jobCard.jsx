@@ -7,23 +7,25 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card";
 export default function JobCard({ job, page }) {
     const bgColor = page === 'home' ? 'dark:bg-slate-800' : 'dark:bg-neutral-900 dark:sm:bg-neutral-800';
 
-    console.log({job});
-    
+    console.log({ job });
+
     return (
         <Link className="group" href={`/jobs/${job.slug}`} >
             <Card className={`border hover:border-brand rounded-xl hover:shadow-md ${bgColor} p-5 transition-all cursor-pointer h-full`}>
                 <CardTitle className='hidden'>{job.name} ({job.abbr})</CardTitle>
-                <CardContent className='flex justify-between items-center gap-2 px-0'>
+                <CardContent className='flex justify-between items-center px-0'>
                     <div className='flex flex-col w-full'>
                         <div className="mb-3">
                             <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1 block">
                                 {job.sector}
                             </span>
-                            <h3 className="text-xl font-bold mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>
+                            <h3 className="font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
                                 {job.name}
                             </h3>
                             <div className="flex items-center gap-1 mb-3">
-                                <img className="h-3 w-3" src={`${process.env.NEXT_PUBLIC_CDN_URL}/${job.orgLogo}`} />
+                                <div className="border rounded-full h-fit w-fit p-[2px]">
+                                    <img className="h-3 w-3" src={`${process.env.NEXT_PUBLIC_CDN_URL}/${job.orgLogo}`} />
+                                </div>
                                 <p className="text-xs text-muted-foreground leading-none">{job.orgName}</p>
                             </div>
                         </div>
@@ -34,7 +36,7 @@ export default function JobCard({ job, page }) {
                                 ₹{job.payScale.min.toLocaleString("en-IN")} – ₹{job.payScale.max.toLocaleString("en-IN")}
                             </span>
                             <span className={`text-brand dark:text-blue-100 text-xs ml-auto`}>
-                                {job.payScale.abbr}
+                                {job.payScale.abbr || `Pay Level ${job.payScale.level}`}
                             </span>
                         </div>
 
@@ -53,7 +55,10 @@ export default function JobCard({ job, page }) {
                                 <MapPin className="w-3 h-3" />
                                 {
                                     job.location.isAllIndia === true ?
-                                        `All India${job.location.isStateWise === true ? ' (State-wise)' : job.location.isCircleWise === true ? ' (Circle-wise)' : ''}` :
+                                        `All India${job.location.isStateWise === true ? ' (State-wise)' :
+                                            job.location.isCircleWise === true ? ' (Circle-wise)' :
+                                                job.location.sector === 'railways' ? ' (RRB-wise)' :
+                                                    ''}` :
                                         job.location.state
                                 }
                             </div>

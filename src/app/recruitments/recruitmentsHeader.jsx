@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { deslugify } from "@/lib/utils";
 
-export default function RecruitmentsHeader() {
+export default function RecruitmentsHeader({forOrg, by}) {
     const sp = useSearchParams();
     const router = useRouter();
     const pathName = usePathname();
@@ -19,8 +19,6 @@ export default function RecruitmentsHeader() {
     const qualification = sp.get('qualification');
     const expLvl = sp.get('expLvl');
     const status = sp.get('status');
-    const forOrg = sp.get('for');
-    const by = sp.get('by');
     const location = sp.get('location');
 
     const activeFilters = [
@@ -68,8 +66,8 @@ export default function RecruitmentsHeader() {
         { key: 'search', label: `search: ${search}` },
         { key: 'sector', label: `sector: ${sector}` },
         { key: 'qualification', label: `qualification: ${qualification}` },
-        { key: 'expLvl', label: `exp level: ${expLvl}` },
-        { key: 'status', label: `recruitment status: ${status}` },
+        { key: 'expLvl', label: expLvl },
+        { key: 'status', label: `status: ${status}` },
         { key: 'forOrg', label: `for: ${forOrg}` },
         { key: 'by', label: `by: ${by}` },
         { key: 'location', label: `location: ${deslugify(location)}` },

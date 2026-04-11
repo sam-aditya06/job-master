@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 
 export default function RecruitmentsSidebar({ orgs = [], states = [], recruiters = [] }) {
-    console.log({ recruiters });
     const pathName = usePathname();
     const sp = useSearchParams();
     const router = useRouter();
@@ -112,7 +111,7 @@ export default function RecruitmentsSidebar({ orgs = [], states = [], recruiters
 
 
     return (
-        <div className="flex flex-col gap-5 mt-12 lg:mt-5 p-2 overflow-y-auto">
+        <div className="grow flex flex-col gap-5 mt-12 xl:mt-0 h-full p-2 overflow-y-auto">
             <div className="flex flex-col gap-2">
                 <p className='font-bold text-sm'>Recruitment for</p>
                 <Popover open={forOpen} onOpenChange={setForOpen}>

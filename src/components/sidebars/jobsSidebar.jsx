@@ -89,7 +89,7 @@ export default function JobsSidebar({ orgs = [], states = [], setSidebarOpen }) 
     }
 
     return (
-        <div className="flex flex-col gap-5 mt-12 xl:mt-5 p-2 overflow-y-auto">
+        <div className="flex flex-col gap-5 mt-12 xl:mt-0 h-full p-2 overflow-y-auto">
             <div className="flex flex-col gap-2">   
                 <p className='font-bold text-sm'>Organisation</p>
                 <Popover open={open} onOpenChange={setOpen}>

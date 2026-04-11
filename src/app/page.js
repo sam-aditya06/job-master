@@ -1,4 +1,4 @@
-import { getJobs, getPopularJobs, getRecentRecruitments } from "@/lib/serverUtils";
+import { getJobs, getPopularJobs, getOngoingRecruitments } from "@/lib/serverUtils";
 import Home from "./home";
 import HeroSection from "@/components/home/heroSection";
 import { Suspense } from "react";
@@ -21,7 +21,7 @@ export default function HomePage() {
 }
 
 async function RecruitmentsSectionWrapper() {
-  const recentRecruitments = await getRecentRecruitments();
+  const recentRecruitments = await getOngoingRecruitments('home');
 
   return (
     <RecruitmentsSection recentRecruitments={recentRecruitments} />

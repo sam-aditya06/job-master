@@ -148,7 +148,7 @@ export function OrgCardSkeleton() {
                         <div className="border rounded-full bg-neutral-300 dark:bg-neutral-800 w-full h-full animate-pulse"></div>
                     </div>
                     <div className="flex flex-col gap-1 w-full">
-                        <div className="border rounded-full bg-neutral-300 dark:bg-neutral-800 h-6 w-2/3 animate-pulse"></div>
+                        <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 h-6 w-2/3 animate-pulse"></div>
                         <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 h-5 w-1/3 animate-pulse"></div>
                     </div>
                 </div>

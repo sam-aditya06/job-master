@@ -1,25 +1,26 @@
+import { Suspense } from "react";
+
 import DesktopSidebar from "@/components/sidebars/desktopSidebar";
 import MobileSidebar from "@/components/sidebars/mobileSidebar";
 import { SidebarSkeleton } from "@/components/skeletons";
-import { getOrgs, getStates } from "@/lib/serverUtils";
-import { Suspense } from "react";
+import { getJobSidebarFields } from "@/lib/serverUtils";
 
-export default function JobLayout({ children }) {
+export default function JobLayout({ children, params }) {
 
     return (
         <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
             <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
                 <div className="p-2 h-full">
                     <Suspense fallback={<SidebarSkeleton />}>
-                        <DesktopSidebar />
+                        <Sidebar params={params} screen='desktop' />
                     </Suspense>
                 </div>
             </aside>
             <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
-                <div className="p-5 min-h-full h-full overflow-y-auto">
+                <div className="p-3 min-h-full h-full overflow-y-auto">
                     <div className="xl:hidden">
                         <Suspense fallback={null}>
-                            <MobileSidebar />
+                            <Sidebar params={params} screen='mobile' />
                         </Suspense>
                     </div>
                     {children}
@@ -33,4 +34,16 @@ export default function JobLayout({ children }) {
             </aside>
         </div>
     )
+}
+
+async function Sidebar({params, screen}) {
+    const {job} = await params;
+    const fields = await getJobSidebarFields(job);
+    
+    return(
+        <>
+            {screen === 'desktop' ? <DesktopSidebar fields={fields} /> : <MobileSidebar fields={fields} />}
+        </>
+    )
+
 }

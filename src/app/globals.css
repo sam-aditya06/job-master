@@ -46,6 +46,8 @@
   --radius-4xl: calc(var(--radius) + 16px);
 
   --color-brand: var(--brand);
+
+  --animate-fade-in: fade-in 2s ease-in-out;
 }
 
 :root {
@@ -130,21 +132,42 @@
     @apply bg-background text-foreground;
   }
 
-  /*custom cms content styling*/
+  /* Custom Styling (CMS Content) */
+
+  .cms-content article {
+    @apply flex flex-col gap-6;
+  }
+
+  .cms-content article> :is(section, header) {
+    @apply flex flex-col gap-4;
+  }
+
+  .cms-content article section section {
+    @apply flex flex-col gap-2;
+  }
+
   .cms-content h1 {
     @apply text-3xl font-bold font-sans;
   }
 
   .cms-content h2 {
-    @apply mt-6 text-2xl font-bold;
+    @apply text-2xl font-bold;
   }
 
   .cms-content h3 {
-    @apply mt-6 text-xl font-bold;
+    @apply text-xl font-bold;
   }
 
   .cms-content p {
-    @apply mt-4 text-justify lg:text-base/7;
+    @apply text-justify lg:text-base/7;
+  }
+
+  .cms-content p.stage-label {
+    @apply mt-0 mb-1 text-xl font-semibold text-foreground;
+  }
+
+  .cms-content p.cms-note {
+    @apply text-justify text-sm text-muted-foreground;
   }
 
   .dark .cms-content b {
@@ -152,15 +175,19 @@
   }
 
   .cms-content ol {
-    @apply mt-6 pl-5 list-decimal;
+    @apply pl-5 list-decimal;
   }
 
   .cms-content ul {
-    @apply mt-4 pl-5 list-disc;
+    @apply pl-5 list-disc;
   }
 
-   .cms-content ul > li {
+  .cms-content ul>li {
     @apply text-justify text-base/7;
+  }
+
+  .cms-content div.tc {
+    @apply w-full overflow-x-auto;
   }
 
   .cms-content table {
@@ -181,12 +208,39 @@
     @apply text-white/90;
   }
 
-  .cms-content a {
-    @apply mx-auto underline text-blue-500
+  .cms-content div.stage-card {
+    @apply flex flex-col items-center gap-2 border rounded-lg shadow-sm dark:bg-neutral-800 mx-auto px-5 py-4 lg:w-xl text-center transition-shadow hover:shadow-md;
+  }
+
+  .cms-content div.link-btn-disabled {
+    @apply border rounded-md bg-neutral-300 dark:bg-neutral-600 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed
+  }
+
+  .cms-content a.link-btn {
+    @apply mx-auto mt-2 text-sm;
   }
 
 }
 
+/* Custom Styling (General) */
+
+.link-btn {
+  @apply flex items-center gap-1 border rounded-md !bg-brand dark:hover:bg-brand/70 px-3 py-2 w-fit text-white leading-none cursor-pointer
+}
+
+
+/* Keyframes */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 5px;
 }
@@ -197,10 +251,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--sidebar-border);
+  background-color: var(--muted);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--primary);
+  background-color: var(--brand);
 }

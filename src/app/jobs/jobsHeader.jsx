@@ -9,13 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { deslugify } from "@/lib/utils";
 
-export default function JobsHeader() {
+export default function JobsHeader({org}) {
 
     const sp = useSearchParams();
     const router = useRouter();
     const pathName = usePathname();
 
-    const org = sp.get('org');
     const search = sp.get('search');
     const sector = sp.get('sector');
     const qualification = sp.get('qualification');
@@ -69,7 +68,7 @@ export default function JobsHeader() {
 
     const filterChips = [
         { key: 'search', label: `search: ${search}` },
-        { key: 'org', label: `org: ${org}` },
+        { key: 'org', label: `org: ${deslugify(org)}` },
         { key: 'sector', label: `sector: ${sector}` },
         { key: 'qualification', label: `qualification: ${qualification}` },
         { key: 'expLvl', label: expLvl },

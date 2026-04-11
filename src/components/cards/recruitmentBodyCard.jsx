@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
-import { capitalize, cn } from "@/lib/utils";
+import { capitalize, cn, deslugify } from "@/lib/utils";
 import Link from "next/link";
 
 export function RecruitmentBodyCard({ recruitmentBody }) {
@@ -25,7 +25,7 @@ export function RecruitmentBodyCard({ recruitmentBody }) {
                         </div>
                         <div className="flex flex-col">
                             <span className="font-semibold">{recruitmentBody.name}</span>
-                            <span className="text-sm text-muted-foreground">{capitalize(recruitmentBody.sector)}</span>
+                            <span className="text-sm text-muted-foreground">{deslugify(recruitmentBody.sector)}</span>
                         </div>
                     </div>
                     <p className="text-xs text-muted-foreground line-clamp-3">{recruitmentBody.description}</p>

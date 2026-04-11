@@ -1,8 +1,7 @@
 'use client';
 
-export default function Recruitment({ recruitmentDetails }) {
-    const { content } = recruitmentDetails;
+export default function Recruitment({ content }) {
     return (
-        <div className="cms-content p-3" dangerouslySetInnerHTML={{ __html: content }} />
+        <div className="cms-content p-5 h-full overflow-y-auto" dangerouslySetInnerHTML={{ __html: content }} />
     )
 }

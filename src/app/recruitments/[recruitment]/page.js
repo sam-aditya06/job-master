@@ -3,9 +3,63 @@ import { notFound } from "next/navigation";
 
 import DesktopSidebar from "@/components/sidebars/desktopSidebar";
 import MobileSidebar from "@/components/sidebars/mobileSidebar";
-import { getRecruitmentDetails, getRecruitmentSidebarDetails } from "@/lib/serverUtils";
+import { getRecruiterFromId, getRecruitmentDetails, getRecruitmentSidebarDetails } from "@/lib/serverUtils";
 import Recruitment from "./recruitment";
 import { ContentSkeleton, SearchListSkeleton, SidebarSkeleton } from "@/components/skeletons";
+
+export const generateMetadata = async ({ params, searchParams }) => {
+    const { recruitment } = await params
+    const { stage: stageSlug, year } = await searchParams
+
+    const recruitmentDetails = await getRecruitmentDetails(recruitment)
+    if (!recruitmentDetails)
+        return {};
+
+    const recruiterName = await getRecruiterFromId(recruitmentDetails.recruiterId)
+
+    // ?year=X — past cycle
+    if (year) {
+        return {
+            title: `${recruitmentDetails.name} ${year} — Overview | ${recruiterName}`,
+            description: `Complete overview of ${recruitmentDetails.name} ${year} recruitment cycle. Check stage-wise cut-offs, and important dates.`,
+            alternates: {
+                canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/recruitments/${recruitment}?year=${year}`
+            },
+            robots: { index: true, follow: true }
+        }
+    }
+
+    // ?stage=X — current cycle stage
+    if (stageSlug) {
+        const stage = recruitmentDetails.stages.find(s => s.slug === stageSlug)
+        if (!stage) return {}
+
+        return {
+            title: `${recruitmentDetails.name} ${recruitmentDetails.year} ${stage.name} | ${recruiterName}`,
+            description: `${recruitmentDetails.name} ${recruitmentDetails.year} ${stage.name}. ${stage.status === "pending"
+                ? "Check expected release date and steps."
+                : "Check direct link, steps, and important details."}`,
+            alternates: {
+                canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/recruitments/${recruitment}?stage=${stageSlug}`
+            },
+            robots: { index: true, follow: true }
+        }
+    }
+
+    // no params — current cycle overview
+    const description = recruitmentDetails.status === "pending"
+        ? `${recruitmentDetails.name} ${recruitmentDetails.year} notification has not been released yet. Check back for updates on eligibility, stages, and important dates.`
+        : `${recruitmentDetails.name} ${recruitmentDetails.year} recruitment is ${recruitmentDetails.status}. Check important dates, stages, and latest updates.`
+
+    return {
+        title: `${recruitmentDetails.name} ${recruitmentDetails.year} | ${recruiterName}`,
+        description,
+        alternates: {
+            canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/recruitments/${recruitment}`
+        },
+        robots: { index: true, follow: true }
+    }
+}
 
 export default function RecruitmentPage({ params, searchParams }) {
     return (
@@ -18,7 +72,7 @@ export default function RecruitmentPage({ params, searchParams }) {
                 </div>
             </aside>
             <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
-                <div className="p-5 min-h-full h-full overflow-y-auto">
+                <div className="p-3 min-h-full h-full overflow-hidden">
                     <div className="xl:hidden">
                         <Suspense fallback={null}>
                             <SidebarWrapper screen='mobile' params={params} />
@@ -55,14 +109,14 @@ async function SidebarWrapper({ screen, params }) {
 async function MainContentWrapper({ params, searchParams }) {
     const { recruitment } = await params;
     const sp = await searchParams;
-    const { y, state } = sp;
+    const { year, stage } = sp;
     const key = JSON.stringify(sp);
-    const isValid = await getRecruitmentDetails(recruitment, y, state);
-    if (isValid)
+    const recruitmentDetails = await getRecruitmentDetails("content", recruitment, year, stage);
+    if (recruitmentDetails)
         return (
             <>
                 <Suspense key={key} fallback={<ContentSkeleton />}>
-                    <MainContent params={params} searchParams={searchParams} />
+                    <MainContent recruitmentDetails={recruitmentDetails} />
                 </Suspense>
             </>
         )
@@ -70,12 +124,47 @@ async function MainContentWrapper({ params, searchParams }) {
         notFound();
 }
 
-async function MainContent({ params, searchParams }) {
-    const { recruitment } = await params;
-    const { y, stage } = await searchParams;
-    const recruitmentDetails = await getRecruitmentDetails(recruitment, y, stage);
+async function MainContent({ recruitmentDetails }) {
+
+    const recruiterDetails = await getRecruiterFromId(recruitmentDetails.recruiterId)
+    const recruiterName = recruiterDetails.name;
+    const location = () => {
+        if (recruitmentDetails.location.isAllIndia) return { "@type": "Country", "name": "India" }
+        if (recruitmentDetails.location.state) return { "@type": "AdministrativeArea", "name": recruitmentDetails.location.state }
+        return null
+    }
+
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": `${recruitmentDetails.name} ${recruitmentDetails.year}`,
+        "description": recruitmentDetails.description,
+        "organizer": {
+            "@type": "Organization",
+            "name": recruiterName
+        },
+        "eventStatus": recruitmentDetails.status === "ongoing"
+            ? "https://schema.org/EventScheduled"
+            : recruitmentDetails.status === "completed"
+                ? "https://schema.org/EventCompleted"
+                : "https://schema.org/EventPostponed",
+        ...(recruitmentDetails.notificationDate && {
+            "startDate": recruitmentDetails.notificationDate
+        }),
+        ...(location && {
+            "location": location
+        })
+    }
 
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    return <Recruitment recruitmentDetails={recruitmentDetails} />
+    return (
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <Recruitment content={recruitmentDetails.content} />
+        </>
+    )
 }

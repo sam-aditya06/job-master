@@ -20,16 +20,14 @@ export default function QuickLinksList({ quickLinks = [] }) {
                         <p className="text-4xl text-muted-foreground">No result found</p>
                     </div> :
                     <div className="grid grid-cols-3 gap-2">
-                        <div className="flex gap-2">
-                            {
-                                quickLinks.map(quickLink => (
-                                    <Link key={quickLink._id} className="border rounded-md hover:bg-brand px-2 py-1 w-full hover:text-white text-center" href={quickLink.relativeUrl} target="_blank">
-                                        {quickLink.name}
-                                    </Link>
-                                ))
-                            }
-                        </div>
-                    </div>  
+                        {
+                            quickLinks.map(quickLink => (
+                                <Link key={quickLink._id} className="border rounded-md hover:bg-brand px-2 py-1 w-full hover:text-white text-center" href={quickLink.relativeUrl} target="_blank">
+                                    {quickLink.name}
+                                </Link>
+                            ))
+                        }
+                    </div>
             }
         </>
     )

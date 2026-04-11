@@ -52,7 +52,7 @@ export default function Header() {
                 </div>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className='hidden lg:flex rounded-full hover:bg-brand dark:hover:bg-neutral-700 hover:text-white cursor-pointer' onClick={() => setTheme(isDark ? 'light' : 'dark')}>
+                        <Button variant="ghost" size="icon" className='hidden lg:flex rounded-full hover:bg-brand dark:hover:bg-neutral-700 text-brand hover:text-white cursor-pointer' onClick={() => setTheme(isDark ? 'light' : 'dark')}>
                             {mounted && isDark ? <Sun className="hidden lg:block !h-5 !w-5 cursor-pointer" /> : <Moon className="hidden lg:block !h-5 !w-5 cursor-pointer" />}
                         </Button>
                     </TooltipTrigger>

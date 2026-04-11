@@ -23,7 +23,7 @@ export default function RecruitmentCard({ recruitment, color, icon, page }) {
                             <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1 block">
                                 {recruitment.sector}
                             </span>
-                            <h3 className="text-xl font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
+                            <h3 className="font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
                                 {recruitment.name}
                             </h3>
                         </div>
@@ -45,7 +45,10 @@ export default function RecruitmentCard({ recruitment, color, icon, page }) {
                             <p className="flex items-center gap-1 text-xs text-muted-foreground leading-relaxed"><MapPin className="w-3 h-3" />
                                 {
                                     recruitment.location.isAllIndia === true ?
-                                        `All India${recruitment.location.isStateWise === true ? ' (State-wise)' : recruitment.location.isCircleWise === true ? ' (Circle-wise)' : ''}` :
+                                        `All India${recruitment.location.isStateWise === true ? ' (State-wise)' :
+                                            recruitment.location.isCircleWise === true ? ' (Circle-wise)' :
+                                                recruitment.sector === 'railways' ? ' (RRB-wise)' :
+                                                    ''}` :
                                         recruitment.location.state
                                 }
                             </p>
