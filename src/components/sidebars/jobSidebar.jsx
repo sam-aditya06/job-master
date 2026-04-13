@@ -1,15 +1,13 @@
 'use client';
 
 import Link from "next/link";
-import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Check, Hourglass, Lock } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useState } from "react";
 
 export default function JobSidebar({ fields }) {
 
     const { job, jobNavSlug } = useParams();
-    
+
     const [selected, setSelected] = useState(() => jobNavSlug || 'overview');
 
     const handleSelect = (slug) => {
@@ -36,9 +34,9 @@ export default function JobSidebar({ fields }) {
             {fields.includes('medicalStandards') && <Link className={`flex justify-center rounded-md pl-2 py-1 w-full${selected === 'medical-standards' ? ' bg-brand text-white' : ' hover:bg-brand hover:text-white'}`} href={`/jobs/${job}/perks`} onClick={() => handleSelect('perks')}>
                 Medical Standards
             </Link>}
-            {fields.includes('recruitmentDetails') && <Link className={`flex justify-center rounded-md pl-2 py-1 w-full${selected === 'recruitment-details' ? ' bg-brand text-white' : ' hover:bg-brand hover:text-white'}`} href={`/jobs/${job}/perks`} onClick={() => handleSelect('perks')}>
+            <Link className={`flex justify-center rounded-md pl-2 py-1 w-full${selected === 'recruitment-details' ? ' bg-brand text-white' : ' hover:bg-brand hover:text-white'}`} href={`/jobs/${job}/recruitment-details`} onClick={() => handleSelect('recruitment-details')}>
                 Recruitment Details
-            </Link>}
+            </Link>
         </div>
     )
 }

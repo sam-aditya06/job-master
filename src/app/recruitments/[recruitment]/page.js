@@ -9,18 +9,18 @@ import { ContentSkeleton, SearchListSkeleton, SidebarSkeleton } from "@/componen
 
 export const generateMetadata = async ({ params, searchParams }) => {
     const { recruitment } = await params
-    const { stage: stageSlug, year } = await searchParams
+    const { stage: stageSlug, year } = await searchParams;
 
-    const recruitmentDetails = await getRecruitmentDetails(recruitment)
+    const recruitmentDetails = await getRecruitmentDetails('md', recruitment)
     if (!recruitmentDetails)
         return {};
 
-    const recruiterName = await getRecruiterFromId(recruitmentDetails.recruiterId)
+    const recruiter = await getRecruiterFromId(recruitmentDetails.recruiterId)
 
     // ?year=X — past cycle
     if (year) {
         return {
-            title: `${recruitmentDetails.name} ${year} — Overview | ${recruiterName}`,
+            title: `${recruitmentDetails.name} ${year} — Overview | ${recruiter.name}`,
             description: `Complete overview of ${recruitmentDetails.name} ${year} recruitment cycle. Check stage-wise cut-offs, and important dates.`,
             alternates: {
                 canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/recruitments/${recruitment}?year=${year}`
@@ -35,7 +35,7 @@ export const generateMetadata = async ({ params, searchParams }) => {
         if (!stage) return {}
 
         return {
-            title: `${recruitmentDetails.name} ${recruitmentDetails.year} ${stage.name} | ${recruiterName}`,
+            title: `${recruitmentDetails.name} ${recruitmentDetails.year} ${stage.name} | ${recruiter.abbr || recruiter.name}`,
             description: `${recruitmentDetails.name} ${recruitmentDetails.year} ${stage.name}. ${stage.status === "pending"
                 ? "Check expected release date and steps."
                 : "Check direct link, steps, and important details."}`,
@@ -52,7 +52,7 @@ export const generateMetadata = async ({ params, searchParams }) => {
         : `${recruitmentDetails.name} ${recruitmentDetails.year} recruitment is ${recruitmentDetails.status}. Check important dates, stages, and latest updates.`
 
     return {
-        title: `${recruitmentDetails.name} ${recruitmentDetails.year} | ${recruiterName}`,
+        title: `${recruitmentDetails.name} Recruitment ${recruitmentDetails.year} | ${recruiter.name}`,
         description,
         alternates: {
             canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/recruitments/${recruitment}`
@@ -71,16 +71,18 @@ export default function RecruitmentPage({ params, searchParams }) {
                     </Suspense>
                 </div>
             </aside>
-            <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
+            <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900 overflow-hidden">
                 <div className="p-3 min-h-full h-full overflow-hidden">
-                    <div className="xl:hidden">
-                        <Suspense fallback={null}>
-                            <SidebarWrapper screen='mobile' params={params} />
+                    <div className="p-2 h-full overflow-y-auto">
+                        <div className="xl:hidden">
+                            <Suspense fallback={null}>
+                                <SidebarWrapper screen='mobile' params={params} />
+                            </Suspense>
+                        </div>
+                        <Suspense fallback={<p>Loading...</p>}>
+                            <MainContentWrapper params={params} searchParams={searchParams} />
                         </Suspense>
                     </div>
-                    <Suspense fallback={<p>Loading...</p>}>
-                        <MainContentWrapper params={params} searchParams={searchParams} />
-                    </Suspense>
                 </div>
             </section>
             <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">

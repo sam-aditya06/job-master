@@ -80,18 +80,20 @@ export default function OrgsPage({ searchParams }) {
                 </div>
             </aside>
             <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
-                <div className="p-5 min-h-full h-full overflow-y-auto">
-                    <div className="relative flex justify-center items-center">
-                        <div className="absolute left-0 xl:hidden">
-                            <Suspense fallback={<SidebarSkeleton />}>
-                                <MobileSidebar />
-                            </Suspense>
+                <div className="p-3 min-h-full h-full overflow-hidden">
+                    <div className="p-2 h-full overflow-y-auto">
+                        <div className="relative flex justify-center items-center">
+                            <div className="absolute left-0 xl:hidden">
+                                <Suspense fallback={<SidebarSkeleton />}>
+                                    <MobileSidebar />
+                                </Suspense>
+                            </div>
+                            <h1 className="text-3xl leading-none">Organisations</h1>
                         </div>
-                        <h1 className="text-3xl leading-none">Organisations</h1>
+                        <Suspense fallback={null}>
+                            <MainContentWrapper searchParams={searchParams} />
+                        </Suspense>
                     </div>
-                    <Suspense fallback={null}>
-                        <MainContentWrapper searchParams={searchParams} />
-                    </Suspense>
                 </div>
             </section>
             <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
@@ -108,12 +110,12 @@ async function MainContentWrapper({ searchParams }) {
     const sp = await searchParams;
     const key = JSON.stringify(sp);
     return (
-        <>
+        <div className="sm:pr-3">
             <OrgsHeader />
             <Suspense key={key} fallback={<SearchListSkeleton type={'org'} />}>
                 <MainContent searchParams={searchParams} />
             </Suspense>
-        </>
+        </div>
     )
 }
 

@@ -135,7 +135,7 @@
   /* Custom Styling (CMS Content) */
 
   .cms-content article {
-    @apply flex flex-col gap-6;
+    @apply flex flex-col gap-6 w-full;
   }
 
   .cms-content article> :is(section, header) {

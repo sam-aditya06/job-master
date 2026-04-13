@@ -37,6 +37,8 @@ async function MainContent({ params }) {
         getJobDetails(job)
     ]);
 
+    const location = jobDetails.location.includes('All India') ? 'All India' : jobDetails.location;
+
     const industryMap = {
         "central-govt": "Government",
         "state-govt": "Government",
@@ -63,7 +65,7 @@ async function MainContent({ params }) {
         },
         "occupationLocation": {
             "@type": "AdministrativeArea",
-            "name": jobDetails.location
+            "name": location
         },
         ...(jobDetails.payScale?.min && jobDetails.payScale?.max && {
             "baseSalary": {

@@ -26,7 +26,7 @@ export const generateMetadata = async ({ params }) => {
 
 export default function OrgPage({ params }) {
     return (
-        <Suspense fallback={<OrgsPageSkeleton />}>
+        <Suspense fallback={<OrgsPageSkeleton type={'org'} />}>
             <MainContent params={params} />
         </Suspense>
     )
@@ -52,6 +52,8 @@ async function MainContent({ params }) {
             "alternateName": orgDetails.abbr
         })
     }
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     return (
         <>

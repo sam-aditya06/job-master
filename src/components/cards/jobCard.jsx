@@ -20,7 +20,7 @@ export default function JobCard({ job, page }) {
                                 {job.sector}
                             </span>
                             <h3 className="font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
-                                {job.name}
+                                {job.abbr || job.name}
                             </h3>
                             <div className="flex items-center gap-1 mb-3">
                                 <div className="border rounded-full h-fit w-fit p-[2px]">

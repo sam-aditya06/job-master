@@ -102,7 +102,7 @@ export default function RecruitmentsPage({ searchParams }) {
             </aside>
             <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
                 <div className="p-3 min-h-full h-full overflow-hidden">
-                    <div className="p-5 h-full overflow-y-auto">
+                    <div className="p-2 h-full overflow-y-auto">
                         <div className="relative flex justify-center items-center">
                             <div className="absolute left-0 xl:hidden">
                                 <Suspense fallback={null}>
@@ -148,12 +148,12 @@ async function MainContentWrapper({ searchParams }) {
     const forOrg = forSlug ? await getNameFromSlug('orgs', forSlug) : undefined;
     const by = bySlug ? await getRecruiterNameFromSlug(bySlug) : undefined;
     return (
-        <>
+        <div className="sm:pr-3">
             <RecruitmentsHeader forOrg={forOrg} by={by} />
             <Suspense key={key} fallback={<SearchListSkeleton type={'recruitment'} />}>
                 <MainContent sp={sp} />
             </Suspense>
-        </>
+        </div>
     )
 }
 

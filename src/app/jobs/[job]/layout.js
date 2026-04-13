@@ -16,14 +16,16 @@ export default function JobLayout({ children, params }) {
                     </Suspense>
                 </div>
             </aside>
-            <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
-                <div className="p-3 min-h-full h-full overflow-y-auto">
-                    <div className="xl:hidden">
-                        <Suspense fallback={null}>
-                            <Sidebar params={params} screen='mobile' />
-                        </Suspense>
+            <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900 overflow-hidden">
+                <div className="p-3 min-h-full h-full overflow-hidden">
+                    <div className="p-2 h-full overflow-y-auto">
+                        <div className="xl:hidden">
+                            <Suspense fallback={null}>
+                                <Sidebar params={params} screen='mobile' />
+                            </Suspense>
+                        </div>
+                        {children}
                     </div>
-                    {children}
                 </div>
             </section>
             <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
@@ -36,11 +38,11 @@ export default function JobLayout({ children, params }) {
     )
 }
 
-async function Sidebar({params, screen}) {
-    const {job} = await params;
+async function Sidebar({ params, screen }) {
+    const { job } = await params;
     const fields = await getJobSidebarFields(job);
-    
-    return(
+
+    return (
         <>
             {screen === 'desktop' ? <DesktopSidebar fields={fields} /> : <MobileSidebar fields={fields} />}
         </>

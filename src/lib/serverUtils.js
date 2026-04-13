@@ -155,7 +155,7 @@ export async function getRecruiterFromId(recruiterId) {
         const collection = recruiter.recruiterType === 'org' ? 'orgs' : 'recruitment-bodies'
         const entity = await db.collection(collection).findOne(
             { _id: ObjectId.createFromHexString(recruiter.refId) },
-            { projection: { name: 1, slug: 1, _id: 0 } }
+            { projection: { name: 1, slug: 1, abbr: 1, _id: 0 } }
         )
 
         if (!entity) {
@@ -272,7 +272,7 @@ export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlu
         if (mdOrContent === 'md') {
             recruitment = await db.collection('recruitments').findOne(
                 { slug: recSlug },
-                { projection: { recruiterId: 1, name: 1 } }
+                { projection: { recruiterId: 1, name: 1, year: 1, stages: { name: 1, slug: 1, status: 1 } } }
             );
             if (!recruitment) return null;
         }
@@ -308,7 +308,6 @@ export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlu
                     return null;
             }
             else {
-                console.log({ recruitment });
                 const { status, overview: { pendingContent, completedContent } } = recruitment;
 
                 if (status === 'pending')
@@ -599,6 +598,26 @@ export function formatEducation(education) {
     return levels.join(" / ")
 }
 
+export function formatLocation(location, sector) {
+    let formattedLocation = '';
+    if (location.state)
+        formattedLocation = location.state;
+    else if (location.isAllIndia === true) {
+        if (location.isStateWise)
+            formattedLocation = 'All India (State wise)';
+        else if (location.isStateWise)
+            formattedLocation = 'All India (State wise)';
+        else if (location.isCircleWise)
+            formattedLocation = 'All India (Circle wise)';
+        else if (sector === 'railways')
+            formattedLocation = 'All India (RRB wise)';
+        else
+            formattedLocation = 'All India';
+
+    }
+    return formattedLocation;
+}
+
 export async function getJobDetails(jobSlug) {
 
     'use cache';
@@ -610,23 +629,7 @@ export async function getJobDetails(jobSlug) {
         const org = await db.collection('orgs').findOne({ _id: ObjectId.createFromHexString(jobDetails.orgId) }, { projection: { name: 1 } });
         if (!jobDetails)
             return null;
-
-        let formattedLocation = '';
-        if (jobDetails.location.state)
-            formattedLocation = jobDetails.location.state;
-        else if (jobDetails.location.isAllIndia === true) {
-            if (jobDetails.location.isStateWise)
-                formattedLocation = 'All India (State wise)';
-            else if (jobDetails.location.isStateWise)
-                formattedLocation = 'All India (State wise)';
-            else if (jobDetails.location.isCircleWise)
-                formattedLocation = 'All India (Circle wise)';
-            else if (jobDetails.sector === 'railways')
-                formattedLocation = 'All India (RRB wise)';
-            else
-                formattedLocation = 'All India';
-
-        }
+        let formattedLocation = formatLocation(jobDetails.location, jobDetails.sector);
         return JSON.parse(JSON.stringify({ ...jobDetails, location: formattedLocation, org: org.name }));
 
     } catch (error) {
@@ -669,6 +672,45 @@ export async function getJobContent(jobSlug, jobNavSlug) {
     } catch (error) {
         console.error(error);
         throw error;
+    }
+}
+
+export async function getJobRecruitmentDetails(jobSlug) {
+    // 'use cache';
+    // cacheLife('hours');
+
+    try {
+        const db = await connectDB();
+        const jobDetails = await db.collection('jobs').findOne({ slug: jobSlug }, { projection: { orgId: 1, recruitmentId: 1, name: 1, abbr: 1, location: 1 } });
+        console.log({ jobDetails });
+        if (!jobDetails)
+            return null;
+        const recruitmentDetails = await db.collection('recruitments')
+            .findOne({ _id: new ObjectId(jobDetails.recruitmentId) }, { projection: { recruiterId: 1, name: 1, slug: 1, year: 1, status: 1 } });
+
+        const { recruiterId, name, slug, year, status } = recruitmentDetails;
+
+        const recruiter = await db.collection('recruiters').findOne({ _id: new ObjectId(recruiterId) });
+
+        const recruiterDetails = recruiter.recruiterType === 'org' ?
+            await db.collection('orgs').findOne({ _id: new ObjectId(recruiter.refId) }, { projection: { name: 1, abbr: 1 } }) :
+            await db.collection('recruitment-bodies').findOne({ _id: new ObjectId(recruiter.refId) }, { projection: { name: 1, abbr: 1 } });
+
+        const recruiterName = `${recruiterDetails.name}${recruiterDetails.abbr ? ` (${recruiterDetails.abbr})` : ''}`;
+
+        const pastCycles = await db.collection('archives')
+            .find({ refId: jobDetails.recruitmentId })
+            .sort({ year: -1 })
+            .limit(6)
+            .toArray();
+
+        let formattedLocation = formatLocation(jobDetails.location, jobDetails.sector);
+        const finalJobDetails = { ...jobDetails, location: formattedLocation, recruiterName, recName: name, recSlug: slug, recYear: year, recStatus: status, pastCycles }
+        console.log({ finalJobDetails });
+        return finalJobDetails;
+
+    } catch (error) {
+
     }
 }
 

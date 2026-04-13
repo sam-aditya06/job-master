@@ -191,12 +191,12 @@ export function RecruitmentCardSkeleton() {
 export function OrgsPageSkeleton({ type }) {
 
     return (
-        <>
-            <section className="flex items-center gap-2">
-                <div className="h-48 w-48 p-4">
-                    <div className="rounded-full bg-neutral-300 dark:bg-neutral-800 w-40 h-40 animate-pulse"></div>
+        <div className="sm:pr-3">
+            <section className="flex items-center gap-4 sm:gap-2">
+                <div className="h-24 sm:h-48 w-24 sm:w-48 sm:py-4">
+                    <div className="rounded-full bg-neutral-300 dark:bg-neutral-800 w-24 sm:w-40 h-24 sm:h-40 animate-pulse"></div>
                 </div>
-                <div className="grow flex flex-col gap-2 h-40">
+                <div className="grow flex flex-col gap-2 h-fit">
                     <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-8 w-1/2 animate-pulse"></div>
                     <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-6 w-1/6 animate-pulse"></div>
                     <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-6 w-1/6 animate-pulse"></div>
@@ -222,7 +222,7 @@ export function OrgsPageSkeleton({ type }) {
                     }
                 </div>
             </section>
-        </>
+        </div>
     )
 
 }

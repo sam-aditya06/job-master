@@ -81,18 +81,20 @@ export default function RecruitmentBodiesPage({ searchParams }) {
                 </div>
             </aside>
             <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
-                <div className="p-5 min-h-full h-full overflow-y-auto">
-                    <div className="relative flex justify-center items-center">
-                        <div className="absolute left-0 lg:hidden">
-                            <Suspense fallback={null}>
-                                <MobileSidebar />
-                            </Suspense>
+                <div className="p-3 min-h-full h-full overflow-hidden">
+                    <div className="p-2 h-full overflow-y-auto">
+                        <div className="relative flex justify-center items-center">
+                            <div className="absolute left-0 lg:hidden">
+                                <Suspense fallback={null}>
+                                    <MobileSidebar />
+                                </Suspense>
+                            </div>
+                            <h1 className="text-3xl text-brand leading-none">Recruitment Bodies</h1>
                         </div>
-                        <h1 className="text-3xl text-brand leading-none">Recruitment Bodies</h1>
+                        <Suspense fallback={null}>
+                            <MainContentWrapper searchParams={searchParams} />
+                        </Suspense>
                     </div>
-                    <Suspense fallback={null}>
-                        <MainContentWrapper searchParams={searchParams} />
-                    </Suspense>
                 </div>
             </section>
             <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
@@ -110,12 +112,12 @@ async function MainContentWrapper({ searchParams }) {
     const { search, sector } = sp;
     const key = JSON.stringify(sp);
     return (
-        <>
+        <div className="sm:pr-3">
             <RecruitmentBodiesHeader />
             <Suspense key={key} fallback={<SearchListSkeleton type={'org'} />}>
                 <MainContent search={search} sector={sector} />
             </Suspense>
-        </>
+        </div>
     )
 }
 
