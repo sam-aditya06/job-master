@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { ChipSkeleton } from "@/components/skeletons";
 
 import { useFilter } from "@/lib/context/filterContext";
+import { deslugify } from "@/lib/utils";
 
 export default function RecruitmentsHeader({ forOrg, by }) {
     const sp = useSearchParams();
@@ -52,8 +53,8 @@ export default function RecruitmentsHeader({ forOrg, by }) {
             <div className="flex flex-wrap items-center gap-2 mt-5">
                 <p>Filters:</p>
                 {Object.keys(optimisticParams).map(key => {
-                    const param = key === 'for' ? forOrg : key === 'by' ? by : sp.get(key);
-                    if (param && param === optimisticParams[key])
+                    const param = key === 'for' ? forOrg : key === 'by' ? by : deslugify(sp.get(key));
+                    if (param && (key === 'search' ? param === optimisticParams[key] : param === deslugify(optimisticParams[key])))
                         return (
                             <div key={key} className="flex items-center gap-1 border rounded-full pl-2 pr-1 py-1">
                                 <p className="text-sm">{`${key}: ${param}`}</p>
