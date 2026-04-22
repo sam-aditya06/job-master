@@ -1,66 +1,29 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useFilter } from "@/lib/context/filterContext";
 
 export default function OrgsSidebar() {
-    const pathName = usePathname();
-    const sp = useSearchParams();
-    const router = useRouter();
+    const { optimisticParams, applyFilter } = useFilter();
 
-    const sector = sp.get('sector');
-    const search = sp.get('search');
-
-    const [inputValue, setInputValue] = useState(search || '');
-
-    useEffect(() => {
-        !search ? setInputValue('') : setInputValue(search);
-    }, [search])
-
-    useEffect(() => {
-        if (!inputValue) {
-            if (search) {
-                const sParams = new URLSearchParams(sp);
-                sParams.delete('search');
-                router.replace(`${pathName}?${sParams.toString()}`);
-            }
-            return;
-        }
-        const timoutId = setTimeout(() => {
-            const sParams = new URLSearchParams(sp);
-            sParams.set('search', inputValue);
-            router.replace(`${pathName}?${sParams.toString()}`);
-        }, 500);
-        return () => {
-            clearTimeout(timoutId);
-        }
-    }, [inputValue]);
+    const sector = optimisticParams.sector;
 
     const handleFilterSelect = (key, value) => {
-        const sParams = new URLSearchParams(sp);
-        sParams.set(key, value);
-        router.replace(`${pathName}?${sParams.toString()}`);
+        applyFilter({ [key]: value });
     }
 
 
     return (
-        <div className="flex flex-col gap-5 mt-12 lg:mt-5 p-2">
-            <div className="flex flex-col gap-2">
-                <p className='font-bold text-sm'>Search</p>
-                <Input className='h-8 text-sm' placeholder='Search organisation' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
-            </div>
+        <div className="flex flex-col gap-5 mt-12 lg:mt-2 p-2">
             <Accordion type='single' collapsible defaultValue='sector'>
                 <AccordionItem value='sector'>
                     <AccordionTrigger className='border-b rounded-none px-1 !py-2 font-bold cursor-pointer hover:no-underline'>Sector</AccordionTrigger>
                     <AccordionContent className='mt-2 px-2'>
-                        <RadioGroup className="flex flex-col gap-3" value={sector} onValueChange={(value) => handleFilterSelect('sector', value)}>
+                        <RadioGroup className="flex flex-col gap-3" value={sector ?? ""} onValueChange={(value) => handleFilterSelect('sector', value)}>
                             <div className="flex justify-between items-center">
                                 <Label className="text-sm" htmlFor='central-govt'>Central Govt</Label>
                                 <RadioGroupItem id='central-govt' value='central-govt' />

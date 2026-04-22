@@ -1,11 +1,13 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 
 import OrgsHeader from "./orgsHeader";
-import { OrgListSkeleton, SearchListSkeleton, SidebarSkeleton } from "@/components/skeletons";
+import { SidebarSkeleton } from "@/components/skeletons";
 import DesktopSidebar from "@/components/sidebars/desktopSidebar";
 import MobileSidebar from "@/components/sidebars/mobileSidebar";
-import { getOrgs, getStates } from "@/lib/serverUtils";
+import { getOrgs } from "@/lib/serverUtils";
 import OrgsList from "./orgsList";
+import { FilterProvider } from "@/lib/context/filterContext";
 
 export async function generateMetadata({ searchParams }) {
     const { sector, search } = await searchParams
@@ -68,20 +70,28 @@ export async function generateMetadata({ searchParams }) {
     }
 }
 
-export default function OrgsPage({ searchParams }) {
+export default async function OrgsPage({ searchParams }) {
+
+    const sp = await searchParams;
+
+    const { page } = sp;
+
+    const pageNum = page ? parseInt(page) : 1;
+    if (isNaN(pageNum) || pageNum < 1)
+        redirect('/orgs');
 
     return (
-        <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
-            <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
-                <div className="p-2 h-full">
-                    <Suspense fallback={<SidebarSkeleton />}>
-                        <DesktopSidebar />
-                    </Suspense>
-                </div>
-            </aside>
-            <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
-                <div className="p-3 min-h-full h-full overflow-hidden">
-                    <div className="p-2 h-full overflow-y-auto">
+        <FilterProvider initialParams={sp}>
+            <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
+                <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
+                    <div className="p-2 h-full">
+                        <Suspense fallback={<SidebarSkeleton />}>
+                            <DesktopSidebar />
+                        </Suspense>
+                    </div>
+                </aside>
+                <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900 p-3 overflow-hidden">
+                    <div className="flex flex-col gap-10 sm:gap-5 p-2 h-full overflow-y-auto">
                         <div className="relative flex justify-center items-center">
                             <div className="absolute left-0 xl:hidden">
                                 <Suspense fallback={<SidebarSkeleton />}>
@@ -90,40 +100,32 @@ export default function OrgsPage({ searchParams }) {
                             </div>
                             <h1 className="text-3xl leading-none">Organisations</h1>
                         </div>
-                        <Suspense fallback={null}>
-                            <MainContentWrapper searchParams={searchParams} />
-                        </Suspense>
+                        <div className="sm:pr-3">
+                            <Suspense fallback={null}>
+                                <MainContentWrapper sp={sp} />
+                            </Suspense>
+                        </div>
                     </div>
-                </div>
-            </section>
-            <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
-                <div className="flex flex-col p-2 h-full">
-                    <div className="grow"></div>
-                    <p className="justify-end text-center">Advertisement</p>
-                </div>
-            </aside>
-        </div>
+                </section>
+                <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
+                    <div className="flex flex-col p-2 h-full">
+                        <div className="grow"></div>
+                        <p className="justify-end text-center">Advertisement</p>
+                    </div>
+                </aside>
+            </div>
+        </FilterProvider>
     )
 }
 
-async function MainContentWrapper({ searchParams }) {
-    const sp = await searchParams;
-    const key = JSON.stringify(sp);
+async function MainContentWrapper({ sp }) {
+    const { search, sector, page } = sp;
+    const {itemCount, orgs} = await getOrgs({search, sector, page});
+
     return (
-        <div className="sm:pr-3">
+        <>
             <OrgsHeader />
-            <Suspense key={key} fallback={<SearchListSkeleton type={'org'} />}>
-                <MainContent searchParams={searchParams} />
-            </Suspense>
-        </div>
+            <OrgsList itemCount={itemCount} currentPage={page ? parseInt(page) : page} orgs={orgs} />
+        </>
     )
-}
-
-async function MainContent({ searchParams }) {
-    const { search, sector } = await searchParams;
-    const orgs = await getOrgs(search, sector);
-
-    await new Promise(resolve => setTimeout(resolve, 5000));
-
-    return <OrgsList orgs={orgs} />
 }

@@ -1,11 +1,14 @@
 import { Suspense } from "react";
 
-import { getNameFromSlug, getOrgs, getRecruiterFromId, getRecruiterNameFromSlug, getRecruiters, getRecruitments, getStates } from "@/lib/serverUtils";
-import { SearchListSkeleton, SidebarSkeleton } from "@/components/skeletons";
+import { getNameFromSlug, getOrgs, getRecruiterNameFromSlug, getRecruiters, getRecruitments, getStates } from "@/lib/serverUtils";
+import { SidebarSkeleton } from "@/components/skeletons";
 import DesktopSidebar from "@/components/sidebars/desktopSidebar";
 import MobileSidebar from "@/components/sidebars/mobileSidebar";
-import RecruitmentsHeader from "./recruitmentsHeader";
 import RecruitmentsList from "./recruitmentsList";
+import RecruitmentsHeader from "./recruitmentsHeader";
+
+import { FilterProvider } from "@/lib/context/filterContext";
+import { redirect } from "next/navigation";
 
 export async function generateMetadata({ searchParams }) {
     const { sector, by, for: forOrg, status, search, expLvl, location, qualification } = await searchParams
@@ -89,20 +92,27 @@ export async function generateMetadata({ searchParams }) {
     }
 }
 
-export default function RecruitmentsPage({ searchParams }) {
+export default async function RecruitmentsPage({ searchParams }) {
+    const sp = await searchParams;
+
+    const { page } = sp;
+
+    const pageNum = page ? parseInt(page) : 1;
+    if (isNaN(pageNum) || pageNum < 1)
+        redirect('/recruitments');
 
     return (
-        <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
-            <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
-                <div className="p-2 h-full">
-                    <Suspense fallback={<SidebarSkeleton />}>
-                        <Sidebar type={'desktop'} />
-                    </Suspense>
-                </div>
-            </aside>
-            <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
-                <div className="p-3 min-h-full h-full overflow-hidden">
-                    <div className="p-2 h-full overflow-y-auto">
+        <FilterProvider initialParams={sp}>
+            <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
+                <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
+                    <div className="p-2 h-full">
+                        <Suspense fallback={<SidebarSkeleton />}>
+                            <Sidebar type={'desktop'} />
+                        </Suspense>
+                    </div>
+                </aside>
+                <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900 p-3 overflow-hidden">
+                    <div className="flex flex-col gap-10 sm:gap-5 p-2 h-full overflow-y-auto">
                         <div className="relative flex justify-center items-center">
                             <div className="absolute left-0 xl:hidden">
                                 <Suspense fallback={null}>
@@ -111,24 +121,26 @@ export default function RecruitmentsPage({ searchParams }) {
                             </div>
                             <h1 className="text-3xl leading-none">Recruitments</h1>
                         </div>
-                        <Suspense fallback={null}>
-                            <MainContentWrapper searchParams={searchParams} />
-                        </Suspense>
+                        <div className="sm:pr-3">
+                            <Suspense fallback={null}>
+                                <MainContentWrapper sp={sp} />
+                            </Suspense>
+                        </div>
                     </div>
-                </div>
-            </section>
-            <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
-                <div className="flex flex-col p-2 h-full">
-                    <div className="grow"></div>
-                    <p className="justify-end text-center">Advertisement</p>
-                </div>
-            </aside>
-        </div>
+                </section>
+                <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
+                    <div className="flex flex-col p-2 h-full">
+                        <div className="grow"></div>
+                        <p className="justify-end text-center">Advertisement</p>
+                    </div>
+                </aside>
+            </div>
+        </FilterProvider>
     )
 }
 
 async function Sidebar({ type }) {
-    const orgs = await getOrgs();
+    const orgs = await getOrgs({});
     const states = await getStates();
     const recruiters = await getRecruiters();
 
@@ -141,30 +153,20 @@ async function Sidebar({ type }) {
     )
 }
 
-async function MainContentWrapper({ searchParams }) {
-    const sp = await searchParams;
-    const { for: forSlug, by: bySlug } = sp;
-    const key = JSON.stringify(sp);
-    const forOrg = forSlug ? await getNameFromSlug('orgs', forSlug) : undefined;
-    const by = bySlug ? await getRecruiterNameFromSlug(bySlug) : undefined;
+async function MainContentWrapper({ sp }) {
+    const { search, for: forSlug, by: bySlug, status, sector, qualification, expLvl, location, page } = sp;
+
+    const [{ itemCount, recruitments }, forOrg, by] = await Promise.all([
+        getRecruitments({ search, forSlug, bySlug, status, sector, qualification, expLvl, location, page }),
+        forSlug ? getNameFromSlug('orgs', forSlug) : undefined,
+        bySlug ? getRecruiterNameFromSlug(bySlug) : undefined,
+    ]);
+
+
     return (
-        <div className="sm:pr-3">
+        <>
             <RecruitmentsHeader forOrg={forOrg} by={by} />
-            <Suspense key={key} fallback={<SearchListSkeleton type={'recruitment'} />}>
-                <MainContent sp={sp} />
-            </Suspense>
-        </div>
-    )
-}
-
-async function MainContent({ sp }) {
-    const { search, for: forSlug, by: bySlug, status, sector, qualification, expLvl, location } = sp;
-    const recruitments = await getRecruitments({ search, forSlug, bySlug, status, sector, qualification, expLvl, location });
-    const orgs = await getOrgs();
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    return (
-        <RecruitmentsList recruitments={recruitments} orgs={orgs} />
+            <RecruitmentsList itemCount={itemCount} currentPage={page ? parseInt(page) : page} recruitments={recruitments} />
+        </>
     )
 }

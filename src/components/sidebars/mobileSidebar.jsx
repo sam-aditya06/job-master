@@ -14,15 +14,13 @@ import JobSidebar from "./jobSidebar"
 export default function MobileSidebar({ orgs, regions, recruiters, fields, details }) {
     const { recruitment } = useParams();
     const sp = useSearchParams();
-    const stage = sp.get('stage');
-    const year = sp.get('year');
     const pathName = usePathname()
     const [open, setOpen] = useState(false)
 
     useEffect(() => {
         // Close sheet whenever route changes
         setOpen(false)
-    }, [pathName, stage, year]);
+    }, [pathName, sp]);
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>

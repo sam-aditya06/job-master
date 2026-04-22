@@ -2,8 +2,8 @@ export default function RecruitmentBodyLayout({ children }) {
 
     return (
         <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
-            <section className="sm:flex-[75] xl:flex-[8] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
-                <div className="p-5 min-h-full h-full overflow-y-auto">
+            <section className="sm:flex-[75] xl:flex-[8] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900 p-3 overflow-hidden">
+                <div className="p-2 min-h-full h-full overflow-y-auto">
                     {children}
                 </div>
             </section>

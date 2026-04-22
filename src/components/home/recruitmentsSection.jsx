@@ -26,15 +26,15 @@ export default function RecruitmentsSection({ recentRecruitments = [] }) {
   }, [currentCategory]);
 
   return (
-    <section className="py-16 bg-white dark:bg-neutral-900">
+    <section>
       <div className="max-w-6xl mx-auto px-4">
         {/* Section header */}
-        <div className="flex flex-col items-center sm:flex-row justify-between gap-4 mb-10">
-          <div>
+        <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 mb-10">
+          <div className="flex flex-col gap-1">
             <h2 className="text-3xl font-bold text-brand" style={{ fontFamily: "'Syne', sans-serif" }}>
               Ongoing Recruitments
             </h2>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="text-muted-foreground text-sm">
               Exam schedules, eligibility criteria, application links, admit cards & results — all in one place.
             </p>
           </div>

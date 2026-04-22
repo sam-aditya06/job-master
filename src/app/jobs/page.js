@@ -1,11 +1,13 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 
-import { SearchListSkeleton, SidebarSkeleton } from "@/components/skeletons";
+import { SidebarSkeleton } from "@/components/skeletons";
 import DesktopSidebar from "@/components/sidebars/desktopSidebar";
 import MobileSidebar from "@/components/sidebars/mobileSidebar";
 import { getJobs, getNameFromSlug, getOrgs, getStates } from "@/lib/serverUtils";
 import JobsHeader from "./jobsHeader";
 import JobsList from "./jobsList";
+import { FilterProvider } from "@/lib/context/filterContext";
 
 export async function generateMetadata({ searchParams }) {
     const { search, sector, org, expLvl, location, rStatus, qualification } = await searchParams;
@@ -80,20 +82,28 @@ export async function generateMetadata({ searchParams }) {
     }
 }
 
-export default function JobsPage({ searchParams }) {
+export default async function JobsPage({ searchParams }) {
+
+    const sp = await searchParams;
+
+    const { page } = sp;
+
+    const pageNum = page ? parseInt(page) : 1;
+    if (isNaN(pageNum) || pageNum < 1)
+        redirect('/jobs');
 
     return (
-        <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
-            <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
-                <div className="p-2 h-full">
-                    <Suspense fallback={<SidebarSkeleton />}>
-                        <SidebarWrapper type={'desktop'} />
-                    </Suspense>
-                </div>
-            </aside>
-            <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
-                <div className="p-3 min-h-full h-full overflow-hidden">
-                    <div className="p-2 h-full overflow-y-auto">
+        <FilterProvider initialParams={sp}>
+            <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
+                <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
+                    <div className="p-2 h-full">
+                        <Suspense fallback={<SidebarSkeleton />}>
+                            <SidebarWrapper type={'desktop'} />
+                        </Suspense>
+                    </div>
+                </aside>
+                <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900 p-3 overflow-hidden">
+                    <div className="flex flex-col gap-10 sm:gap-5 p-2 h-full overflow-y-auto">
                         <div className="relative flex justify-center items-center">
                             <div className="absolute left-0 xl:hidden">
                                 <Suspense fallback={null}>
@@ -102,27 +112,27 @@ export default function JobsPage({ searchParams }) {
                             </div>
                             <h1 className="text-3xl leading-none">Jobs</h1>
                         </div>
-                        <Suspense fallback={null}>
-                            <MainContentWrapper searchParams={searchParams} />
-                        </Suspense>
+                        <div className="sm:pr-3">
+                            <Suspense fallback={null}>
+                                <MainContentWrapper sp={sp} />
+                            </Suspense>
+                        </div>
                     </div>
-                </div>
-            </section>
-            <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
-                <div className="flex flex-col p-2 h-full">
-                    <div className="grow"></div>
-                    <p className="justify-end text-center">Advertisement</p>
-                </div>
-            </aside>
-        </div>
+                </section>
+                <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
+                    <div className="flex flex-col p-2 h-full">
+                        <div className="grow"></div>
+                        <p className="justify-end text-center">Advertisement</p>
+                    </div>
+                </aside>
+            </div>
+        </FilterProvider>
     )
 }
 
 async function SidebarWrapper({ type }) {
-    const orgs = await getOrgs();
+    const orgs = await getOrgs({});
     const states = await getStates();
-
-    // await new Promise(resolve => setTimeout(resolve, 2000));
 
     return (
         <>
@@ -133,26 +143,16 @@ async function SidebarWrapper({ type }) {
     )
 }
 
-async function MainContentWrapper({ searchParams }) {
-    const sp = await searchParams;
-    const { org } = sp;
-    const key = JSON.stringify(sp);
-    const orgName = org ? await getNameFromSlug('orgs', org) : undefined;
+async function MainContentWrapper({ sp }) {
+    const { search, org: orgSlug, rStatus, sector, qualification, expLvl, location, page } = sp;
+    const [{itemCount, jobs}, orgName] = await Promise.all([
+        getJobs({ search, orgSlug, rStatus, sector, qualification, expLvl, location, page }),
+        orgSlug ? await getNameFromSlug('orgs', orgSlug) : undefined
+    ]);
     return (
-        <div className="sm:pr-3">
+        <>
             <JobsHeader org={orgName} />
-            <Suspense key={key} fallback={<SearchListSkeleton type={'job'} />}>
-                <MainContent searchParams={sp} />
-            </Suspense>
-        </div>
+            <JobsList itemCount={itemCount} currentPage={page ? parseInt(page) : page} jobs={jobs} />
+        </>
     )
-}
-
-async function MainContent({ searchParams }) {
-    const { search, org: orgSlug, rStatus, sector, qualification, expLvl, location } = searchParams;
-    const jobs = await getJobs({ search, orgSlug, rStatus, sector, qualification, expLvl, location });
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    return <JobsList jobs={jobs} />
 }

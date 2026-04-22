@@ -22,10 +22,10 @@ export default function JobsSection({ popularJobs = [] }) {
   }, [currentCategory]);
 
   return (
-    <section className="py-16 bg-stone-100 dark:bg-slate-900">
+    <section>
       <div className="max-w-6xl mx-auto px-4">
         {/* Section header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between items-center gap-4 mb-10">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 mb-10">
           <div>
             <h2 className="text-3xl font-bold text-brand" style={{ fontFamily: "'Syne', sans-serif" }}>
               Popular Jobs

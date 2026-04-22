@@ -8,17 +8,20 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
+import { useFilter } from "@/lib/context/filterContext";
 
-export default function JobsSidebar({ orgs = [], states = [], setSidebarOpen }) {
+export default function JobsSidebar({ orgs = [], states = [] }) {
     const pathName = usePathname();
     const sp = useSearchParams();
     const router = useRouter();
 
-    const sector = sp.get('sector');
-    const paramsLocation = sp.get('location');
-    const qualification = sp.get('qualification');
-    const expLvl = sp.get('expLvl');
-    const recruitmentStatus = sp.get('rStatus');
+    const { optimisticParams, applyFilter, removeFilter } = useFilter();
+
+    const sector = optimisticParams.sector;
+    const paramsLocation = optimisticParams.location;
+    const qualification = optimisticParams.qualification;
+    const expLvl = optimisticParams.expLvl;
+    const recruitmentStatus = optimisticParams.rStatus;
 
     const [orgInputValue, setOrgInputValue] = useState('');
     const [stateInputValue, setStateInputValue] = useState('');
@@ -28,7 +31,7 @@ export default function JobsSidebar({ orgs = [], states = [], setSidebarOpen }) 
     const [regionOpen, setRegionOpen] = useState(false);
     const [enableStateSelection, setEnableStateSelection] = useState(false);
     const [stateListOpen, setStateListOpen] = useState(false);
-    const [location, setLocation] = useState(() => (paramsLocation === null || paramsLocation === 'all-india') ? paramsLocation : 'state');
+    const [location, setLocation] = useState(() => (paramsLocation === undefined || paramsLocation === 'all-india') ? paramsLocation : 'state');
 
     useEffect(() => {
         if (!open)
@@ -63,27 +66,19 @@ export default function JobsSidebar({ orgs = [], states = [], setSidebarOpen }) 
     }, [stateInputValue]);
 
     const handleFilterSelect = (key, value) => {
+        applyFilter({ [key]: value });
         key === 'org' && setOpen(false);
         key === 'location' && setRegionOpen(false);
-        const sParams = new URLSearchParams(sp);
-        sParams.set(key, value);
-        router.replace(`${pathName}?${sParams.toString()}`);
-        setSidebarOpen && setSidebarOpen(false);
     }
 
     const handleLocationSelect = (value) => {
         setLocation(value);
-        if (value === 'all-india') {
-            const sParams = new URLSearchParams(sp);
-            sParams.set('location', value);
-            router.replace(`${pathName}?${sParams.toString()}`);
-        }
+        if (value === 'all-india')
+            applyFilter({ location: value })
         else {
-            if (location === 'all-india') {
-                const sParams = new URLSearchParams(sp);
-                sParams.delete('location');
-                router.replace(`${pathName}?${sParams.toString()}`);
-            }
+            if (location === 'all-india')
+                removeFilter('location');
+
             setEnableStateSelection(true);
         }
     }
@@ -109,7 +104,7 @@ export default function JobsSidebar({ orgs = [], states = [], setSidebarOpen }) 
                 <AccordionItem value='recruitmentStatus'>
                     <AccordionTrigger className='rounded-none px-1 !py-2 font-bold cursor-pointer hover:no-underline'>Recruitment Status</AccordionTrigger>
                     <AccordionContent className='mt-2 px-2'>
-                        <RadioGroup className="flex flex-col gap-2" value={recruitmentStatus} onValueChange={(value) => handleFilterSelect('rStatus', value)}>
+                        <RadioGroup className="flex flex-col gap-2" value={recruitmentStatus ?? ""} onValueChange={(value) => handleFilterSelect('rStatus', value)}>
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-2">
                                     <div className="h-3 w-3 rounded-full bg-green-500 translate-y-[1.5px]"></div>
@@ -137,7 +132,7 @@ export default function JobsSidebar({ orgs = [], states = [], setSidebarOpen }) 
                 <AccordionItem value='jobSector'>
                     <AccordionTrigger className='rounded-none px-1 !py-2 font-bold cursor-pointer hover:no-underline'>Job Sector</AccordionTrigger>
                     <AccordionContent className='mt-2 px-2'>
-                        <RadioGroup className="flex flex-col gap-3" value={sector} onValueChange={(value) => handleFilterSelect('sector', value)}>
+                        <RadioGroup className="flex flex-col gap-3" value={sector ?? ""} onValueChange={(value) => handleFilterSelect('sector', value)}>
                             <div className="flex justify-between items-center">
                                 <Label className="text-sm" htmlFor='central-govt'>Central Govt</Label>
                                 <RadioGroupItem id='central-govt' value='central-govt' />
@@ -176,7 +171,7 @@ export default function JobsSidebar({ orgs = [], states = [], setSidebarOpen }) 
                 <AccordionItem value='location'>
                     <AccordionTrigger className='rounded-none px-1 !py-2 font-bold cursor-pointer hover:no-underline'>Location</AccordionTrigger>
                     <AccordionContent className='flex flex-col gap-3 mt-2 px-2'>
-                        <RadioGroup className="flex flex-col gap-3" value={location} onValueChange={(value) => handleLocationSelect(value)}>
+                        <RadioGroup className="flex flex-col gap-3" value={location ?? ""} onValueChange={(value) => handleLocationSelect(value)}>
                             <div className="flex justify-between items-center">
                                 <Label className="text-sm" htmlFor='all-india'>All India</Label>
                                 <RadioGroupItem id='all-india' value='all-india' />
@@ -203,7 +198,7 @@ export default function JobsSidebar({ orgs = [], states = [], setSidebarOpen }) 
                 <AccordionItem value='qualification'>
                     <AccordionTrigger className='rounded-none px-1 !py-2 font-bold cursor-pointer hover:no-underline'>Qualification</AccordionTrigger>
                     <AccordionContent className='mt-2 px-2'>
-                        <RadioGroup className="flex flex-col gap-3" value={qualification} onValueChange={(value) => handleFilterSelect('qualification', value)}>
+                        <RadioGroup className="flex flex-col gap-3" value={qualification ?? ""} onValueChange={(value) => handleFilterSelect('qualification', value)}>
                             <div className="flex justify-between items-center">
                                 <Label className="text-sm" htmlFor='10th'>10th</Label>
                                 <RadioGroupItem id='10th' value='10th' />
@@ -238,7 +233,7 @@ export default function JobsSidebar({ orgs = [], states = [], setSidebarOpen }) 
                 <AccordionItem value='expLvl'>
                     <AccordionTrigger className='border-b rounded-none px-1 !py-2 font-bold cursor-pointer hover:no-underline'>Experience</AccordionTrigger>
                     <AccordionContent className='mt-2 px-2'>
-                        <RadioGroup className="flex flex-col gap-3" value={expLvl} onValueChange={(value) => handleFilterSelect('expLvl', value)}>
+                        <RadioGroup className="flex flex-col gap-3" value={expLvl ?? ""} onValueChange={(value) => handleFilterSelect('expLvl', value)}>
                             <div className="flex justify-between items-center">
                                 <Label htmlFor='fresher' className="text-sm">Fresher</Label>
                                 <RadioGroupItem id='fresher' value='fresher' />

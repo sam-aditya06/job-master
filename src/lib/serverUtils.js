@@ -1,7 +1,8 @@
 import { cacheLife } from "next/cache";
 import { connectDB } from "./dbConfig";
 import { ObjectId } from "mongodb";
-import { connection } from "next/server";
+
+const ITEM_PER_PAGE = 4;
 
 //For Job and Recruitment Filters
 export async function getStates() {
@@ -20,10 +21,10 @@ export async function getStates() {
 }
 
 //For Recruitments Page
-export async function getRecruitments({ search, forSlug, bySlug, status, sector, qualification, expLvl, location, isTop } = {}) {
+export async function getRecruitments({ search, forSlug, bySlug, status, sector, qualification, expLvl, location, page = 1 } = {}) {
 
-    // 'use cache';
-    // cacheLife('hours');
+    'use cache';
+    cacheLife('hours');
 
     let query = {};
 
@@ -44,10 +45,6 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
         query.status = status;
     if (expLvl) {
         query['experienceRange.minYears'] = expLvl === 'experienced' ? { $gt: 0 } : 0;
-    }
-
-    if (isTop) {
-        query.isTop = isTop;
     }
 
     try {
@@ -81,7 +78,7 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
             }
             query.recruiterId = recruiter._id.toString();
         }
-        const recruitments = await db.collection('recruitments').aggregate([
+        const recruitmentsInfo = await db.collection('recruitments').aggregate([
             { $match: query },
             {
                 $addFields: {
@@ -97,10 +94,24 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
                     }
                 }
             },
-            { $sort: { statusOrder: 1, updatedAt: -1 } }
-        ]).toArray();
+            {
+                $facet: {
+                    metadata: [
+                        { $count: "total" }
+                    ],
+                    data: [
+                        { $sort: { statusOrder: 1, updatedAt: -1 } },
+                        { $skip: (page - 1) * ITEM_PER_PAGE },
+                        { $limit: ITEM_PER_PAGE }
+                    ]
+                }
+            }
+        ]).next();
 
-        if (!recruitments.length) return [];
+        const { metadata, data: recruitments } = recruitmentsInfo;
+
+        if (recruitments.length === 0)
+            return { itemCount: 0, recruitments };
 
         const recruitmentIds = recruitments.map((r) => r._id.toString());
 
@@ -136,7 +147,9 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
             return { ...recruitment, experienceRange: { minYears, maxYears } };
         });
 
-        return JSON.parse(JSON.stringify(finalRecruitmentsList));
+        const details = { itemCount: metadata[0].total, recruitments: finalRecruitmentsList };
+
+        return JSON.parse(JSON.stringify(details));
 
     } catch (error) {
         console.error("getRecruitments failed:", error);
@@ -191,8 +204,8 @@ export async function getRecruiterNameFromSlug(slug) {
 //For Home Page, Org Page and Recruitment body page
 export async function getOngoingRecruitments(page, orgSlug, rBodySlug) {
 
-    // 'use cache';
-    // cacheLife('hours');
+    'use cache';
+    cacheLife('hours');
 
     let aggregate = [];
 
@@ -260,10 +273,11 @@ export async function getOngoingRecruitments(page, orgSlug, rBodySlug) {
     }
 };
 
+//For Recruitment Page
 export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlug) {
 
-    // 'use cache';
-    // cacheLife('hours');
+    'use cache';
+    cacheLife('hours');
 
     try {
         const db = await connectDB();
@@ -286,7 +300,7 @@ export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlu
             let content = '';
 
             if (year) {
-                const pastRecruitmentInfo = await db.collection('archive').findOne({ recruitmentSlug: recSlug, year: year });
+                const pastRecruitmentInfo = await db.collection('archives').findOne({ recruitmentSlug: recSlug, year: parseInt(year) });
                 if (!pastRecruitmentInfo)
                     return null;
 
@@ -298,12 +312,14 @@ export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlu
                 if (!stage)
                     return null;
 
-                const { completedContent, pendingContent, status } = stage;
+                const { name, link, completedContent, pendingContent, status } = stage;
+
+                const stageCard = generateStageCard(name, link, status);
 
                 if (status === 'pending')
-                    content = pendingContent;
-                else if (status === 'completed')
-                    content = completedContent;
+                    content = pendingContent.replace('stage-card', stageCard);
+                else if (status === 'ongoing' || status === 'completed')
+                    content = completedContent.replace('stage-card', stageCard);
                 else
                     return null;
             }
@@ -325,10 +341,11 @@ export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlu
     }
 };
 
+//For the Recruitment Page's Sidebar
 export async function getRecruitmentSidebarDetails(recSlug) {
 
-    // 'use cache';
-    // cacheLife('hours');
+    'use cache';
+    cacheLife('hours');
 
     try {
         const db = await connectDB();
@@ -336,11 +353,11 @@ export async function getRecruitmentSidebarDetails(recSlug) {
         if (!recruitment)
             return null;
 
-        const pastRecruitmentInfos = await db.collection('archive').find({ recruitmentId: recruitment._id.toString() }).toArray();
+        const pastRecruitmentInfos = await db.collection('archives').find({ recruitmentSlug: recruitment.slug }).toArray();
         const sidebarDetails = {
             stages: recruitment.stages.map(({ name, slug, status }) => ({ name, slug, status })),
             years: [
-                recruitment.year.toString(),
+                recruitment.year,
                 ...pastRecruitmentInfos.map(p => p.year)
             ]
         };
@@ -353,7 +370,8 @@ export async function getRecruitmentSidebarDetails(recSlug) {
     }
 };
 
-export async function getOrgs(search, sector) {
+//For Orgs Page
+export async function getOrgs({ search, sector, page = 1 }) {
 
     'use cache';
     cacheLife('hours');
@@ -372,8 +390,25 @@ export async function getOrgs(search, sector) {
 
     try {
         const db = await connectDB();
-        const res = await db.collection('orgs').find(query).toArray();
-        return JSON.parse(JSON.stringify(res));
+        const res = await db.collection('orgs').aggregate([
+            { $match: query },
+            {
+                $facet: {
+                    metadata: [
+                        { $count: "total" }
+                    ],
+                    data: [
+                        { $sort: { name: 1 } },
+                        { $skip: (page - 1) * ITEM_PER_PAGE },
+                        { $limit: ITEM_PER_PAGE }
+                    ]
+                }
+            }
+        ]).next();
+
+        const details = { itemCount: res.metadata[0].total, orgs: res.data };
+
+        return JSON.parse(JSON.stringify(details));
 
     } catch (error) {
         console.error(error);
@@ -381,6 +416,7 @@ export async function getOrgs(search, sector) {
     }
 };
 
+//For Org Page
 export async function getOrgDetails(orgSlug) {
 
     'use cache';
@@ -402,10 +438,11 @@ export async function getOrgDetails(orgSlug) {
     }
 };
 
-export async function getRecruitmentBodies(search, sector) {
+//For Recruitment bodies page
+export async function getRecruitmentBodies({ search, sector, page = 1 }) {
 
-    // 'use cache';
-    // cacheLife('hours');
+    'use cache';
+    cacheLife('hours');
 
     let query = {};
     if (search) {
@@ -420,15 +457,32 @@ export async function getRecruitmentBodies(search, sector) {
 
     try {
         const db = await connectDB();
-        const rBodiesCollection = db.collection('recruitment-bodies');
-        const res = await rBodiesCollection.find(query).toArray();
-        return JSON.parse(JSON.stringify(res));
+        const res = await db.collection('recruitment-bodies').aggregate([
+            { $match: query },
+            {
+                $facet: {
+                    metadata: [
+                        { $count: "total" }
+                    ],
+                    data: [
+                        { $sort: { name: 1 } },
+                        { $skip: (page - 1) * ITEM_PER_PAGE },
+                        { $limit: ITEM_PER_PAGE }
+                    ]
+                }
+            }
+        ]).next();
+
+        const details = { itemCount: res.metadata[0].total, recruitmentBodies: res.data };
+
+        return JSON.parse(JSON.stringify(details));
 
     } catch (error) {
         console.log(error);
     }
 };
 
+//For Recruitment body page
 export async function getRecruitmentBodyDetails(rBodySlug) {
 
     // 'use cache';
@@ -453,8 +507,8 @@ export async function getRecruitmentBodyDetails(rBodySlug) {
     }
 };
 
-export async function getJobs({ search, orgSlug, rStatus, sector, qualification, expLvl, location, isTop } = {}) {
-
+//For Jobs Page
+export async function getJobs({ search, orgSlug, rStatus, sector, qualification, expLvl, location, page = 1 } = {}) {
     'use cache';
     cacheLife('hours');
 
@@ -473,10 +527,6 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
         query['education.level'] = new RegExp(qualification, 'i');
     if (expLvl) {
         query['experience.minYears'] = expLvl === 'experienced' ? { $gt: 0 } : 0;
-    }
-
-    if (isTop) {
-        query.isTop = isTop;
     }
 
     try {
@@ -512,19 +562,33 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
             query.recruitmentId = { $in: recruitments.map(r => r._id.toString()) };
         }
 
-        const res = await db.collection('jobs').find(query).sort({ popularityScore: -1 }).toArray();
+        const res = await db.collection('jobs').aggregate([
+            { $match: query },
+            {
+                $facet: {
+                    metadata: [
+                        { $count: "total" }
+                    ],
+                    data: [
+                        { $sort: { popularityScore: -1 } },
+                        { $skip: (page - 1) * ITEM_PER_PAGE },
+                        { $limit: ITEM_PER_PAGE }
+                    ]
+                }
+            }
+        ]).next();
 
-        if (res.length === 0)
-            return [];
+        if (res.data.length === 0)
+            return { itemCount: 0, jobs: res.data };
 
-        const orgIds = [...new Set(res.map(j => j.orgId))];
+        const orgIds = [...new Set(res.data.map(j => j.orgId))];
 
         const orgs = await db.collection('orgs')
             .find({ _id: { $in: orgIds.map(id => ObjectId.createFromHexString(id)) } })
             .project({ name: 1, abbr: 1, logoSrc: 1 })
             .toArray();
 
-        const jobs = res.map(job => {
+        const jobs = res.data.map(job => {
             const orgDetails = orgs.find(org => org._id.toString() === job.orgId);
             if (!orgDetails)
                 return null;
@@ -536,7 +600,9 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
             return { ...job, orgName, orgAbbr, orgLogo, recruitmentSlug, recruitmentStatus: rStatus };
         }).filter(Boolean);
 
-        return JSON.parse(JSON.stringify(jobs));
+        const details = { itemCount: res.metadata[0].total, jobs };
+
+        return JSON.parse(JSON.stringify(details));
 
     } catch (error) {
         console.error(error);
@@ -544,6 +610,7 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
     }
 };
 
+//For Home Page
 export async function getPopularJobs() {
 
     'use cache';
@@ -699,7 +766,7 @@ export async function getJobRecruitmentDetails(jobSlug) {
         const recruiterName = `${recruiterDetails.name}${recruiterDetails.abbr ? ` (${recruiterDetails.abbr})` : ''}`;
 
         const pastCycles = await db.collection('archives')
-            .find({ refId: jobDetails.recruitmentId })
+            .find({ recruitmentSlug: slug })
             .sort({ year: -1 })
             .limit(6)
             .toArray();
@@ -791,7 +858,7 @@ export async function getQuickLinks(search) {
 
     try {
         const db = await connectDB();
-        const res = await db.collection('quick-links').find(query).toArray();
+        const res = await db.collection('quick-links').find(query).sort({ name: 1 }).toArray();
         return JSON.parse(JSON.stringify(res));
 
     } catch (error) {
@@ -845,5 +912,96 @@ export async function getNameFromSlug(collectionName, slug) {
         return doc.name;
     } catch (error) {
 
+    }
+}
+
+export function generateStageCard(stage, link, status) {
+
+    switch (stage) {
+        case "Notification":
+            return status === "completed"
+                ? `
+          <div class="stage-card">
+            <p class="stage-label">${stage}</p>
+            <a href="${link}" target="_blank">
+              <div class="link-btn">View Notification PDF</div>
+            </a>
+            <p class="cms-note">Check the details carefully before applying.</p>
+          </div>
+        `
+                : `
+          <div class="stage-card">
+            <p class="stage-label">Notification</p>
+            <div class="link-btn-disabled">View Notification PDF</div>
+            <p class="cms-note">The official notification PDF link will be activated once released.</p>
+          </div>
+        `;
+        case "Registration":
+            return status === "pending" ?
+                `<div class="stage-card">
+                <p class="stage-label">${stage}</p>
+                <div class="link-btn-disabled">Apply Online</div>
+                <p class="cms-note">The link will be activated once registration begins.</p>
+            </div>` :
+                status === "ongoing" ?
+                    `<div class="stage-card">
+                <p class="stage-label">${stage}</p>
+                <a href="${link}" target="_blank">
+                <div class="link-btn">Apply Online</div>
+                </a>
+                <p class="cms-note">Complete your registration before the last date.</p>
+            </div>` :
+                    `<div class="stage-card">
+                <p class="stage-label">${stage}</p>
+                <div class="link-btn-disabled">Apply Online</div>
+                <p class="cms-note">The registration process has now closed.</p>
+            </div>`;
+
+        case "Admit Card (Prelims)":
+        case "Admit Card (Mains)":
+        case "Admit Card (CBT 1)":
+        case "Admit Card (CBT 2)":
+        case "Admit Card (Online Test)":
+            return status === "pending" ?
+                `<div class="stage-card">
+                    <p class="stage-label">${stage}</p>
+                    <div class="link-btn-disabled">Download Admit Card</div>
+                    <p class="cms-note">The link will be activated once registration begins.</p>
+                </div>` :
+                status === "ongoing" ?
+                    `<div class="stage-card">
+                        <p class="stage-label">${stage}</p>
+                        <a href="${link}" target="_blank">
+                            <div class="link-btn">Download Admit Card</div>
+                        </a>
+                        <p class="cms-note">Download your admit card using the above link.</p>
+                    </div>` :
+                    `<div class="stage-card">
+                        <p class="stage-label">${stage}</p>
+                        <div class="link-btn-disabled">Download Admit Card</div>
+                        <p class="cms-note">The admit card link has expired.</p>
+                    </div>`;
+
+        case "Result (Online Test)":
+            return status === "active"
+                ? `
+          <div class="stage-card">
+            <p class="stage-label">${stage}</p>
+            <a href="${link}" target="_blank">
+              <div class="link-btn">Check Result</div>
+            </a>
+            <p class="cms-note">Use your registration details to check your result.</p>
+          </div>
+        `
+                : `
+          <div class="stage-card">
+            <p class="stage-label">Online Test</p>
+            <div class="link-btn-disabled">Check Result</div>
+            <p class="cms-note">The result link will be activated once declared.</p>
+          </div>
+        `;
+
+        default:
+            return "";
     }
 }

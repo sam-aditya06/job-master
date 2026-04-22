@@ -1,8 +1,12 @@
-import Footer from "@/components/footer";
 import "./globals.css";
-import Header from "@/components/header";
-import { ThemeProvider } from 'next-themes';
+
 import { Suspense } from "react";
+
+import { ThemeProvider } from 'next-themes';
+import { Toaster } from "@/components/ui/sonner";
+
+import Footer from "@/components/footer";
+import Header from "@/components/header";
 
 export const metadata = {
   title: "Create Next App",
@@ -28,6 +32,7 @@ export default function RootLayout({ children }) {
             {children}
           </main>
           <Footer />
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

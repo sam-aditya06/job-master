@@ -34,9 +34,9 @@ export default function RecruitmentBodyPage({ params }) {
 
 async function MainContent({ params }) {
     const { rBody } = await params
-    const recruitmentBodyDetails = await getRecruitmentBodyDetails(rBody)
+    const recruitmentBodyDetails = await getRecruitmentBodyDetails(rBody);
 
-    if (!recruitmentBodyDetails) notFound()
+    if (!recruitmentBodyDetails) notFound();
 
     const jsonLd = {
         "@context": "https://schema.org",

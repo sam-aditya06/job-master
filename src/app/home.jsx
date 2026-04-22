@@ -6,10 +6,8 @@ import Link from "next/link";
 
 export default function Home({ jobs, recentRecruitments }) {
 
-
-
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-20">
             <HeroSection />
             <RecruitmentsSection recentRecruitments={recentRecruitments} />
             <JobsSection jobs={jobs} />

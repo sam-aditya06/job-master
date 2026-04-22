@@ -5,9 +5,7 @@ import { ArrowRight, Briefcase, MapPin } from "lucide-react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 
 export default function JobCard({ job, page }) {
-    const bgColor = page === 'home' ? 'dark:bg-slate-800' : 'dark:bg-neutral-900 dark:sm:bg-neutral-800';
-
-    console.log({ job });
+    const bgColor = page === 'home' ? 'dark:bg-neutral-800' : 'dark:bg-neutral-900 dark:sm:bg-neutral-800';
 
     return (
         <Link className="group" href={`/jobs/${job.slug}`} >
@@ -31,11 +29,11 @@ export default function JobCard({ job, page }) {
                         </div>
 
                         {/* Salary highlight */}
-                        <div className={`flex items-center gap-1.5 border bg-blue-50 dark:bg-sky-700 rounded-lg px-3 py-2 mb-4`}>
-                            <span className={`text-brand dark:text-blue-100 text-sm font-semibold`}>
+                        <div className={`flex items-center gap-1.5 border bg-green-50 dark:bg-emerald-700 rounded-lg px-3 py-2 mb-4`}>
+                            <span className={`text-brand dark:text-green-100 text-sm font-semibold`}>
                                 ₹{job.payScale.min.toLocaleString("en-IN")} – ₹{job.payScale.max.toLocaleString("en-IN")}
                             </span>
-                            <span className={`text-brand dark:text-blue-100 text-xs ml-auto`}>
+                            <span className={`text-brand dark:text-green-100 text-xs ml-auto`}>
                                 {job.payScale.abbr || `Pay Level ${job.payScale.level}`}
                             </span>
                         </div>
@@ -62,7 +60,7 @@ export default function JobCard({ job, page }) {
                                         job.location.state
                                 }
                             </div>
-                            <div className='flex items-center gap-1 text-xs font-medium text-sky-500 dark:text-sky-600 group-hover:gap-2 group-hover:!text-brand transition-all'>
+                            <div className='flex items-center gap-1 text-xs font-medium text-emerald-500 dark:text-emerald-600 group-hover:gap-2 group-hover:!text-brand transition-all'>
                                 View Profile <ArrowRight className="w-3.5 h-3.5" />
                             </div>
                         </div>

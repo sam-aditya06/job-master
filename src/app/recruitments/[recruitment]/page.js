@@ -111,7 +111,8 @@ async function SidebarWrapper({ screen, params }) {
 async function MainContentWrapper({ params, searchParams }) {
     const { recruitment } = await params;
     const sp = await searchParams;
-    const { year, stage } = sp;
+    const { fy, stage } = sp;
+    const year = fy && parseInt(fy.substring(0, 4));
     const key = JSON.stringify(sp);
     const recruitmentDetails = await getRecruitmentDetails("content", recruitment, year, stage);
     if (recruitmentDetails)

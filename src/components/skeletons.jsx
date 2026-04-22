@@ -1,3 +1,25 @@
+//For Search Page Filter Chips
+export function ChipSkeleton() {
+    return (
+        <div className="rounded-full bg-neutral-300 dark:bg-neutral-800 h-8 w-1/6 animate-pulse"></div>
+    )
+}
+
+//For loading.jsx of Search Pages
+export function SearchPageSkeleton() {
+    return (
+        <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
+            <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
+            </aside>
+            <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
+            </section>
+            <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
+            </aside>
+        </div>
+    )
+}
+
+//For item lists of Search Pages
 export function SearchListSkeleton({ type }) {
     return (
         <div className="flex flex-col gap-5 mt-5">
@@ -17,6 +39,7 @@ export function SearchListSkeleton({ type }) {
     )
 }
 
+//For Quick Links Page
 export function QuickLinkListSkeleton() {
     return (
         <div className="grid grid-cols-3 gap-2">
@@ -225,4 +248,29 @@ export function OrgsPageSkeleton({ type }) {
         </div>
     )
 
+}
+
+//For Home Page's "Recent Recruitments" and "Popular Jobs" Sections
+export function HomeSectionSkeleton({ type }) {
+    return (
+        <div className="w-9/10 xl:w-6xl mx-auto px-4">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 mb-10">
+                <div className="grow flex flex-col gap-1">
+                    <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-8 w-1/4 animate-pulse"></div>
+                    <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 w-2/3 animate-pulse"></div>
+                </div>
+                <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-8 w-1/6 animate-pulse"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {
+                    Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i}>
+                            {type === 'recruitment' && <RecruitmentCardSkeleton />}
+                            {type === 'job' && <JobCardSkeleton />}
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+    )
 }

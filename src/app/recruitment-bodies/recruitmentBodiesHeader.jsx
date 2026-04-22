@@ -1,80 +1,76 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useFilter } from "@/lib/context/filterContext";
+import { ChipSkeleton } from "@/components/skeletons";
+import { deslugify } from "@/lib/utils";
 
 export default function RecruitmentBodiesHeader() {
 
     const sp = useSearchParams();
-    const pathName = usePathname();
-    const router = useRouter();
 
-    const sector = sp.get('sector');
-    const search = sp.get('search');
+    const { optimisticParams, applyFilter, removeFilter } = useFilter();
 
-    const activeFilters = [
-        search && 'search',
-        sector && 'sector'
-    ].filter(Boolean);
+    const search = optimisticParams.search;
 
-    const [inputValue, setInputValue] = useState('');
+    const [inputValue, setInputValue] = useState(search ?? '');
 
     useEffect(() => {
-        const sParams = new URLSearchParams(sp);
         if (!inputValue) {
             if (search) {
-                sParams.delete('search');
-                router.replace(`${pathName}?${sParams.toString()}`);
+                removeFilter('search');
             }
             return;
         }
         const timoutId = setTimeout(() => {
-            sParams.set('search', inputValue);
-            router.replace(`${pathName}?${sParams.toString()}`);
+            applyFilter({ search: inputValue });
         }, 300);
-        return () => {
-            clearTimeout(timoutId);
-        }
+        return () => clearTimeout(timoutId);
     }, [inputValue]);
 
     useEffect(() => {
         search ? setInputValue(search) : setInputValue('');
     }, [search]);
 
-    const handleClearFilter = (key) => {
-        const newSearchParams = new URLSearchParams(sp);
-        newSearchParams.delete(key);
-        router.replace(`${pathName}?${newSearchParams.toString()}`);
-    }
-
-    const filterChips = [
-        { key: 'search', label: `search: ${search}` },
-        { key: 'sector', label: `sector: ${sector}` }
-    ].filter(({ key }) => activeFilters.includes(key));
-
     return (
-        <div className="flex flex-col mt-10 sm:mt-5">
-            <Input className='mt-5' placeholder='search a recruitment body' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
-            <div className="flex flex-wrap items-center gap-2 mt-5">
-                {filterChips.length > 0 && <p>Filters:</p>}
-                {filterChips.map(({ key, label }) => (
-                    <div key={key} className="flex items-center gap-1 border rounded-full pl-2 pr-1 py-1">
-                        <p className="text-sm">{label}</p>
-                        <Button
-                            className='rounded-full !h-6 !w-6 cursor-pointer'
-                            size="icon"
-                            onClick={() => handleClearFilter(key)}
-                        >
-                            <X className="!h-4 !w-4" />
-                        </Button>
-                    </div>
-                ))}
+        <>
+            <div className="relative">
+                <Input className='mt-5' placeholder='search an organisation' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
+                <Button
+                    className='absolute right-2 top-7 bg-transparent hover:bg-transparent p-0 w-5 h-5 cursor-pointer'
+                    size="icon"
+                    onClick={() => removeFilter('search')}
+                >
+                    <X className="!w-4 !h-4 stroke-muted-foreground" />
+                </Button>
             </div>
-        </div>
+            <div className="flex flex-wrap items-center gap-2 mt-5">
+                <p>Filters:</p>
+                {Object.keys(optimisticParams).map(key => {
+                    const param = key === 'search' ? sp.get(key) : deslugify(sp.get(key));
+                    if (param && (key === 'search' ? param === optimisticParams[key] : param === deslugify(optimisticParams[key])))
+                        return (
+                            <div key={key} className="flex items-center gap-1 border rounded-full pl-2 pr-1 py-1">
+                                <p className="text-sm">{`${key}: ${param}`}</p>
+                                <Button
+                                    className='rounded-full !h-6 !w-6 cursor-pointer'
+                                    size="icon"
+                                    onClick={() => removeFilter(key)}
+                                >
+                                    <X className="!h-4 !w-4" />
+                                </Button>
+                            </div>
+                        )
+                    else
+                        return <ChipSkeleton key={key} />
+                })}
+            </div>
+        </>
     )
 }

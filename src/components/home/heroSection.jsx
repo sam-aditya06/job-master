@@ -47,7 +47,7 @@ export default function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-cover bg-[url(https://images.pexels.com/photos/9841343/pexels-photo-9841343.jpeg)] sm:bg-[url(https://images.pexels.com/photos/9832700/pexels-photo-9832700.jpeg)] h-screen -mt-[3.5rem] text-white">
       <div className="absolute inset-0 z-10 bg-black opacity-60 dark:opacity-80" />
-      <div className="relative flex flex-col justify-center items-center gap-10 mx-auto mt-[3.5rem] max-w-7xl h-full z-20">
+      <div className="relative flex flex-col justify-center items-center gap-10 mx-auto max-w-7xl h-full z-20">
         <div className="w-fit lg:w-[41rem] px-2">
           <h1 className="text-4xl md:text-7xl text-center font-bold leading-tight tracking-tight mb-4"
             style={{ fontFamily: "'Syne', sans-serif" }}>
@@ -59,7 +59,7 @@ export default function HeroSection() {
           </p>
         </div>
         <Link className="rounded-sm bg-brand px-3 py-2" href='/recruitments?status=ongoing'>Explore Recruitments</Link>
-        <div className="flex flex-wrap items-center gap-2 mb-14">
+        {/* <div className="flex flex-wrap items-center gap-2 mb-14">
           <span className="flex items-center gap-1 text-white/40 text-sm">
             <TrendingUp className="w-3.5 h-3.5" /> Trending:
           </span>
@@ -72,7 +72,7 @@ export default function HeroSection() {
               {term}
             </Link>
           ))}
-        </div>
+        </div> */}
       </div>
     </section>
   );
