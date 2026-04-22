@@ -1,23 +1,29 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 
-const client = new MongoClient(process.env.MONGODB_URI, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
+const uri = process.env.MONGODB_URI;
 
-let db;
+let cached = global._mongo || { client: null, db: null, promise: null };
 
 export async function connectDB() {
-  if (!db) {
-    await client.connect();
-    db = client.db("jobs-master");
-  }
-  return db;
-}
+  if (cached.db) return cached.db;
 
-export async function closeDB() {
-  await client.close();
+  if (!cached.promise) {
+    const client = new MongoClient(uri, {
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      },
+    });
+
+    cached.promise = client.connect();
+    cached.client = client;
+  }
+
+  await cached.promise;
+  cached.db = cached.client.db("jobs-master");
+
+  global._mongo = cached;
+
+  return cached.db;
 }
