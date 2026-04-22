@@ -1,6 +1,6 @@
 // app/sitemap.js
 
-import { getAllSlugs } from "@/lib/serverUtils"
+import { getAllSlugs, getRecruiterFromId } from "@/lib/serverUtils"
 
 const BASE_URL = process.env.NEXT_PUBLIC_DOMAIN
 
@@ -37,6 +37,7 @@ export default async function sitemap({ id }) {
 
 async function getJobsSitemap() {
   const jobSlugs = await getAllSlugs('jobs');
+  const orgSlugs = await getAllSlugs('orgs');
 
   const jobsBase = {
     url: `${BASE_URL}/jobs`,
@@ -81,7 +82,7 @@ async function getJobsSitemap() {
 }
 
 async function getOrgsSitemap() {
-  const orgSlugs = await getAllSlugs('orgs')
+  const orgSlugs = await getAllSlugs('orgs');
 
   const orgsBase = {
     url: `${BASE_URL}/orgs`,
