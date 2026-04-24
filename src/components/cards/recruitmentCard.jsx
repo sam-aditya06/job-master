@@ -5,17 +5,32 @@ import { format, isAfter, isSameDay, parseISO } from "date-fns";
 
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function RecruitmentCard({ recruitment, color, icon, page }) {
+export default function RecruitmentCard({ recruitment, icon }) {
 
-    const bgColor = page === 'home' ? 'dark:bg-neutral-800' : 'dark:bg-neutral-900 dark:sm:bg-neutral-800';
-    const arrowColor = color.split(' ')[2];
-    const borderHoverColor = arrowColor.substring(5);
+    const { status } = recruitment;
+
+    const color = status === 'pending' ?
+        'bg-yellow-500 text-white' :
+        status === 'ongoing' ?
+            "bg-green-700 text-white" :
+            "bg-gray-400 text-white"
+
+    const arrowColor = status === 'pending' ?
+        'stroke-yellow-500' :
+        status === 'ongoing' ?
+            "stroke-green-700" :
+            "stroke-gray-400";
+    const borderHoverColor = status === 'pending' ?
+        'yellow-500' :
+        status === 'ongoing' ?
+            "green-700" :
+            "gray-400";
 
     return (
         <Link className="group" href={`/recruitments/${recruitment.slug}`}>
             <Card
                 style={{ '--hover-color': `var(--color-${borderHoverColor})` }}
-                className={`border rounded-xl p-5 group-hover:border-[var(--hover-color)] hover:shadow-md ${bgColor} h-full transition-all cursor-pointer`}
+                className={`border rounded-xl p-5 group-hover:border-[var(--hover-color)] hover:shadow-md dark:bg-neutral-800 h-full transition-all cursor-pointer`}
             >
                 <CardContent className='flex flex-col px-0 w-full h-full'>
                     <div className="flex items-start justify-between mb-1">
@@ -27,7 +42,7 @@ export default function RecruitmentCard({ recruitment, color, icon, page }) {
                                 {recruitment.name}
                             </h3>
                         </div>
-                        <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full border shrink-0 ${color}`}>
+                        <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${color}`}>
                             {icon} {recruitment.stageStatus}
                         </span>
                     </div>

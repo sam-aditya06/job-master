@@ -2,7 +2,7 @@ import { cacheLife } from "next/cache";
 import { connectDB } from "./dbConfig";
 import { ObjectId } from "mongodb";
 
-const ITEM_PER_PAGE = 4;
+const ITEM_PER_PAGE = 8;
 
 //For Job and Recruitment Filters
 export async function getStates() {
@@ -11,11 +11,10 @@ export async function getStates() {
 
     try {
         const db = await connectDB();
-        const statesCollection = await db.collection('states');
-        const states = await statesCollection.find({}).toArray();
+        const states = await db.collection('states').find({}).toArray();
         return JSON.parse(JSON.stringify(states));
     } catch (error) {
-        console.error("getRegions failed:", error);
+        console.error("getStates failed:", error);
         throw error;
     }
 }
@@ -147,7 +146,7 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
             return { ...recruitment, experienceRange: { minYears, maxYears } };
         });
 
-        const details = { itemCount: metadata[0].total, recruitments: finalRecruitmentsList };
+        const details = { itemCount: forSlug ? finalRecruitmentsList.length : metadata[0].total, recruitments: finalRecruitmentsList };
 
         return JSON.parse(JSON.stringify(details));
 
@@ -194,7 +193,7 @@ export async function getRecruiterNameFromSlug(slug) {
             console.warn(`getRecruiterName: invalid recruiter id`);
             return null;
         }
-        return entity.abbr || entity.name;
+        return entity.name;
 
     } catch (error) {
 
@@ -277,35 +276,37 @@ export async function getOngoingRecruitments(page, orgSlug, rBodySlug) {
 export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlug) {
 
     'use cache';
-    cacheLife('hours');
+    year ? cacheLife('max') : cacheLife('hours');
 
     try {
         const db = await connectDB();
-        let recruitment = null;
+
+        let projection = { recruiterId: 1, name: 1, year: 1 };
 
         if (mdOrContent === 'md') {
-            recruitment = await db.collection('recruitments').findOne(
-                { slug: recSlug },
-                { projection: { recruiterId: 1, name: 1, year: 1, stages: { name: 1, slug: 1, status: 1 } } }
-            );
-            if (!recruitment) return null;
+            projection = { ...projection, stages: { name: 1, slug: 1, status: 1 } }
         }
         else {
-            recruitment = await db.collection('recruitments').findOne(
-                { slug: recSlug },
-                { projection: { recruiterId: 1, name: 1, description: 1, location: 1, year: 1, overview: 1, stages: 1, status: 1 } }
-            );
-            if (!recruitment) return null;
-
-            let content = '';
-
-            if (year) {
-                const pastRecruitmentInfo = await db.collection('archives').findOne({ recruitmentSlug: recSlug, year: parseInt(year) });
-                if (!pastRecruitmentInfo)
-                    return null;
-
-                content = pastRecruitmentInfo.content;
+            projection = { ...projection, description: 1, location: 1, status: 1 };
+            if (!year) {
+                projection = stageSlug ? { ...projection, stages: 1 } : { ...projection, overview: 1 };
             }
+        }
+
+        const [recruitment, pastRecruitmentInfo] = await Promise.all([
+            db.collection('recruitments').findOne({ slug: recSlug }, { projection }),
+            year && db.collection('archives').findOne({ recruitmentSlug: recSlug, year })
+        ]);
+        if (!recruitment || (year && !pastRecruitmentInfo))
+            return null;
+
+
+        let finalDetails = recruitment;
+
+        if (mdOrContent === 'content') {
+            let content = '';
+            if (year)
+                content = pastRecruitmentInfo.content;
             else if (stageSlug) {
 
                 const stage = recruitment.stages.find(s => s.slug === stageSlug);
@@ -331,10 +332,14 @@ export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlu
                 else
                     content = completedContent;
             }
-            recruitment = { ...recruitment, content };
+
+            finalDetails = { ...finalDetails, content };
+
         }
 
-        return recruitment;
+        const { _id, ...finalRecruitmentDetails } = finalDetails;
+
+        return finalRecruitmentDetails;
     } catch (error) {
         console.error("getRecruitmentDetails failed:", error);
         throw error;
@@ -349,13 +354,16 @@ export async function getRecruitmentSidebarDetails(recSlug) {
 
     try {
         const db = await connectDB();
-        const recruitment = await db.collection('recruitments').findOne({ slug: recSlug });
+        const recruitment = await db.collection('recruitments').findOne(
+            { slug: recSlug },
+            { projection: { name: 1, year: 1, stages: { name: 1, slug: 1, status: 1 } } }
+        );
         if (!recruitment)
             return null;
 
-        const pastRecruitmentInfos = await db.collection('archives').find({ recruitmentSlug: recruitment.slug }).toArray();
+        const pastRecruitmentInfos = await db.collection('archives').find({ recruitmentSlug: recruitment.slug }).project({year: 1}).toArray();
         const sidebarDetails = {
-            stages: recruitment.stages.map(({ name, slug, status }) => ({ name, slug, status })),
+            stages: recruitment.stages,
             years: [
                 recruitment.year,
                 ...pastRecruitmentInfos.map(p => p.year)
@@ -371,7 +379,7 @@ export async function getRecruitmentSidebarDetails(recSlug) {
 };
 
 //For Orgs Page
-export async function getOrgs({ search, sector, page = 1 }) {
+export async function getOrgs({ search, sector, page }) {
 
     'use cache';
     cacheLife('hours');
@@ -399,14 +407,16 @@ export async function getOrgs({ search, sector, page = 1 }) {
                     ],
                     data: [
                         { $sort: { name: 1 } },
-                        { $skip: (page - 1) * ITEM_PER_PAGE },
-                        { $limit: ITEM_PER_PAGE }
+                        ...(page ? [
+                            { $skip: (page - 1) * ITEM_PER_PAGE },
+                            { $limit: ITEM_PER_PAGE }
+                        ] : [])
                     ]
                 }
             }
         ]).next();
 
-        const details = { itemCount: res.metadata[0].total, orgs: res.data };
+        const details = { itemCount: res.metadata[0]?.total ?? 0, orgs: res.data };
 
         return JSON.parse(JSON.stringify(details));
 
@@ -473,7 +483,7 @@ export async function getRecruitmentBodies({ search, sector, page = 1 }) {
             }
         ]).next();
 
-        const details = { itemCount: res.metadata[0].total, recruitmentBodies: res.data };
+        const details = { itemCount: res.metadata[0]?.total ?? 0, recruitmentBodies: res.data };
 
         return JSON.parse(JSON.stringify(details));
 

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { getNameFromSlug, getOrgs, getRecruiterNameFromSlug, getRecruiters, getRecruitments, getStates } from "@/lib/serverUtils";
-import { SidebarSkeleton } from "@/components/skeletons";
+import { SearchMainSectionSkeleton, SearchPageSkeleton, SidebarSkeleton } from "@/components/skeletons";
 import DesktopSidebar from "@/components/sidebars/desktopSidebar";
 import MobileSidebar from "@/components/sidebars/mobileSidebar";
 import RecruitmentsList from "./recruitmentsList";
@@ -9,9 +9,10 @@ import RecruitmentsHeader from "./recruitmentsHeader";
 
 import { FilterProvider } from "@/lib/context/filterContext";
 import { redirect } from "next/navigation";
+import ScrollContainer from "@/components/scrollContainer";
 
 export async function generateMetadata({ searchParams }) {
-    const { sector, by, for: forOrg, status, search, expLvl, location, qualification } = await searchParams
+    const { sector, by, for: forOrg, status, search, expLvl, location, qualification } = await searchParams;
 
     const isSingleSectorFilter = sector && !by && !forOrg && !status && !search && !expLvl && !location && !qualification
     const isSingleByFilter = by && !sector && !forOrg && !status && !search && !expLvl && !location && !qualification
@@ -112,21 +113,20 @@ export default async function RecruitmentsPage({ searchParams }) {
                     </div>
                 </aside>
                 <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900 p-3 overflow-hidden">
-                    <div className="flex flex-col gap-10 sm:gap-5 p-2 h-full overflow-y-auto">
-                        <div className="relative flex justify-center items-center">
-                            <div className="absolute left-0 xl:hidden">
+                    <ScrollContainer>
+                        <div className="xl:hidden relative flex justify-center items-center">
+                            <div className="absolute left-0 top-0">
                                 <Suspense fallback={null}>
                                     <Sidebar type={'mobile'} />
                                 </Suspense>
                             </div>
-                            <h1 className="text-3xl leading-none">Recruitments</h1>
                         </div>
                         <div className="sm:pr-3">
-                            <Suspense fallback={null}>
+                            <Suspense fallback={<SearchMainSectionSkeleton type={'recruitment'} />}>
                                 <MainContentWrapper sp={sp} />
                             </Suspense>
                         </div>
-                    </div>
+                    </ScrollContainer>
                 </section>
                 <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
                     <div className="flex flex-col p-2 h-full">
@@ -140,7 +140,7 @@ export default async function RecruitmentsPage({ searchParams }) {
 }
 
 async function Sidebar({ type }) {
-    const orgs = await getOrgs({});
+    const { orgs } = await getOrgs({});
     const states = await getStates();
     const recruiters = await getRecruiters();
 
@@ -161,7 +161,6 @@ async function MainContentWrapper({ sp }) {
         forSlug ? getNameFromSlug('orgs', forSlug) : undefined,
         bySlug ? getRecruiterNameFromSlug(bySlug) : undefined,
     ]);
-
 
     return (
         <>

@@ -27,7 +27,7 @@ export function OrgCard({ org }) {
                     </div>
                     <p className="text-xs text-muted-foreground line-clamp-3">{org.description}</p>
                     <div className="flex justify-end pt-3 border-t">
-                        <div className="flex items-center gap-1 text-xs font-medium text-sky-500 dark:text-sky-600 group-hover:gap-2 group-hover:!text-brand transition-all">
+                        <div className="flex items-center gap-1 text-xs font-medium text-emerald-500 dark:text-emerald-600 group-hover:gap-2 group-hover:!text-brand transition-all">
                             View Details <ArrowRight className="w-3.5 h-3.5" />
                         </div>
                     </div>

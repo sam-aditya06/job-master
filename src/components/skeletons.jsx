@@ -5,13 +5,45 @@ export function ChipSkeleton() {
     )
 }
 
+//For main section (header + item lists) of Search Pages
+export function SearchMainSectionSkeleton({ type }) {
+    return (
+        <div className="flex flex-col gap-7">
+            <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 mx-auto w-1/3 h-9 animate-pulse"></div>
+            <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-9 animate-pulse"></div>
+            <div className="flex flex-wrap items-center gap-2">
+                <p>Filters:</p>
+                {
+                    Array.from({ length: 4 }).map((_, i) => (
+                        <ChipSkeleton key={i} />
+                    ))
+                }
+            </div>
+            <SearchListSkeleton type={type} />
+        </div>
+    )
+}
+
 //For loading.jsx of Search Pages
-export function SearchPageSkeleton() {
+export function SearchPageSkeleton({ type }) {
     return (
         <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
             <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
+                <div className="p-2 h-full">
+                    <SidebarSkeleton />
+                </div>
             </aside>
-            <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900">
+            <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900 p-3">
+                <div className="flex flex-col gap-10 p-2 h-full overflow-y-auto">
+                    <div className="xl:hidden relative flex justify-center items-center">
+                        <div className="absolute left-0 top-0">
+                            <div className="h-6 w-6 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
+                        </div>
+                    </div>
+                    <div className="sm:pr-3">
+                        <SearchMainSectionSkeleton type={type} />
+                    </div>
+                </div>
             </section>
             <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
             </aside>
@@ -45,7 +77,7 @@ export function QuickLinkListSkeleton() {
         <div className="grid grid-cols-3 gap-2">
             {
                 Array.from({ length: 9 }).map((_, i) => (
-                    <div key={i} className="border rounded-md bg-neutral-300 dark:bg-neutral-800 px-2 py-1 h-8 animate-pulse"></div>
+                    <div key={i} className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-8 animate-pulse"></div>
                 ))
             }
         </div>
@@ -109,23 +141,23 @@ export function SidebarSkeleton() {
 export function ContentSkeleton() {
     return (
         <div className="flex flex-col p-3">
-            <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 px-2 py-1 w-2/3 h-9 animate-pulse"></div>
+            <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 w-2/3 h-9 animate-pulse"></div>
             <div className="flex flex-col gap-2 mt-4">
-                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 px-2 py-1 h-6 animate-pulse"></div>
-                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 px-2 py-1 h-6 animate-pulse"></div>
-                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 px-2 py-1 h-6 animate-pulse"></div>
-                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 px-2 py-1 h-6 animate-pulse"></div>
+                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-6 animate-pulse"></div>
+                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-6 animate-pulse"></div>
+                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-6 animate-pulse"></div>
+                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-6 animate-pulse"></div>
             </div>
             <div className="flex flex-col">
                 {
                     Array.from({ length: 4 }).map((_, i) => (
                         <div key={i} className="flex flex-col">
-                            <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 mt-6 px-2 py-1 h-8 w-1/3 animate-pulse"></div>
+                            <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 mt-6 h-8 w-1/3 animate-pulse"></div>
                             <div className="flex flex-col gap-2 mt-4">
-                                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 px-2 py-1 h-6 animate-pulse"></div>
-                                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 px-2 py-1 h-6 animate-pulse"></div>
-                                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 px-2 py-1 h-6 animate-pulse"></div>
-                                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 px-2 py-1 h-6 animate-pulse"></div>
+                                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-6 animate-pulse"></div>
+                                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-6 animate-pulse"></div>
+                                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-6 animate-pulse"></div>
+                                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-6 animate-pulse"></div>
                             </div>
                         </div>
                     ))

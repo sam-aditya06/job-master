@@ -2,12 +2,13 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
 import OrgsHeader from "./orgsHeader";
-import { SidebarSkeleton } from "@/components/skeletons";
+import { SearchMainSectionSkeleton, SidebarSkeleton } from "@/components/skeletons";
 import DesktopSidebar from "@/components/sidebars/desktopSidebar";
 import MobileSidebar from "@/components/sidebars/mobileSidebar";
 import { getOrgs } from "@/lib/serverUtils";
 import OrgsList from "./orgsList";
 import { FilterProvider } from "@/lib/context/filterContext";
+import ScrollContainer from "@/components/scrollContainer";
 
 export async function generateMetadata({ searchParams }) {
     const { sector, search } = await searchParams
@@ -91,21 +92,20 @@ export default async function OrgsPage({ searchParams }) {
                     </div>
                 </aside>
                 <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900 p-3 overflow-hidden">
-                    <div className="flex flex-col gap-10 sm:gap-5 p-2 h-full overflow-y-auto">
-                        <div className="relative flex justify-center items-center">
-                            <div className="absolute left-0 xl:hidden">
+                    <ScrollContainer>
+                        <div className="xl:hidden relative flex justify-center items-center">
+                            <div className="absolute left-0 top-0">
                                 <Suspense fallback={<SidebarSkeleton />}>
                                     <MobileSidebar />
                                 </Suspense>
                             </div>
-                            <h1 className="text-3xl leading-none">Organisations</h1>
                         </div>
                         <div className="sm:pr-3">
-                            <Suspense fallback={null}>
+                            <Suspense fallback={<SearchMainSectionSkeleton type={'org'} />}>
                                 <MainContentWrapper sp={sp} />
                             </Suspense>
                         </div>
-                    </div>
+                    </ScrollContainer>
                 </section>
                 <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
                     <div className="flex flex-col p-2 h-full">
@@ -120,7 +120,7 @@ export default async function OrgsPage({ searchParams }) {
 
 async function MainContentWrapper({ sp }) {
     const { search, sector, page } = sp;
-    const {itemCount, orgs} = await getOrgs({search, sector, page});
+    const { itemCount, orgs } = await getOrgs({ search, sector, page: page || 1 });
 
     return (
         <>

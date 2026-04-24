@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-import { X } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,20 +39,21 @@ export default function RecruitmentBodiesHeader() {
     }, [search]);
 
     return (
-        <>
+        <div className="flex flex-col gap-7">
+            <h1 className="text-3xl text-center">Recruitment Bodies</h1>
             <div className="relative">
-                <Input className='mt-5' placeholder='search an organisation' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
+                <Input placeholder='Recruiting Authorities (e.g., IBPS, UPSC, RRB)' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
                 <Button
-                    className='absolute right-2 top-7 bg-transparent hover:bg-transparent p-0 w-5 h-5 cursor-pointer'
+                    className='absolute right-2 top-2 bg-transparent hover:bg-transparent p-0 w-5 h-5 cursor-pointer'
                     size="icon"
                     onClick={() => removeFilter('search')}
                 >
-                    <X className="!w-4 !h-4 stroke-muted-foreground" />
+                    {inputValue ? <X className="!w-4 !h-4 stroke-muted-foreground" /> : <Search className="!w-4 !h-4 stroke-muted-foreground" />}
                 </Button>
             </div>
-            <div className="flex flex-wrap items-center gap-2 mt-5">
+            <div className="flex flex-wrap items-center gap-2">
                 <p>Filters:</p>
-                {Object.keys(optimisticParams).map(key => {
+                {Object.keys(optimisticParams).filter(key => key !== 'page').map(key => {
                     const param = key === 'search' ? sp.get(key) : deslugify(sp.get(key));
                     if (param && (key === 'search' ? param === optimisticParams[key] : param === deslugify(optimisticParams[key])))
                         return (
@@ -71,6 +72,6 @@ export default function RecruitmentBodiesHeader() {
                         return <ChipSkeleton key={key} />
                 })}
             </div>
-        </>
+        </div>
     )
 }

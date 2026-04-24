@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-import { X } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFilter } from "@/lib/context/filterContext";
 import { ChipSkeleton } from "@/components/skeletons";
+
+import { deslugify } from "@/lib/utils";
 
 export default function JobsHeader({ org }) {
 
@@ -38,25 +40,32 @@ export default function JobsHeader({ org }) {
     }, [search]);
 
     return (
-        <>
+        <div className="flex flex-col gap-7">
+            <h1 className="text-3xl text-center">Jobs</h1>
             <div className="relative">
-                <Input className='mt-5' placeholder='search an organisation' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
+                <Input placeholder='Job Title (e.g., SBI PO, IAS Officer, IBPS PO)' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
                 <Button
-                    className='absolute right-2 top-7 bg-transparent hover:bg-transparent p-0 w-5 h-5 cursor-pointer'
+                    className='absolute right-2 top-2 bg-transparent hover:bg-transparent p-0 w-5 h-5 cursor-pointer'
                     size="icon"
                     onClick={() => removeFilter('search')}
                 >
-                    <X className="!w-4 !h-4 stroke-muted-foreground" />
+                    {inputValue ? <X className="!w-4 !h-4 stroke-muted-foreground" /> : <Search className="!w-4 !h-4 stroke-muted-foreground" />}
                 </Button>
             </div>
-            <div className="flex flex-wrap items-center gap-2 mt-5">
+            <div className="flex flex-wrap items-center gap-2">
                 <p>Filters:</p>
-                {Object.keys(optimisticParams).map(key => {
-                    const param = key === 'org' ? org : sp.get(key);
-                    if (param)
+                {Object.keys(optimisticParams).filter(key => key !== 'page').map(key => {
+                    const displayedParam = key === 'org' ? org : key === 'search' ? sp.get(key) : deslugify(sp.get(key));
+                    if (displayedParam && (
+                        key === 'org' ?
+                            displayedParam === org :
+                            key === 'search' ?
+                                displayedParam === optimisticParams[key] :
+                                displayedParam === deslugify(optimisticParams[key])
+                    ))
                         return (
                             <div key={key} className="flex items-center gap-1 border rounded-full pl-2 pr-1 py-1">
-                                <p className="text-sm">{`${key}: ${param}`}</p>
+                                <p className="text-sm">{`${key}: ${displayedParam}`}</p>
                                 <Button
                                     className='rounded-full !h-6 !w-6 cursor-pointer'
                                     size="icon"
@@ -70,6 +79,6 @@ export default function JobsHeader({ org }) {
                         return <ChipSkeleton key={key} />
                 })}
             </div>
-        </>
+        </div>
     )
 }

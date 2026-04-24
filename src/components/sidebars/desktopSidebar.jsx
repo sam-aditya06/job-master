@@ -9,14 +9,14 @@ import RecruitmentBodiesSidebar from "./recruitmentBodiesSidebar";
 import JobSidebar from "./jobSidebar";
 
 export default function DesktopSidebar({ orgs, states, recruiters, fields, details }) {
-    const { recruitment, jobSlug } = useParams();
+    const { recruitment } = useParams();
     const pathName = usePathname();
 
     return (
         <>
             {recruitment && <RecruitmentSidebar details={details} />}
             {pathName === '/recruitments' && <RecruitmentsSidebar recruiters={recruiters} orgs={orgs} states={states} />}
-            {pathName === '/jobs' && <JobsSidebar orgs={orgs} regions={states} />}
+            {pathName === '/jobs' && <JobsSidebar orgs={orgs} states={states} />}
             {pathName.includes('/jobs/') && <JobSidebar fields={fields} />}
             {pathName === '/orgs' && <OrgsSidebar />}
             {pathName === '/recruitment-bodies' && <RecruitmentBodiesSidebar />}

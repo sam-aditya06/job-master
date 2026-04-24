@@ -8,6 +8,7 @@ import { Check, Hourglass, Lock } from "lucide-react";
 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useContentLoader } from "@/lib/context/paginateContext";
 
 
 export default function RecruitmentSidebar({ details }) {
@@ -16,6 +17,8 @@ export default function RecruitmentSidebar({ details }) {
     const sp = useSearchParams();
     const pathName = usePathname();
     const router = useRouter();
+
+    const { setIsLoading } = useContentLoader();
 
     const paramFY = sp.get("fy");
     const stage = sp.get('stage');
@@ -32,6 +35,9 @@ export default function RecruitmentSidebar({ details }) {
 
     const handleSelect = (slug) => {
         setSelected(slug);
+        setIsLoading(true);
+        router.replace(`/recruitments/${recruitment}?stage=${slug}`)
+
     }
 
     const handleYearChange = (year) => {
@@ -47,23 +53,27 @@ export default function RecruitmentSidebar({ details }) {
         router.push(`${pathName}?${searchParams.toString()}`);
     }
 
+    const handleClick = () => {
+
+    }
+
     return (
         <div className="grow flex flex-col gap-5 mt-12 xl:mt-0 h-full p-2 overflow-y-auto">
             <div className="flex flex-col gap-2">
-            <Label htmlFor='recruitmentYear' className='text-sm'>Recruitment Cycle</Label>
-            <Select id='recruitmentYear' value={selectedFY} onValueChange={(val) => handleYearChange(val)}>
-                <SelectTrigger className='w-full'>
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    {
-                        details.years.map(year => {
-                            const fy = `${year}-${(year + 1).toString().slice(-2)}`;
-                            return <SelectItem key={fy} value={fy}>{fy}</SelectItem>
-                        })
-                    }
-                </SelectContent>
-            </Select>
+                <Label htmlFor='recruitmentYear' className='text-sm'>Recruitment Cycle</Label>
+                <Select id='recruitmentYear' value={selectedFY} onValueChange={(val) => handleYearChange(val)}>
+                    <SelectTrigger className='w-full'>
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {
+                            details.years.map(year => {
+                                const fy = `${year}-${(year + 1).toString().slice(-2)}`;
+                                return <SelectItem key={fy} value={fy}>{fy}</SelectItem>
+                            })
+                        }
+                    </SelectContent>
+                </Select>
             </div>
             <Link className={`flex justify-center border rounded-md mt-5 pl-2 py-1 w-full${!selected ? ' bg-brand text-white' : ' hover:bg-brand hover:text-white'}`} href={`/recruitments/${recruitment}`} onClick={() => handleSelect(undefined)}>
                 Overview
@@ -83,9 +93,9 @@ export default function RecruitmentSidebar({ details }) {
                                                 <div className="flex justify-center items-center h-6 w-6 border border-brand rounded-full bg-brand">
                                                     <Check size={18} className="stroke-white" />
                                                 </div>
-                                                <Link className={selected === stage.slug ? 'text-brand font-bold' : 'hover:text-brand hover:font-bold'} href={`/recruitments/${recruitment}?stage=${stage.slug}`} onClick={() => handleSelect(stage.slug)}>
+                                                <p className={`${selected === stage.slug ? 'text-brand font-bold' : 'hover:text-brand hover:font-bold'} cursor-pointer`} href={`/recruitments/${recruitment}?stage=${stage.slug}`} onClick={() => handleSelect(stage.slug)}>
                                                     {stage.name}
-                                                </Link>
+                                                </p>
                                             </div>
                                         }
                                         {
@@ -95,9 +105,9 @@ export default function RecruitmentSidebar({ details }) {
                                                 <div className="flex gap-2 justify-center items-center h-6 w-6 border border-brand rounded-full">
                                                     <Hourglass size={15} className="stroke-brand" />
                                                 </div>
-                                                <Link className={selected === stage.slug ? 'text-brand font-bold' : 'hover:text-brand hover:font-bold'} href={`/recruitments/${recruitment}?stage=${stage.slug}`} onClick={() => handleSelect(stage.slug)}>
+                                                <p className={`${selected === stage.slug ? 'text-brand font-bold' : 'hover:text-brand hover:font-bold'} cursor-pointer`} href={`/recruitments/${recruitment}?stage=${stage.slug}`} onClick={() => handleSelect(stage.slug)}>
                                                     {stage.name}
-                                                </Link>
+                                                </p>
                                             </div>
                                         }
                                         {
@@ -118,23 +128,6 @@ export default function RecruitmentSidebar({ details }) {
                                 ))
                             }
                         </div>
-                        {/* <ul className="flex flex-col gap-[1.8rem] w-full">
-                    {
-                        details?.stages?.map(stage => (
-                            <li key={stage.slug} className={`w-fit leading-none text-sm${selected === stage.slug ? ' text-brand font-bold' : stage.status === 'not-reached' ? ' text-muted-foreground cursor-none' : ' hover:text-brand hover:font-bold'}`}>
-                                {
-                                    stage.status === 'not-reached' ?
-                                        <p className="text-muted-foreground cursor-not-allowed">
-                                            {stage.name}
-                                        </p> :
-                                        <Link href={`/recruitments/${recruitment}?stage=${stage.slug}`} onClick={() => handleSelect(stage.slug)}>
-                                            {stage.name}
-                                        </Link>
-                                }
-                            </li>
-                        ))
-                    }
-                </ul> */}
                     </div>
                 </>
             }

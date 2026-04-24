@@ -1,31 +1,28 @@
-// context/filter-context.jsx
 'use client'
 
-import { createContext, useContext, useOptimistic, useTransition } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { createContext, useContext, useOptimistic, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 
 const FilterContext = createContext(null)
 
 export function FilterProvider({ children, initialParams = {} }) {
-    const { page, ...requiredParams } = initialParams;
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
-    const [optimisticParams, setOptimisticParams] = useOptimistic(requiredParams)
+    const [optimisticParams, setOptimisticParams] = useOptimistic(initialParams);
+    const [isPaginating, setIsPaginating] = useState(false);
 
     function applyFilter(newParams) {
-        if (!newParams.page) {
-            const merged = { ...optimisticParams, ...newParams };
-            // Remove undefined/null/empty keys
-            const cleaned = Object.fromEntries(
-                Object.entries(merged).filter(([_, v]) => v != null && v !== '')
-            )
+        const {page, ...rest} = optimisticParams;
+        const merged = { ...rest, ...newParams };
+        const cleaned = Object.fromEntries(
+            Object.entries(merged).filter(([_, v]) => v != null && v !== '')
+        )
 
-            startTransition(() => {
-                setOptimisticParams(cleaned)
-                const qs = new URLSearchParams(cleaned).toString();
-                router.replace(`?${qs}`)
-            })
-        }
+        startTransition(() => {
+            setOptimisticParams(cleaned)
+            const qs = new URLSearchParams(cleaned).toString();
+            router.replace(`?${qs}`)
+        })
     }
 
     function removeFilter(key) {
@@ -47,7 +44,7 @@ export function FilterProvider({ children, initialParams = {} }) {
     }
 
     return (
-        <FilterContext.Provider value={{ optimisticParams, isPending, applyFilter, removeFilter, clearFilters }}>
+        <FilterContext.Provider value={{ optimisticParams, isPending, isPaginating, setIsPaginating, applyFilter, removeFilter, clearFilters }}>
             {children}
         </FilterContext.Provider>
     )

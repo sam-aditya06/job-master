@@ -7,12 +7,12 @@ import { useFilter } from "@/lib/context/filterContext";
 
 export default function OrgsList({ itemCount, currentPage = 1, orgs = [] }) {
 
-    const { isPending } = useFilter();
+    const { isPending, isPaginating } = useFilter();
 
     return (
         <div className="flex flex-col gap-10">
             {
-                isPending ? <SearchListSkeleton type={'org'} /> :
+                (isPending || isPaginating) ? <SearchListSkeleton type={'org'} /> :
                     <div className="flex flex-col gap-5 mt-5">
                         <h2 className="text-2xl font-bold">Results ({itemCount})</h2>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -24,7 +24,7 @@ export default function OrgsList({ itemCount, currentPage = 1, orgs = [] }) {
                         </div>
                     </div>
             }
-            <PaginationComponent currentPage={currentPage} itemCount={itemCount} />
+            {itemCount > 0 && <PaginationComponent currentPage={currentPage} itemCount={itemCount} />}
         </div>
     )
 }

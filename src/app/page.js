@@ -1,5 +1,4 @@
-import { getJobs, getPopularJobs, getOngoingRecruitments } from "@/lib/serverUtils";
-import Home from "./home";
+import { getPopularJobs, getOngoingRecruitments } from "@/lib/serverUtils";
 import HeroSection from "@/components/home/heroSection";
 import { Suspense } from "react";
 import RecruitmentsSection from "@/components/home/recruitmentsSection";

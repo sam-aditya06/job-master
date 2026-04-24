@@ -65,7 +65,7 @@ export default function RecruitmentsSection({ recentRecruitments = [] }) {
             const key = Object.keys(statusConfig).filter(status => r.stageStatus.includes(status));
             const { color, icon } = statusConfig[key];
             return (
-              <RecruitmentCard key={r._id} recruitment={r} color={color} icon={icon} page={'home'} />
+              <RecruitmentCard key={r._id} recruitment={r} color={color} icon={icon} />
             );
           })}
         </div>

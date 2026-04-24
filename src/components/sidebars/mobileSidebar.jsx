@@ -11,14 +11,13 @@ import RecruitmentsSidebar from "./recruitmentsSidebar"
 import JobsSidebar from "./jobsSidebar"
 import JobSidebar from "./jobSidebar"
 
-export default function MobileSidebar({ orgs, regions, recruiters, fields, details }) {
+export default function MobileSidebar({ orgs, states, recruiters, fields, details }) {
     const { recruitment } = useParams();
     const sp = useSearchParams();
     const pathName = usePathname()
     const [open, setOpen] = useState(false)
 
     useEffect(() => {
-        // Close sheet whenever route changes
         setOpen(false)
     }, [pathName, sp]);
 
@@ -28,8 +27,8 @@ export default function MobileSidebar({ orgs, regions, recruiters, fields, detai
             <SheetContent side='left'>
                 <SheetTitle className='hidden'>Menu</SheetTitle>
                 {recruitment && <RecruitmentSidebar details={details} />}
-                {pathName === '/recruitments' && <RecruitmentsSidebar recruiters={recruiters} orgs={orgs} regions={regions} />}
-                {pathName === '/jobs' && <JobsSidebar recruiters={recruiters} orgs={orgs} regions={regions} setSidebarOpen={setOpen} />}
+                {pathName === '/recruitments' && <RecruitmentsSidebar recruiters={recruiters} orgs={orgs} states={states} />}
+                {pathName === '/jobs' && <JobsSidebar recruiters={recruiters} orgs={orgs} states={states} />}
                 {pathName.includes('/jobs/') && <JobSidebar fields={fields} />}
             </SheetContent>
         </Sheet>

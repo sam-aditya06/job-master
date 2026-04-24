@@ -26,8 +26,7 @@ export function slugify(str) {
 }
 
 export function deslugify(str) {
-  return str?.replace('govt', 'government')
-    .split('-')
+  return str?.split('-')
     .map(([first, ...rest]) => first.toUpperCase() + rest.join(''))
     .join(' ');
 }

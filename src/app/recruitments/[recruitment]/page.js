@@ -5,7 +5,8 @@ import DesktopSidebar from "@/components/sidebars/desktopSidebar";
 import MobileSidebar from "@/components/sidebars/mobileSidebar";
 import { getRecruiterFromId, getRecruitmentDetails, getRecruitmentSidebarDetails } from "@/lib/serverUtils";
 import Recruitment from "./recruitment";
-import { ContentSkeleton, SearchListSkeleton, SidebarSkeleton } from "@/components/skeletons";
+import { ContentSkeleton, SidebarSkeleton } from "@/components/skeletons";
+import { ContentLoadingProvider } from "@/lib/context/paginateContext";
 
 export const generateMetadata = async ({ params, searchParams }) => {
     const { recruitment } = await params
@@ -63,49 +64,52 @@ export const generateMetadata = async ({ params, searchParams }) => {
 
 export default function RecruitmentPage({ params, searchParams }) {
     return (
-        <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
-            <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
-                <div className="p-2 h-full">
-                    <Suspense fallback={<SidebarSkeleton />}>
-                        <SidebarWrapper screen='desktop' params={params} />
-                    </Suspense>
-                </div>
-            </aside>
-            <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900 overflow-hidden">
-                <div className="p-3 min-h-full h-full overflow-hidden">
-                    <div className="p-2 h-full overflow-y-auto">
-                        <div className="xl:hidden">
-                            <Suspense fallback={null}>
-                                <SidebarWrapper screen='mobile' params={params} />
-                            </Suspense>
-                        </div>
-                        <Suspense fallback={<p>Loading...</p>}>
-                            <MainContentWrapper params={params} searchParams={searchParams} />
+        <ContentLoadingProvider>
+            <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
+                <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
+                    <div className="p-2 h-full">
+                        <Suspense fallback={<SidebarSkeleton />}>
+                            <Sidebar screen='desktop' params={params} />
                         </Suspense>
                     </div>
-                </div>
-            </section>
-            <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
-                <div className="flex flex-col p-2 h-full">
-                    <div className="grow"></div>
-                    <p className="justify-end text-center">Advertisement</p>
-                </div>
-            </aside>
-        </div>
+                </aside>
+                <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900 overflow-hidden">
+                    <div className="p-3 min-h-full h-full overflow-hidden">
+                        <div className="p-2 h-full overflow-y-auto">
+                            <div className="xl:hidden">
+                                <Suspense fallback={null}>
+                                    <Sidebar screen='mobile' params={params} />
+                                </Suspense>
+                            </div>
+                            <Suspense fallback={<ContentSkeleton />}>
+                                <MainContentWrapper params={params} searchParams={searchParams} />
+                            </Suspense>
+                        </div>
+                    </div>
+                </section>
+                <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">
+                    <div className="flex flex-col p-2 h-full">
+                        <div className="grow"></div>
+                        <p className="justify-end text-center">Advertisement</p>
+                    </div>
+                </aside>
+            </div>
+        </ContentLoadingProvider>
     )
 }
 
-async function SidebarWrapper({ screen, params }) {
+async function Sidebar({ params, screen }) {
     const { recruitment } = await params;
     const sidebarDetails = await getRecruitmentSidebarDetails(recruitment);
     if (sidebarDetails)
         return (
-            <Suspense fallback={<p>Loading...</p>}>
+            <Suspense fallback={<SidebarSkeleton />}>
                 {screen === 'desktop' ? <DesktopSidebar details={sidebarDetails} /> : <MobileSidebar details={sidebarDetails} />}
             </Suspense>
         )
     else
         notFound();
+
 }
 
 async function MainContentWrapper({ params, searchParams }) {
@@ -158,8 +162,6 @@ async function MainContent({ recruitmentDetails }) {
             "location": location
         })
     }
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
 
     return (
         <>

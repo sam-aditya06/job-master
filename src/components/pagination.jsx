@@ -11,10 +11,13 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useFilter } from "@/lib/context/filterContext";
 
 export default function PaginationComponent({ itemCount, currentPage }) {
 
-    const totalPages = Math.ceil(itemCount / 4);
+    const totalPages = Math.ceil(itemCount / 8);
+
+    const { setIsPaginating } = useFilter();
 
     const pathName = usePathname();
     const sp = useSearchParams();
@@ -54,6 +57,7 @@ export default function PaginationComponent({ itemCount, currentPage }) {
                         aria-disabled={currentPage === 1}
                         tabIndex={currentPage === 1 ? -1 : undefined}
                         className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                        onClick={() => setIsPaginating(true)}
                     />
                 </PaginationItem>
 
@@ -68,6 +72,7 @@ export default function PaginationComponent({ itemCount, currentPage }) {
                                 <PaginationLink
                                     href={buildHref(page)}
                                     isActive={page === currentPage}
+                                    onClick={() => setIsPaginating(true)}
                                 >
                                     {page}
                                 </PaginationLink>
@@ -82,6 +87,7 @@ export default function PaginationComponent({ itemCount, currentPage }) {
                         aria-disabled={currentPage === totalPages}
                         tabIndex={currentPage === totalPages ? -1 : undefined}
                         className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                        onClick={() => setIsPaginating(true)}
                     />
                 </PaginationItem>
             </PaginationContent>
