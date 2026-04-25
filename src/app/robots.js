@@ -2,7 +2,15 @@ export default function robots() {
   return {
     rules: {
       userAgent: "*",
-      allow: "/",
+      allow: [
+        "/",
+        "/about",
+        "/contact",
+        "/disclaimer",
+        "/feedback",
+        "/privacy-policy",
+        "/terms"
+      ],
       disallow: [
         // jobs
         "/jobs?search=",

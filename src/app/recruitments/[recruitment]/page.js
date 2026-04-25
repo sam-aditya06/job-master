@@ -7,6 +7,7 @@ import { getRecruiterFromId, getRecruitmentDetails, getRecruitmentSidebarDetails
 import Recruitment from "./recruitment";
 import { ContentSkeleton, SidebarSkeleton } from "@/components/skeletons";
 import { ContentLoadingProvider } from "@/lib/context/paginateContext";
+import ScrollProvider from "@/components/scrollProvider";
 
 export const generateMetadata = async ({ params, searchParams }) => {
     const { recruitment } = await params
@@ -75,7 +76,7 @@ export default function RecruitmentPage({ params, searchParams }) {
                 </aside>
                 <section className="flex-1 sm:flex-[75] xl:flex-[6] sm:rounded-md bg-white dark:bg-background dark:sm:bg-neutral-900 overflow-hidden">
                     <div className="p-3 min-h-full h-full overflow-hidden">
-                        <div className="p-2 h-full overflow-y-auto">
+                        <ScrollProvider>
                             <div className="xl:hidden">
                                 <Suspense fallback={null}>
                                     <Sidebar screen='mobile' params={params} />
@@ -84,7 +85,7 @@ export default function RecruitmentPage({ params, searchParams }) {
                             <Suspense fallback={<ContentSkeleton />}>
                                 <MainContentWrapper params={params} searchParams={searchParams} />
                             </Suspense>
-                        </div>
+                        </ScrollProvider>
                     </div>
                 </section>
                 <aside className="hidden sm:flex-[25] xl:flex-[2] sm:flex flex-col rounded-md bg-white dark:bg-neutral-900">

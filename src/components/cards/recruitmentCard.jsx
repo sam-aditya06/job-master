@@ -10,18 +10,18 @@ export default function RecruitmentCard({ recruitment, icon }) {
     const { status } = recruitment;
 
     const color = status === 'pending' ?
-        'bg-yellow-500 text-white' :
+        'bg-yellow-600 text-white' :
         status === 'ongoing' ?
             "bg-green-700 text-white" :
             "bg-gray-400 text-white"
 
     const arrowColor = status === 'pending' ?
-        'stroke-yellow-500' :
+        'stroke-amber-500' :
         status === 'ongoing' ?
             "stroke-green-700" :
             "stroke-gray-400";
     const borderHoverColor = status === 'pending' ?
-        'yellow-500' :
+        'amber-500' :
         status === 'ongoing' ?
             "green-700" :
             "gray-400";

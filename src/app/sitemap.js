@@ -13,6 +13,15 @@ const sectors = [
   "railways",
   "judiciary",
   "police"
+];
+
+const staticPages = [
+  { url: `${BASE_URL}/about`, changeFrequency: "monthly", priority: 0.5 },
+  { url: `${BASE_URL}/contact`, changeFrequency: "monthly", priority: 0.4 },
+  { url: `${BASE_URL}/disclaimer`, changeFrequency: "monthly", priority: 0.3 },
+  { url: `${BASE_URL}/feedback`, changeFrequency: "monthly", priority: 0.3 },
+  { url: `${BASE_URL}/privacy-policy`, changeFrequency: "monthly", priority: 0.3 },
+  { url: `${BASE_URL}/terms`, changeFrequency: "monthly", priority: 0.3 }
 ]
 
 export async function generateSitemaps() {
@@ -20,17 +29,19 @@ export async function generateSitemaps() {
     { id: "jobs" },
     { id: "orgs" },
     { id: "recruitments" },
-    { id: "recruitment-bodies" }
+    { id: "recruitment-bodies" },
+    { id: "static" }
   ]
 }
 
 export default async function sitemap({ id }) {
   const idValue = await id;
   switch (idValue) {
-    case "jobs": return await getJobsSitemap()
-    case "orgs": return await getOrgsSitemap()
-    case "recruitments": return await getRecruitmentsSitemap()
-    case "recruitment-bodies": return await getRecruitmentBodiesSitemap()
+    case "jobs": return await getJobsSitemap();
+    case "orgs": return await getOrgsSitemap();
+    case "recruitments": return await getRecruitmentsSitemap();
+    case "recruitment-bodies": return await getRecruitmentBodiesSitemap();
+    case "static": return staticPages;
     default: return []
   }
 }

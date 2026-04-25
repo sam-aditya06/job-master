@@ -106,7 +106,7 @@ export default function RecruitmentsSidebar({ orgs = [], states = [], recruiters
                             </div>
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-2">
-                                    <div className="h-3 w-3 rounded-full bg-yellow-500 translate-y-[1.5px]"></div>
+                                    <div className="h-3 w-3 rounded-full bg-yellow-600 translate-y-[1.5px]"></div>
                                     <Label className="text-sm" htmlFor='pending'>Pending</Label>
                                 </div>
                                 <RadioGroupItem id='pending' value='pending' />

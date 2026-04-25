@@ -38,7 +38,7 @@ export default function Header() {
 
     return (
         <header
-            className={`fixed top-0 z-50 transition-all duration-150 ease-in-out ${transparent ? 'bg-transparent text-white' : 'bg-white dark:bg-neutral-800 text-black dark:text-white shadow-sm dark:border-neutral-700'} w-full h-[3.5rem]`}
+            className={`fixed top-0 z-50 border-b transition-all duration-150 ease-in-out ${transparent ? 'bg-transparent text-white' : 'bg-white dark:bg-neutral-800 text-black dark:text-white shadow-sm dark:border-neutral-700'} w-full h-[3.5rem]`}
         >
             <nav className="flex justify-between gap-4 items-center mx-auto max-[1281px]:px-2 w-full max-w-7xl h-full">
                 <Link href='/'><h1 className="text-brand">JM</h1></Link>
