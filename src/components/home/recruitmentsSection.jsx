@@ -63,9 +63,9 @@ export default function RecruitmentsSection({ recentRecruitments = [] }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {displayedRecruitments.map((r) => {
             const key = Object.keys(statusConfig).filter(status => r.stageStatus.includes(status));
-            const { color, icon } = statusConfig[key];
+            const { icon } = statusConfig[key];
             return (
-              <RecruitmentCard key={r._id} recruitment={r} color={color} icon={icon} />
+              <RecruitmentCard key={r._id} recruitment={r} icon={icon} />
             );
           })}
         </div>
