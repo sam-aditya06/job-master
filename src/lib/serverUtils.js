@@ -1,6 +1,7 @@
 import { cacheLife } from "next/cache";
 import { connectDB } from "./dbConfig";
 import { ObjectId } from "mongodb";
+import { capitalize, formatLocation } from "./utils";
 
 const ITEM_PER_PAGE = 8;
 
@@ -215,10 +216,15 @@ export async function getOngoingRecruitments(page, orgSlug, rBodySlug) {
         else if (page === 'org') {
             if (!orgSlug)
                 return [];
-            const org = await db.collection('orgs').findOne({ slug: orgSlug });
-            const recruiter = await db.collection('recruiters').findOne({ refId: org._id.toString() });
-            aggregate.push({ $match: { recruiterId: recruiter._id.toString(), status: 'ongoing' } });
 
+            const org = await db.collection('orgs').findOne({ slug: orgSlug });
+            if (!org)
+                return [];
+            const orgJobs = await db.collection('jobs').find({ orgId: org._id.toString() }).project({ recruitmentId: 1 }).toArray();
+
+            const recruitmentIds = [...new Set(orgJobs.map(job => job.recruitmentId))];
+
+            aggregate.push({ $match: { _id: { $in: recruitmentIds }, status: 'ongoing' } });
         }
         else if (page === 'rBody') {
             if (!rBodySlug)
@@ -361,7 +367,7 @@ export async function getRecruitmentSidebarDetails(recSlug) {
         if (!recruitment)
             return null;
 
-        const pastRecruitmentInfos = await db.collection('archives').find({ recruitmentSlug: recruitment.slug }).project({year: 1}).toArray();
+        const pastRecruitmentInfos = await db.collection('archives').find({ recruitmentSlug: recruitment.slug }).project({ year: 1 }).toArray();
         const sidebarDetails = {
             stages: recruitment.stages,
             years: [
@@ -438,7 +444,7 @@ export async function getOrgDetails(orgSlug) {
         if (!org)
             return null;
         const ongoingRecruitments = await getOngoingRecruitments('org', orgSlug);
-        const popularJobs = await getJobs({ orgSlug: org.slug });
+        const { jobs: popularJobs } = await getJobs({ orgSlug: org.slug });
         const orgDetails = ongoingRecruitments.length > 0 ? { ...org, popularJobs, ongoingRecruitments } : { ...org, popularJobs };
         return JSON.parse(JSON.stringify(orgDetails));
 
@@ -495,8 +501,8 @@ export async function getRecruitmentBodies({ search, sector, page = 1 }) {
 //For Recruitment body page
 export async function getRecruitmentBodyDetails(rBodySlug) {
 
-    // 'use cache';
-    // cacheLife('hours');
+    'use cache';
+    cacheLife('hours');
 
     try {
         const db = await connectDB();
@@ -504,11 +510,41 @@ export async function getRecruitmentBodyDetails(rBodySlug) {
         if (!rBody)
             return null;
 
-        const recruitersCollection = await db.collection('recruiters');
-        const recruiter = await recruitersCollection.findOne({ refId: rBody._id.toString() });
-        const topRecruitments = await db.collection('recruitments').find({ recruiterId: recruiter._id.toString() }).toArray();
-        const ongoingRecruitments = await getOngoingRecruitments('rBody', null, rBodySlug);
-        const rBodyDetails = ongoingRecruitments.length > 0 ? { ...rBody, topRecruitments, ongoingRecruitments } : { ...rBody, topRecruitments };
+        const recruiter = await db.collection('recruiters').findOne({ refId: rBody._id.toString() });
+        const [topRecruitments, ongoingRecruitments] = await Promise.all([
+            db.collection('recruitments').find({ recruiterId: recruiter._id.toString() }).toArray(),
+            getOngoingRecruitments('rBody', null, rBodySlug)
+        ])
+
+        const topRecruitmentIds = topRecruitments.map((r) => r._id.toString());
+        const ongoingRecruitmentIds = ongoingRecruitments.map((r) => r._id.toString());
+
+        const jobs = await db.collection('jobs').find({
+            recruitmentId: { $in: [...topRecruitmentIds, ...ongoingRecruitmentIds] },
+        }).project({ orgId: 1, recruitmentId: 1, experience: 1 }).toArray();
+
+        const finalTopRecruitmentsList = topRecruitments.map(recruitment => {
+            const recruitmentJobs = jobs.filter(job => job.recruitmentId === recruitment._id.toString());
+            const minYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.minYears)]) || 0;
+            const maxYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.maxYears)]) || 0;
+            return { ...recruitment, experienceRange: { minYears, maxYears } };
+        });
+        const finalOngoingRecruitmentsList = topRecruitments.map(recruitment => {
+            const recruitmentJobs = jobs.filter(job => job.recruitmentId === recruitment._id.toString());
+            const minYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.minYears)]) || 0;
+            const maxYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.maxYears)]) || 0;
+            return { ...recruitment, experienceRange: { minYears, maxYears } };
+        });
+        const rBodyDetails = ongoingRecruitments.length > 0 ?
+            {
+                ...rBody,
+                topRecruitments: finalTopRecruitmentsList,
+                ongoingRecruitments: finalOngoingRecruitmentsList
+            } :
+            {
+                ...rBody,
+                topRecruitments: finalTopRecruitmentsList
+            };
         return JSON.parse(JSON.stringify(rBodyDetails));
 
     } catch (error) {
@@ -556,7 +592,7 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
 
 
         if (orgSlug) {
-            const org = await db.collection('orgs').findOne({ slug: orgSlug });
+            const org = await db.collection('orgs').findOne({ slug: orgSlug }, { projection: { _id: 1 } });
             if (!org)
                 return [];
             query.orgId = org._id.toString();
@@ -582,7 +618,8 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
                     data: [
                         { $sort: { popularityScore: -1 } },
                         { $skip: (page - 1) * ITEM_PER_PAGE },
-                        { $limit: ITEM_PER_PAGE }
+                        { $limit: ITEM_PER_PAGE },
+                        { $project: { orgId: 1, recruitmentId: 1, name: 1, slug: 1, abbr: 1, sector: 1, location: 1, experience: 1, payScale: 1 } }
                     ]
                 }
             }
@@ -599,6 +636,7 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
             .toArray();
 
         const jobs = res.data.map(job => {
+            const { _id, ...rest } = job;
             const orgDetails = orgs.find(org => org._id.toString() === job.orgId);
             if (!orgDetails)
                 return null;
@@ -606,13 +644,13 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
             const recruitmentDetails = recruitments.find(recruitment => recruitment._id.toString() === job.recruitmentId);
             if (!recruitmentDetails)
                 return null;
-            const { slug: recruitmentSlug } = recruitmentDetails;
-            return { ...job, orgName, orgAbbr, orgLogo, recruitmentSlug, recruitmentStatus: rStatus };
+            const { slug: recruitmentSlug, status: recruitmentStatus } = recruitmentDetails;
+            return { ...rest, orgName, orgAbbr, orgLogo, recruitmentSlug, recruitmentStatus: rStatus || recruitmentStatus };
         }).filter(Boolean);
 
         const details = { itemCount: res.metadata[0].total, jobs };
 
-        return JSON.parse(JSON.stringify(details));
+        return details;
 
     } catch (error) {
         console.error(error);
@@ -645,19 +683,26 @@ export async function getPopularJobs() {
         //     }
         // ]).toArray();
         // const jobsList = sectorWisePopularJobs.flatMap(jList => jList.jobs);
-        const jobsList = await db.collection('jobs').find({}).sort({ popularityScore: -1 }).limit(6).toArray();
+        const jobsList = await db.collection('jobs')
+            .find({})
+            .sort({ popularityScore: -1 })
+            .limit(6)
+            .project({ orgId: 1, name: 1, slug: 1, abbr: 1, sector: 1, location: 1, experience: 1, payScale: 1 })
+            .toArray();
+
         const orgIds = [...new Set(jobsList.map(j => j.orgId))];
         const orgs = await db.collection('orgs')
-            .find({ _id: { $in: orgIds.map(id => ObjectId.createFromHexString(id)) } })
+            .find({ _id: { $in: orgIds.map(id => new ObjectId(id)) } })
             .project({ name: 1, logoSrc: 1 })
             .toArray();
 
         const allPopularJobs = jobsList.map(job => {
+            const { _id, ...rest } = job;
             const org = orgs.find(o => o._id.toString() === job.orgId);
             const { name: orgName, logoSrc: orgLogo } = org;
-            return { ...job, orgName, orgLogo };
+            return { ...rest, orgName, orgLogo };
         });
-        return JSON.parse(JSON.stringify(allPopularJobs));
+        return allPopularJobs;
     } catch (error) {
         console.error("getPopularJobs failed:", error);
         throw error;
@@ -675,26 +720,7 @@ export function formatEducation(education) {
     return levels.join(" / ")
 }
 
-export function formatLocation(location, sector) {
-    let formattedLocation = '';
-    if (location.state)
-        formattedLocation = location.state;
-    else if (location.isAllIndia === true) {
-        if (location.isStateWise)
-            formattedLocation = 'All India (State wise)';
-        else if (location.isStateWise)
-            formattedLocation = 'All India (State wise)';
-        else if (location.isCircleWise)
-            formattedLocation = 'All India (Circle wise)';
-        else if (sector === 'railways')
-            formattedLocation = 'All India (RRB wise)';
-        else
-            formattedLocation = 'All India';
-
-    }
-    return formattedLocation;
-}
-
+//For Job and JobNav page's metadata and for Job page's JSON-LD
 export async function getJobDetails(jobSlug) {
 
     'use cache';
@@ -702,12 +728,17 @@ export async function getJobDetails(jobSlug) {
 
     try {
         const db = await connectDB();
-        const jobDetails = await db.collection('jobs').findOne({ slug: jobSlug });
-        const org = await db.collection('orgs').findOne({ _id: ObjectId.createFromHexString(jobDetails.orgId) }, { projection: { name: 1 } });
+        const jobDetails = await db.collection('jobs')
+            .findOne(
+                { slug: jobSlug },
+                { projection: { orgId: 1, name: 1, description: 1, sector: 1, location: 1, education: 1, payScale: 1 } }
+            );
         if (!jobDetails)
             return null;
+        const org = await db.collection('orgs').findOne({ _id: new ObjectId(jobDetails.orgId) }, { projection: { name: 1 } });
+        let formattedEducation = formatEducation(jobDetails.education)
         let formattedLocation = formatLocation(jobDetails.location, jobDetails.sector);
-        return JSON.parse(JSON.stringify({ ...jobDetails, location: formattedLocation, org: org.name }));
+        return JSON.parse(JSON.stringify({ ...jobDetails, location: formattedLocation, education: formattedEducation, org: org.name }));
 
     } catch (error) {
         console.error(error);
@@ -720,31 +751,27 @@ export async function getJobContent(jobSlug, jobNavSlug) {
     'use cache';
     cacheLife('hours');
 
+    const dbKey = jobNavSlug?.split('-').map((word, index) => {
+        if (index > 0)
+            return capitalize(word);
+        return word;
+    }).join('');
+
     try {
         const db = await connectDB();
-        const jobDetails = await db.collection('jobs').findOne({ slug: jobSlug });
+        let projection = jobNavSlug ? { [dbKey]: 1 } : { overview: 1 };
+        const jobDetails = await db.collection('jobs').findOne({ slug: jobSlug }, { projection });
+
         if (!jobDetails)
             return null;
+
         if (!jobNavSlug)
             return jobDetails.overview;
 
-        const jobNavSlugs = [
-            'overview',
-            'eligibility-criteria',
-            'responsibilities',
-            'perks',
-            'physical-standards',
-            'medical-standards',
-            'recruitment-details'
-        ]
-        if (!jobNavSlugs.includes(jobNavSlug))
+        if (!jobDetails[dbKey])
             return null;
-        else if (jobNavSlug === 'eligibility-criteria')
-            return jobDetails.eligibilityCriteria
-        else if (jobNavSlug === 'recruitment-details')
-            return jobDetails.recruitmentDetails
-        else
-            return jobDetails[jobNavSlug];
+
+        return jobDetails[dbKey];
 
     } catch (error) {
         console.error(error);
@@ -753,13 +780,12 @@ export async function getJobContent(jobSlug, jobNavSlug) {
 }
 
 export async function getJobRecruitmentDetails(jobSlug) {
-    // 'use cache';
-    // cacheLife('hours');
+    'use cache';
+    cacheLife('hours');
 
     try {
         const db = await connectDB();
         const jobDetails = await db.collection('jobs').findOne({ slug: jobSlug }, { projection: { orgId: 1, recruitmentId: 1, name: 1, abbr: 1, location: 1 } });
-        console.log({ jobDetails });
         if (!jobDetails)
             return null;
         const recruitmentDetails = await db.collection('recruitments')
@@ -783,7 +809,6 @@ export async function getJobRecruitmentDetails(jobSlug) {
 
         let formattedLocation = formatLocation(jobDetails.location, jobDetails.sector);
         const finalJobDetails = { ...jobDetails, location: formattedLocation, recruiterName, recName: name, recSlug: slug, recYear: year, recStatus: status, pastCycles }
-        console.log({ finalJobDetails });
         return finalJobDetails;
 
     } catch (error) {

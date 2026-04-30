@@ -1,14 +1,15 @@
 import { Suspense } from "react";
 
 import Overview from "./overview";
-import { formatEducation, getJobContent, getJobDetails } from "@/lib/serverUtils";
+import { getJobContent, getJobDetails } from "@/lib/serverUtils";
 import { ContentSkeleton } from "@/components/skeletons";
+import { notFound } from "next/navigation";
 
 export const generateMetadata = async ({ params }) => {
     const { job } = await params;
     const jobDetails = await getJobDetails(job);
 
-    const edu = formatEducation(jobDetails.education);
+    const edu = jobDetails.education;
     const loc = jobDetails.location;
 
     return {
@@ -37,7 +38,14 @@ async function MainContent({ params }) {
         getJobDetails(job)
     ]);
 
-    const location = jobDetails.location.includes('All India') ? 'All India' : jobDetails.location;
+    if(!content || !jobDetails)
+        notFound();
+
+    const location = () => {
+        if (jobDetails.location.scope === 'all_india') return { "@type": "Country", "name": "India" }
+        if (jobDetails.location.state) return { "@type": "AdministrativeArea", "name": capitalize(jobDetails.location.state) }
+        return null
+    }
 
     const industryMap = {
         "central-govt": "Government",
@@ -61,12 +69,9 @@ async function MainContent({ params }) {
         },
         "educationRequirements": {
             "@type": "EducationalOccupationalCredential",
-            "credentialCategory": formatEducation(jobDetails.education)
+            "credentialCategory": jobDetails.education
         },
-        "occupationLocation": {
-            "@type": "AdministrativeArea",
-            "name": location
-        },
+        "occupationLocation": location,
         ...(jobDetails.payScale?.min && jobDetails.payScale?.max && {
             "baseSalary": {
                 "@type": "MonetaryAmount",
@@ -88,7 +93,7 @@ async function MainContent({ params }) {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
-            
+
             <Overview content={content} />
         </>
     )

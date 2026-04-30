@@ -16,9 +16,10 @@ export default function Header() {
     const pathName = usePathname();
     const isHome = pathName === '/'
 
-    const { theme, resolvedTheme, setTheme } = useTheme();
+    const { resolvedTheme, setTheme } = useTheme();
+
     const [mounted, setMounted] = useState(false);
-    const [scrolled, setScrolled] = useState(false)
+    const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -38,17 +39,17 @@ export default function Header() {
 
     return (
         <header
-            className={`fixed top-0 z-50 border-b transition-all duration-150 ease-in-out ${transparent ? 'bg-transparent text-white' : 'bg-white dark:bg-neutral-800 text-black dark:text-white shadow-sm dark:border-neutral-700'} w-full h-[3.5rem]`}
+            className={`fixed top-0 z-50 transition-all duration-150 ease-in-out ${transparent ? 'bg-transparent text-white' : 'border-b bg-white dark:bg-neutral-800 text-black dark:text-white shadow-sm dark:border-neutral-700'} w-full h-[3.5rem]`}
         >
-            <nav className="flex justify-between gap-4 items-center mx-auto max-[1281px]:px-2 w-full max-w-7xl h-full">
-                <Link href='/'><h1 className="text-brand">JM</h1></Link>
+            <nav className="flex justify-between items-center mx-auto max-[1281px]:px-2 w-full max-w-7xl h-full">
+                <Link href='/'><h1 className="text-brand font-bold text-xl">{process.env.NEXT_PUBLIC_NAME}</h1></Link>
                 <div className="flex items-center gap-4">
-                    <Link className={`hidden lg:block rounded-md ${pathName.includes('quick-links') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:bg-brand dark:hover:bg-neutral-700 hover:text-white'} px-2 py-1`} href='/quick-links'>Quick Links</Link>
-                    <Link className={`hidden lg:block rounded-md ${pathName.includes('jobs') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:bg-brand dark:hover:bg-neutral-700 hover:text-white'} px-2 py-1`} href='/jobs'>Jobs</Link>
-                    <Link className={`hidden lg:block rounded-md ${pathName.includes('recruitments') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:bg-brand dark:hover:bg-neutral-700 hover:text-white'} px-2 py-1`} href='/recruitments'>Recruitments</Link>
-                    <Link className={`hidden lg:block rounded-md ${pathName.includes('orgs') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:bg-brand dark:hover:bg-neutral-700 hover:text-white'} px-2 py-1`} href='/orgs'>Organisations</Link>
-                    <Link className={`hidden lg:block rounded-md ${pathName.includes('recruitment-bodies') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:bg-brand dark:hover:bg-neutral-700 hover:text-white'} px-2 py-1`} href='/recruitment-bodies'>Recruitment Bodies</Link>
-                    <Link className={`hidden lg:block rounded-md ${pathName.includes('feedback') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:bg-brand dark:hover:bg-neutral-700 hover:text-white'} px-2 py-1`} href='/feedback'>Feedback</Link>
+                    <Link className={`hidden lg:block border border-transparent rounded-md ${pathName.includes('quick-links') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:border-brand hover:text-brand dark:hover:border-neutral-700 dark:hover:text-white'} px-2 py-1`} href='/quick-links'>Quick Links</Link>
+                    <Link className={`hidden lg:block border border-transparent rounded-md ${pathName.includes('jobs') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:border-brand hover:text-brand dark:hover:border-neutral-700 dark:hover:text-white'} px-2 py-1`} href='/jobs'>Jobs</Link>
+                    <Link className={`hidden lg:block border border-transparent rounded-md ${pathName.includes('recruitments') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:border-brand hover:text-brand dark:hover:border-neutral-700 dark:hover:text-white'} px-2 py-1`} href='/recruitments'>Recruitments</Link>
+                    <Link className={`hidden lg:block border border-transparent rounded-md ${pathName.includes('orgs') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:border-brand hover:text-brand dark:hover:border-neutral-700 dark:hover:text-white'} px-2 py-1`} href='/orgs'>Organisations</Link>
+                    <Link className={`hidden lg:block border border-transparent rounded-md ${pathName.includes('recruitment-bodies') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:border-brand hover:text-brand dark:hover:border-neutral-700 dark:hover:text-white'} px-2 py-1`} href='/recruitment-bodies'>Recruitment Bodies</Link>
+                    <Link className={`hidden lg:block border border-transparent rounded-md ${pathName.includes('feedback') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:border-brand hover:text-brand dark:hover:border-neutral-700 dark:hover:text-white'} px-2 py-1`} href='/feedback'>Feedback</Link>
                 </div>
                 <Tooltip>
                     <TooltipTrigger asChild>

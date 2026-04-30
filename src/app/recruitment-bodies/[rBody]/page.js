@@ -43,8 +43,10 @@ async function MainContent({ params }) {
         "@type": "GovernmentOrganization",
         "name": recruitmentBodyDetails.name,
         "description": recruitmentBodyDetails.description,
-        "url": recruitmentBodyDetails.homeUrl,
-        "sameAs": recruitmentBodyDetails.homeUrl,
+        ...(!recruitmentBodyDetails.logoSrc && {
+            "url": recruitmentBodyDetails.homeUrl,
+            "sameAs": recruitmentBodyDetails.homeUrl
+        }),
         ...(recruitmentBodyDetails.logoSrc && {
             "logo": recruitmentBodyDetails.logoSrc
         }),

@@ -4,10 +4,13 @@ import { ArrowRight, Briefcase, Clock, MapPin } from "lucide-react";
 import { format, isAfter, isSameDay, parseISO } from "date-fns";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { formatLocation } from "@/lib/utils";
 
 export default function RecruitmentCard({ recruitment, icon }) {
 
-    const { status } = recruitment;
+    const { status, location } = recruitment;
+
+    const displayedLocation = formatLocation(location);
 
     const color = status === 'pending' ?
         'bg-yellow-600 text-white' :
@@ -47,7 +50,7 @@ export default function RecruitmentCard({ recruitment, icon }) {
                         </span>
                     </div>
                     <div className="grow flex flex-col justify-between">
-                        <p className="text-xs text-muted-foreground mb-2 leading-relaxed flex-1">{recruitment.fullName}</p>
+                        <p className="text-xs text-muted-foreground mb-2 leading-relaxed flex-1 line-clamp-1">{recruitment.fullName}</p>
                         <div className="flex items-center gap-3 mb-4">
                             <p className="flex items-center gap-1 text-xs text-muted-foreground leading-relaxed"><Briefcase className="w-3 h-3" />
                                 {
@@ -58,31 +61,28 @@ export default function RecruitmentCard({ recruitment, icon }) {
                             </p>
                             <div className="border border-r-muted-foreground h-4"></div>
                             <p className="flex items-center gap-1 text-xs text-muted-foreground leading-relaxed"><MapPin className="w-3 h-3" />
-                                {
-                                    recruitment.location.isAllIndia === true ?
-                                        `All India${recruitment.location.isStateWise === true ? ' (State-wise)' :
-                                            recruitment.location.isCircleWise === true ? ' (Circle-wise)' :
-                                                recruitment.sector === 'railways' ? ' (RRB-wise)' :
-                                                    ''}` :
-                                        recruitment.location.state
-                                }
+                                {displayedLocation}
                             </p>
-                        </div>
-                        <div className="flex items-center justify-between pt-3 border-t border-[#f0ece4]">
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <div className="flex gap-1">
-                                    <span className="font-semibold text-foreground">{recruitment.vacancies}</span> vacancies
-                                </div>
-                                {
-                                    (
-                                        isAfter(new Date(recruitment.registrationDeadline), new Date()) ||
-                                        isSameDay(new Date(recruitment.registrationDeadline), new Date())
-                                    ) &&
-                                    (
-                                        <span className="flex items-center gap-1 text-amber-600">
+                            {
+                                (
+                                    isAfter(new Date(recruitment.registrationDeadline), new Date()) ||
+                                    isSameDay(new Date(recruitment.registrationDeadline), new Date())
+                                ) &&
+                                (
+                                    <>
+                                        <div className="border border-r-muted-foreground h-4"></div>
+                                        <span className="flex items-center gap-1 text-xs text-amber-600">
                                             <Clock className="w-3 h-3" /> {format(parseISO(recruitment.registrationDeadline), "MMM dd, yyyy")}
                                         </span>
-                                    )}
+                                    </>
+                                )
+                            }
+                        </div>
+                        <div className="flex justify-between items-center pt-3 border-t border-[#f0ece4]  text-xs text-muted-foreground">
+                            <div className="flex gap-1">
+                                <span className="font-semibold text-foreground">{recruitment.vacancies}</span>
+                                <span>vacancies</span>
+
                             </div>
                             <ArrowRight className={`w-4 h-4 ${arrowColor} opacity-0 group-hover:opacity-100 transition-opacity`} />
                         </div>

@@ -12,8 +12,6 @@ export default function RecruitmentsList({ itemCount = 0, currentPage = 1, recru
 
     const { isPending, isPaginating } = useFilter();
 
-    console.log({ isPaginating });
-
     return (
         <div className="flex flex-col gap-10">
             {
@@ -22,8 +20,9 @@ export default function RecruitmentsList({ itemCount = 0, currentPage = 1, recru
                         <h1 className="text-2xl">Results ({itemCount})</h1>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mx-2 sm:mx-0">
                             {recruitments.map(recruitment => {
+                                const stageStatus = recruitment.stageStatus;
                                 const key = Object.keys(statusConfig).find(status => recruitment.stageStatus.includes(status));
-                                const { icon } = statusConfig[key];
+                                const { icon } = recruitment.stageStatus.includes("Completed") ? statusConfig["Completed"] : statusConfig[key];
                                 return (
                                     <RecruitmentCard key={recruitment._id} recruitment={recruitment} icon={icon} />
                                 )

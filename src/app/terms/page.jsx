@@ -14,8 +14,8 @@ export default function TermsOfServicePage() {
                 <p className="text-muted-foreground italic">Last updated: April 25, 2026</p>
                 <div className="flex flex-col gap-5">
                     <p>
-                        These Terms of Service ("Terms") govern your use of {process.env.NEXT_PUBLIC_NAME}
-                        ("we", "our", or "us"), accessible at {process.env.NEXT_PUBLIC_DOMAIN}. By
+                        These Terms of Service ("Terms") govern your use of {process.env.NEXT_PUBLIC_NAME} ("we", "our", or "us"), 
+                        accessible at {process.env.NEXT_PUBLIC_DOMAIN}. By
                         accessing or using our website, you agree to be bound by these Terms. If you
                         do not agree, please do not use our website.
                     </p>

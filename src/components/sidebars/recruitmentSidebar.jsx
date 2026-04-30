@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { Check, Hourglass, Lock } from "lucide-react";
+import { Check, Clock, Hourglass, Lock } from "lucide-react";
 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,6 +17,8 @@ export default function RecruitmentSidebar({ details }) {
     const sp = useSearchParams();
     const pathName = usePathname();
     const router = useRouter();
+
+    console.log({ details });
 
     const { setIsLoading } = useContentLoader();
 
@@ -88,10 +90,11 @@ export default function RecruitmentSidebar({ details }) {
                                 details?.stages?.map((stage, i) => (
                                     <div key={stage.slug} className="flex flex-col text-sm">
                                         {
-                                            stage.status === 'completed' &&
+                                            stage.status === 'pending' &&
+
                                             <div className="flex gap-2 items-center">
-                                                <div className="flex justify-center items-center h-6 w-6 border border-brand rounded-full bg-brand">
-                                                    <Check size={18} className="stroke-white" />
+                                                <div className="flex gap-2 justify-center items-center h-6 w-6 border border-brand rounded-full">
+                                                    <Hourglass size={15} className="stroke-brand" />
                                                 </div>
                                                 <p className={`${selected === stage.slug ? 'text-brand font-bold' : 'hover:text-brand hover:font-bold'} cursor-pointer`} href={`/recruitments/${recruitment}?stage=${stage.slug}`} onClick={() => handleSelect(stage.slug)}>
                                                     {stage.name}
@@ -99,11 +102,22 @@ export default function RecruitmentSidebar({ details }) {
                                             </div>
                                         }
                                         {
-                                            stage.status === 'pending' &&
+                                            stage.status === 'ongoing' &&
 
                                             <div className="flex gap-2 items-center">
-                                                <div className="flex gap-2 justify-center items-center h-6 w-6 border border-brand rounded-full">
-                                                    <Hourglass size={15} className="stroke-brand" />
+                                                <div className="flex justify-center items-center h-6 w-6 border border-brand rounded-full">
+                                                    <Clock className="rounded-full w-full h-full stroke-brand" />
+                                                </div>
+                                                <p className={`${selected === stage.slug ? 'text-brand font-bold' : 'hover:text-brand hover:font-bold'} cursor-pointer`} href={`/recruitments/${recruitment}?stage=${stage.slug}`} onClick={() => handleSelect(stage.slug)}>
+                                                    {stage.name}
+                                                </p>
+                                            </div>
+                                        }
+                                        {
+                                            stage.status === 'completed' &&
+                                            <div className="flex gap-2 items-center">
+                                                <div className="flex justify-center items-center h-6 w-6 border border-brand rounded-full bg-brand">
+                                                    <Check size={18} className="stroke-white" />
                                                 </div>
                                                 <p className={`${selected === stage.slug ? 'text-brand font-bold' : 'hover:text-brand hover:font-bold'} cursor-pointer`} href={`/recruitments/${recruitment}?stage=${stage.slug}`} onClick={() => handleSelect(stage.slug)}>
                                                     {stage.name}
@@ -121,9 +135,10 @@ export default function RecruitmentSidebar({ details }) {
                                                 </p>
                                             </div>
                                         }
+                                        {i !== details.stages.length - 1 && details.stages[i + 1].status === 'pending' && <div className="border border-dashed border-brand ml-[0.65rem] w-0 h-6"></div>}
+                                        {i !== details.stages.length - 1 && details.stages[i + 1].status === 'ongoing' && <div className="border border-brand ml-[0.65rem] w-0 h-6"></div>}
                                         {i !== details.stages.length - 1 && details.stages[i + 1].status === 'completed' && <div className="border border-brand ml-[0.65rem] w-0 h-6"></div>}
                                         {i !== details.stages.length - 1 && details.stages[i + 1].status === 'not-reached' && <div className="border ml-[0.65rem] w-0 h-6"></div>}
-                                        {i !== details.stages.length - 1 && details.stages[i + 1].status === 'pending' && <div className="border border-dashed border-brand ml-[0.65rem] w-0 h-6"></div>}
                                     </div>
                                 ))
                             }

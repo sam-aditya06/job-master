@@ -5,6 +5,18 @@ import RecruitmentsSection from "@/components/home/recruitmentsSection";
 import JobsSection from "@/components/home/jobsSection";
 import { HomeSectionSkeleton } from "@/components/skeletons";
 
+export const metadata = {
+  title: `${process.env.NEXT_PUBLIC_NAME} | Government Jobs & Recruitment Tracker`,
+  description: `Discover government jobs and track recruitment cycles across banking, PSU, defence, railways, judiciary, and more. Find eligibility, responsibilities, and stay updated on every stage of every recruitment.`,
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_DOMAIN}`
+  },
+  // placeholder for when you have an og image
+  // openGraph: {
+  //   images: [`${process.env.NEXT_PUBLIC_DOMAIN}/og-image.png`]
+  // }
+}
+
 export default function HomePage() {
 
   return (

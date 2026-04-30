@@ -30,38 +30,38 @@ export default function ContactPage() {
                     <h2>Report an Issue</h2>
                     <p>
                         Found wrong information, a missing job, or a website bug? Use our{' '}
-                        <a href="/feedback">feedback form</a> to let us know. We review every
+                        <a href="/feedback" className="underline">feedback form</a> to let us know. We review every
                         submission and fix issues as quickly as possible.
                     </p>
                 </section>
 
-                <section>
-                    <h2>Follow Us</h2>
-                    <p>
-                        Stay updated with the latest government jobs and recruitments by following
-                        us on social media.
-                    </p>
-                    <ul>
-                        <li>
-                            <a
-                                href="https://instagram.com/xyz"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                Instagram — job updates in reels and posts
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                href="https://youtube.com/@xyz"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                YouTube — detailed recruitment videos
-                            </a>
-                        </li>
-                    </ul>
-                </section >
+                    {/* <section>
+                        <h2>Follow Us</h2>
+                        <p>
+                            Stay updated with the latest government jobs and recruitments by following
+                            us on social media.
+                        </p>
+                        <ul>
+                            <li>
+                                <a
+                                    href="https://instagram.com/xyz"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Instagram — job updates in reels and posts
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="https://youtube.com/@xyz"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    YouTube — detailed recruitment videos
+                                </a>
+                            </li>
+                        </ul>
+                    </section > */}
             </div>
         </section >
     )

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { formatEducation, getJobContent, getJobDetails, getJobRecruitmentDetails } from "@/lib/serverUtils";
+import { getJobContent, getJobDetails, getJobRecruitmentDetails } from "@/lib/serverUtils";
 import Content from "./content";
 import { ContentSkeleton } from "@/components/skeletons";
 import { notFound } from "next/navigation";
@@ -10,7 +10,7 @@ export const generateMetadata = async ({ params }) => {
     const { job, jobNavSlug } = await params;
     const jobDetails = await getJobDetails(job);
 
-    const edu = formatEducation(jobDetails.education);
+    const edu = jobDetails.education;
     const loc = jobDetails.location;
 
     const base = `${process.env.NEXT_PUBLIC_DOMAIN}/jobs/${job}`
@@ -69,7 +69,6 @@ export default function JobDetailPage({ params }) {
 
 async function MainContent({ params }) {
     const { job, jobNavSlug } = await params;
-    await new Promise(resolve => setTimeout(resolve, 2000));
     if (jobNavSlug === 'recruitment-details') {
         const details = await getJobRecruitmentDetails(job);
         if (details)

@@ -58,7 +58,7 @@ export default function JobsSection({ popularJobs = [] }) {
         {/* Job profile cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {displayedJobs.map((job) => (
-            <JobCard key={job._id} job={job} page={'home'} />
+            <JobCard key={job.slug} job={job} page={'home'} />
           ))}
         </div>
       </div>

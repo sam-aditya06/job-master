@@ -1,4 +1,4 @@
-import { Bell, Calendar, FileText, CheckCircle } from "lucide-react";
+import { Bell, Calendar, FileText, CheckCircle, BookText } from "lucide-react";
 
 const statusConfig = {
     "Applications": {
@@ -16,6 +16,10 @@ const statusConfig = {
     "Admit Card": {
         color: "bg-amber-50 dark:bg-amber-700 text-amber-700 dark:text-amber-50 border-amber-200 dark:border-amber-700",
         icon: <Calendar className="w-3 h-3" />,
+    },
+    "Registration": {
+        color: "bg-amber-50 dark:bg-amber-700 text-amber-700 dark:text-amber-50 border-amber-200 dark:border-amber-700",
+        icon: <BookText className="w-3 h-3" />,
     },
     "Completed": {
         color: "bg-emerald-50 dark:bg-emerald-700 text-emerald-700 dark:text-emerald-50 border-emerald-200 dark:border-emerald-700",

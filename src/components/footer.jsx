@@ -17,17 +17,17 @@ export default function Footer() {
 
                 {/* Left — nav links */}
                 <div className="flex flex-wrap justify-between sm:justify-start gap-x-4 gap-y-1 max-sm:px-2">
-                    <Link href="/about" className="hover:underline hover:text-indigo-600">About</Link>
-                    <Link href="/contact" className="hover:underline hover:text-indigo-600">Contact</Link>
-                    <Link href="/privacy-policy" className="hover:underline hover:text-indigo-600">Privacy Policy</Link>
-                    <Link href="/terms-of-service" className="hover:underline hover:text-indigo-600">Terms</Link>
-                    <Link href="/disclaimer" className="hover:underline hover:text-indigo-600">Disclaimer</Link>
+                    <Link className="hover:underline hover:text-brand" href="/about" target="_blank">About</Link>
+                    <Link className="hover:underline hover:text-brand" href="/contact" target="_blank">Contact</Link>
+                    <Link className="hover:underline hover:text-brand" href="/privacy-policy" target="_blank">Privacy Policy</Link>
+                    <Link className="hover:underline hover:text-brand" href="/terms-of-service" target="_blank">Terms</Link>
+                    <Link className="hover:underline hover:text-brand" href="/disclaimer" target="_blank">Disclaimer</Link>
                 </div>
 
-                {/* Right — social + copyright */}
+                {/* Right — social + copyright */}  
                 <div className="flex max-sm:flex-col items-center justify-center sm:justify-end gap-3">
                     <div className="flex gap-4">
-                        <a
+                        {/* <a
                             href="https://instagram.com/xyz"
                             target="_blank"
                             rel="noopener noreferrer"
@@ -44,7 +44,7 @@ export default function Footer() {
                             className="hover:text-indigo-600 transition-colors"
                         >
                             <Icon icon="mdi:youtube" width={20} height={20} />
-                        </a>
+                        </a> */}
                         <p className="text-center sm:text-right text-muted-foreground">
                             © {currentYear ?? ""} {process.env.NEXT_PUBLIC_NAME}
                         </p>

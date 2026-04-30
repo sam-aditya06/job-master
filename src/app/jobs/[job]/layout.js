@@ -45,10 +45,11 @@ async function Sidebar({ params, screen }) {
     const { job } = await params;
     const fields = await getJobSidebarFields(job);
 
-    return (
-        <>
-            {screen === 'desktop' ? <DesktopSidebar fields={fields} /> : <MobileSidebar fields={fields} />}
-        </>
-    )
+    if (fields)
+        return (
+            <>
+                {screen === 'desktop' ? <DesktopSidebar fields={fields} /> : <MobileSidebar fields={fields} />}
+            </>
+        )
 
 }

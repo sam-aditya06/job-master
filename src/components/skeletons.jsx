@@ -171,24 +171,25 @@ export function ContentSkeleton() {
 export function JobCardSkeleton() {
     return (
         <div className='border rounded-xl p-5 h-full'>
-            <div className='flex justify-between items-center gap-2 px-0'>
-                <div className='flex flex-col w-full'>
-                    <div className="mb-3">
+            <div className='flex flex-col gap-3 w-full px-0'>
+                <div className="flex justify-between w-full">
+                    <div className="flex flex-col gap-1 w-full">
                         <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 mb-1 w-1/5 h-4 animate-pulse"></div>
                         <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 mb-1 w-2/3 h-7 animate-pulse"></div>
-                        <div className="flex items-center gap-1 mb-3 w-full">
+                        <div className="flex items-center gap-1 w-full">
                             <div className="border rounded-full bg-neutral-300 dark:bg-neutral-800 h-3 w-3 animate-pulse"></div>
                             <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 h-3 w-1/3 animate-pulse"></div>
                         </div>
                     </div>
-                    <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 mb-4 h-9 animate-pulse'></div>
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
-                        <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
-                        <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
-                    </div>
-                    <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 animate-pulse"></div>
+                    <div className="h-3 w-3 rounded-full bg-neutral-300 dark:bg-neutral-800 translate-y-[1.5px]"></div>
                 </div>
+                <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 h-9 animate-pulse'></div>
+                <div className="flex items-center gap-3">
+                    <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
+                    <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
+                    <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
+                </div>
+                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 animate-pulse"></div>
             </div>
         </div>
     )
@@ -230,7 +231,7 @@ export function RecruitmentCardSkeleton() {
                     <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 w-1/3 h-6 animate-pulse"></div>
                 </div>
                 <div className="grow flex flex-col justify-between">
-                    <div className="grow border rounded-sm bg-neutral-300 dark:bg-neutral-800 h-4 sm:h-9 mb-2 animate-pulse"></div>
+                    <div className="grow border rounded-sm bg-neutral-300 dark:bg-neutral-800 h-4 mb-2 animate-pulse"></div>
                     <div className="flex items-center gap-3 mb-4">
                         <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
                         <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
@@ -248,12 +249,9 @@ export function OrgsPageSkeleton({ type }) {
     return (
         <div className="sm:pr-3">
             <section className="flex items-center gap-4 sm:gap-2">
-                <div className="h-24 sm:h-48 w-24 sm:w-48 sm:py-4">
-                    <div className="rounded-full bg-neutral-300 dark:bg-neutral-800 w-24 sm:w-40 h-24 sm:h-40 animate-pulse"></div>
-                </div>
-                <div className="grow flex flex-col gap-2 h-fit">
+                <div className="rounded-full bg-neutral-300 dark:bg-neutral-800 h-12 sm:h-24 w-12 sm:w-24 animate-pulse"></div>
+                <div className="grow flex flex-col gap-1 h-fit">
                     <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-8 w-1/2 animate-pulse"></div>
-                    <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-6 w-1/6 animate-pulse"></div>
                     <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-6 w-1/6 animate-pulse"></div>
                 </div>
             </section>
@@ -264,15 +262,31 @@ export function OrgsPageSkeleton({ type }) {
                 <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-4 w-full animate-pulse"></div>
                 <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-4 w-full animate-pulse"></div>
             </section>
-            <section className="flex flex-col gap-5 mt-10">
-                <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 w-24 animate-pulse"></div>
+            <section className="flex flex-col gap-8 mt-10">
+                <div className="flex justify-between">
+                    <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 w-40 animate-pulse"></div>
+                    <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 w-20 animate-pulse"></div>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
                     {
-                        Array.from({ length: 6 }).map((_, i) => (
+                        Array.from({ length: 3 }).map((_, i) => (
                             <div key={i}>
-                                {type === 'org' && <JobCardSkeleton key={i} />}
-                                {type === 'rBody' && <RecruitmentCardSkeleton key={i} />}
+                                {type === 'org' && <JobCardSkeleton />}
+                                {type === 'rBody' && <RecruitmentCardSkeleton />}
                             </div>
+                        ))
+                    }
+                </div>
+            </section>
+            <section className="flex flex-col gap-8 mt-10">
+                <div className="flex justify-between">
+                    <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 w-40 animate-pulse"></div>
+                    <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 w-20 animate-pulse"></div>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
+                    {
+                        Array.from({ length: 3 }).map((_, i) => (
+                            <RecruitmentCardSkeleton key={i} />
                         ))
                     }
                 </div>

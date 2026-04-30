@@ -31,6 +31,9 @@ export default function robots() {
 
         // recruitment-bodies
         "/recruitment-bodies?search=",
+
+        //quick-links
+        "/quick-links?search="
       ]
     },
     sitemap: `${process.env.NEXT_PUBLIC_DOMAIN}/sitemap.xml`

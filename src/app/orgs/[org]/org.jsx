@@ -9,14 +9,15 @@ import statusConfig from "@/lib/statusConfig";
 export default function Org({ orgDetails }) {
     return (
         <div className="sm:pr-3">
-            <section className="flex items-center gap-4 sm:gap-2">
-                <div className="shrink-0 h-24 sm:h-48 w-24 sm:w-48 sm:py-4">
-                    <img className="w-24 sm:w-40 h-24 sm:h-40" src={`${process.env.NEXT_PUBLIC_CDN_URL}/${orgDetails.logoSrc}`} />
+            <section className="flex items-center gap-4">
+                <div className="shrink-0 flex justify-center items-center border rounded-full h-12 sm:h-24 w-12 sm:w-24 p-2">
+                    <div className="rounded-full flex justify-center items-center bg-white w-full h-full overflow-hidden">
+                        <img src={`${process.env.NEXT_PUBLIC_CDN_URL}/${orgDetails.logoSrc}`} />
+                    </div>
                 </div>
-                <div className="grow flex flex-col gap-2 h-fit">
+                <div className="grow flex flex-col gap-1 h-fit">
                     <h1 className="text-xl sm:text-2xl">{orgDetails.name}{orgDetails.abbr ? ` (${orgDetails.abbr})` : ''}</h1>
-                    <p className="text-sm sm:text-base">Sector: {deslugify(orgDetails.sector)}</p>
-                    <p className="text-sm sm:text-base">Offical Website: <Link target="_blank" className="text-blue-500 dark:text-blue-300 underline" href={orgDetails.homeUrl}>{orgDetails.homeUrl}</Link></p>
+                    <p className="text-muted-foreground">{deslugify(orgDetails.sector)}</p>
                 </div>
             </section>
             <section className="flex flex-col gap-2 mt-10">
@@ -25,7 +26,7 @@ export default function Org({ orgDetails }) {
             </section>
             {
                 orgDetails.popularJobs &&
-                <section className="flex flex-col gap-5 mt-10">
+                <section className="flex flex-col gap-8 mt-10">
                     <div className='flex justify-between items-center'>
                         <h2 className="text-xl font-semibold">Top Jobs</h2>
                         <Link className="link-btn group" href={`/jobs?org=${orgDetails.slug}`}>
@@ -35,13 +36,13 @@ export default function Org({ orgDetails }) {
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
                         {
                             orgDetails.popularJobs.map(job => {
-                                return <JobCard key={job._id} job={job} page={'job'} />
+                                return <JobCard key={job.name} job={job} page={'job'} />
                             })
                         }
                     </div>
                 </section>
             }
-            <section className="flex flex-col gap-5 mt-10">
+            <section className="flex flex-col gap-8 mt-10">
                 <div className='flex justify-between items-center'>
                     <h2 className="text-xl font-semibold">Ongoing Recruitments</h2>
                     <Link className="link-btn group" href={`/recruitments?for=${orgDetails.slug}&status=ongoing`}>

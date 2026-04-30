@@ -5,14 +5,14 @@ import { useEffect, useRef } from 'react';
 import { useFilter } from '@/lib/context/filterContext';
 
 export default function ScrollContainer({ children }) {
-    const { isPaginating, setIsPaginating, optimisticParams: { page } } = useFilter();
+    const { isPending, isPaginating, setIsPaginating, optimisticParams: { page } } = useFilter();
 
     const containerRef = useRef();
 
     useEffect(() => {
-        if (isPaginating)
+        if (isPaginating || isPending)
             containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [isPaginating]);
+    }, [isPaginating, isPending]);
 
     useEffect(() => {
         if (isPaginating)

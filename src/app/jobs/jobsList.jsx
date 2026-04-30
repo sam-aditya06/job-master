@@ -18,7 +18,7 @@ export default function JobsList({ itemCount, currentPage = 1, jobs = [] }) {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {
                         jobs?.map(job => (
-                            <JobCard key={job._id} job={job} />
+                            <JobCard key={job.slug} job={job} />
                         ))
                     }
                 </div>

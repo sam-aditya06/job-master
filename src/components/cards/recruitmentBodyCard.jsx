@@ -14,17 +14,17 @@ export function RecruitmentBodyCard({ recruitmentBody }) {
                 <CardContent className="flex flex-col gap-4 px-0">
                     <div className="flex items-center gap-2">
                         <div
-                            className="shrink-0 border w-18 h-18 rounded-full overflow-hidden"
+                            className="shrink-0 flex items-center border rounded-full p-1.5 w-18 h-18"
                         >
-                            <img
-                                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${recruitmentBody.logoSrc}`}
-                                alt={`${recruitmentBody.name} logo`}
-                                className="object-contain p-1.5"
-                                sizes="56px"
-                            />
+                            <div className="rounded-full flex justify-center items-center bg-white w-full h-full overflow-hidden">
+                                <img
+                                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${recruitmentBody.logoSrc}`}
+                                    alt={`${recruitmentBody.name} logo`}
+                                />
+                            </div>
                         </div>
                         <div className="flex flex-col">
-                            <span className="font-semibold">{recruitmentBody.name}</span>
+                            <span className="font-semibold line-clamp-1">{recruitmentBody.name}</span>
                             <span className="text-sm text-muted-foreground">{deslugify(recruitmentBody.sector)}</span>
                         </div>
                     </div>

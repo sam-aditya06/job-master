@@ -8,6 +8,7 @@ import Recruitment from "./recruitment";
 import { ContentSkeleton, SidebarSkeleton } from "@/components/skeletons";
 import { ContentLoadingProvider } from "@/lib/context/paginateContext";
 import ScrollProvider from "@/components/scrollProvider";
+import { capitalize } from "@/lib/utils";
 
 export const generateMetadata = async ({ params, searchParams }) => {
     const { recruitment } = await params
@@ -137,8 +138,8 @@ async function MainContent({ recruitmentDetails }) {
     const recruiterDetails = await getRecruiterFromId(recruitmentDetails.recruiterId)
     const recruiterName = recruiterDetails.name;
     const location = () => {
-        if (recruitmentDetails.location.isAllIndia) return { "@type": "Country", "name": "India" }
-        if (recruitmentDetails.location.state) return { "@type": "AdministrativeArea", "name": recruitmentDetails.location.state }
+        if (recruitmentDetails.location.scope === 'all_india') return { "@type": "Country", "name": "India" }
+        if (recruitmentDetails.location.state) return { "@type": "AdministrativeArea", "name": capitalize(recruitmentDetails.location.state) }
         return null
     }
 

@@ -4,24 +4,24 @@ import Link from "next/link";
 
 import { ArrowRight } from "lucide-react";
 
-import { capitalize } from "@/lib/utils";
 import RecruitmentCard from "@/components/cards/recruitmentCard";
+
+import { capitalize } from "@/lib/utils";
 import statusConfig from "@/lib/statusConfig";
-import { useParams } from "next/navigation";
 
 export default function RecruitmentBody({ recruitmentBodyDetails }) {
-    const { rBody } = useParams();
 
     return (
-        <>
+        <div className="sm:pr-3">
             <section className="flex items-center gap-2">
-                <div className="shrink-0 h-24 sm:h-48 w-24 sm:w-48 sm:p-4">
-                    <img className={rBody === 'rrb' ? "bg-white rounded-full" : ''} src={`${process.env.NEXT_PUBLIC_CDN_URL}/${recruitmentBodyDetails.logoSrc}`} />
+                <div className="shrink-0 flex justify-center items-center border rounded-full h-12 sm:h-24 w-12 sm:w-24 p-2">
+                    <div className="rounded-full flex justify-center items-center bg-white w-full h-full overflow-hidden">
+                        <img src={`${process.env.NEXT_PUBLIC_CDN_URL}/${recruitmentBodyDetails.logoSrc}`} />
+                    </div>
                 </div>
-                <div className="grow flex flex-col gap-2 h-fit sm:h-40">
+                <div className="grow flex flex-col gap-1 h-fit">
                     <h1 className="text-xl sm:text-2xl">{recruitmentBodyDetails.name} ({recruitmentBodyDetails.abbr})</h1>
-                    <p className="pl-2 text-sm sm:text-base">Sector: {capitalize(recruitmentBodyDetails.sector)}</p>
-                    <p className="pl-2 text-sm sm:text-base">Offical Website: <Link target="_blank" className="text-blue-500 dark:text-blue-300 underline" href={recruitmentBodyDetails.homeUrl}>{recruitmentBodyDetails.homeUrl}</Link></p>
+                    <p className="text-muted-foreground">{capitalize(recruitmentBodyDetails.sector)}</p>
                 </div>
             </section>
             <section className="flex flex-col gap-2 mt-10">
@@ -30,7 +30,7 @@ export default function RecruitmentBody({ recruitmentBodyDetails }) {
             </section>
             {
                 recruitmentBodyDetails.topRecruitments &&
-                <section className="flex flex-col gap-5 mt-10">
+                <section className="flex flex-col gap-8 mt-10">
                     <div className='flex justify-between items-center'>
                         <h2 className="text-xl font-semibold">Top Recruitments</h2>
                         <Link className="link-btn group" href={`/recruitments?by=${recruitmentBodyDetails.slug}`}>
@@ -50,7 +50,7 @@ export default function RecruitmentBody({ recruitmentBodyDetails }) {
                 </section>
 
             }
-            <section className="flex flex-col gap-5 mt-10">
+            <section className="flex flex-col gap-8 mt-10">
                 <div className='flex justify-between items-center'>
                     <h2 className="text-xl font-semibold">Ongoing Recruitments</h2>
                     <Link className="link-btn group" href={`/recruitments?by=${recruitmentBodyDetails.slug}&status=ongoing`}>
@@ -75,6 +75,6 @@ export default function RecruitmentBody({ recruitmentBodyDetails }) {
                 }
             </section>
 
-        </>
+        </div>
     )
 }

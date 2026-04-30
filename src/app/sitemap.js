@@ -21,7 +21,8 @@ const staticPages = [
   { url: `${BASE_URL}/disclaimer`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${BASE_URL}/feedback`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${BASE_URL}/privacy-policy`, changeFrequency: "monthly", priority: 0.3 },
-  { url: `${BASE_URL}/terms`, changeFrequency: "monthly", priority: 0.3 }
+  { url: `${BASE_URL}/terms`, changeFrequency: "monthly", priority: 0.3 },
+  { url: `${BASE_URL}/quick-links`, changeFrequency: "weekly", priority: 0.7 }
 ]
 
 export async function generateSitemaps() {

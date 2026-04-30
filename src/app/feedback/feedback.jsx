@@ -1,6 +1,6 @@
 'use client'
 
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { submitFeedback } from '@/lib/actions';
@@ -33,9 +33,9 @@ const categories = [
 
 export default function Feedback() {
   const {
+    control,
     register,
     handleSubmit,
-    setValue,
     reset,
     formState: { errors, isSubmitting }
   } = useForm({
@@ -58,7 +58,7 @@ export default function Feedback() {
     const { status, msg } = await submitFeedback(formData);
 
     if (status === 200) {
-      toast.success(msg);
+      toast.success(msg, {duration: 1000});
       reset();
     } else {
       toast.error(msg);
@@ -100,18 +100,24 @@ export default function Feedback() {
             {/* Category */}
             <div className='flex flex-col gap-2'>
               <Label>Category *</Label>
-              <Select onValueChange={(val) => setValue("category", val)}>
-                <SelectTrigger className='w-full'>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(cat => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                control={control}
+                name='category'
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className='w-full'>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(cat => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {errors.category && (
                 <p className="text-red-500 text-sm">{errors.category.message}</p>
               )}

@@ -76,21 +76,21 @@ export default function JobsSidebar({ orgs = [], states = [] }) {
                         <RadioGroup className="flex flex-col gap-2" value={recruitmentStatus ?? ""} onValueChange={(value) => applyFilter({ rStatus: value })}>
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-2">
-                                    <div className="h-3 w-3 rounded-full bg-green-500 translate-y-[1.5px]"></div>
+                                    <div className="h-3 w-3 rounded-full bg-green-700 translate-y-[1.5px]"></div>
                                     <Label className="text-sm" htmlFor='govt'>Ongoing</Label>
                                 </div>
                                 <RadioGroupItem id='ongoing' value='ongoing' />
                             </div>
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-2">
-                                    <div className="h-3 w-3 rounded-full bg-amber-500 translate-y-[1.5px]"></div>
+                                    <div className="h-3 w-3 rounded-full bg-yellow-600 translate-y-[1.5px]"></div>
                                     <Label className="text-sm" htmlFor='psu'>Pending</Label>
                                 </div>
                                 <RadioGroupItem id='pending' value='pending' />
                             </div>
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-2">
-                                    <div className="h-3 w-3 rounded-full bg-gray-500 translate-y-[1.5px]"></div>
+                                    <div className="h-3 w-3 rounded-full bg-gray-400 translate-y-[1.5px]"></div>
                                     <Label className="text-sm" htmlFor='bank'>Completed</Label>
                                 </div>
                                 <RadioGroupItem id='completed' value='completed' />
