@@ -20,7 +20,7 @@ export default function Footer() {
                     <Link className="hover:underline hover:text-brand" href="/about" target="_blank">About</Link>
                     <Link className="hover:underline hover:text-brand" href="/contact" target="_blank">Contact</Link>
                     <Link className="hover:underline hover:text-brand" href="/privacy-policy" target="_blank">Privacy Policy</Link>
-                    <Link className="hover:underline hover:text-brand" href="/terms-of-service" target="_blank">Terms</Link>
+                    <Link className="hover:underline hover:text-brand" href="/terms" target="_blank">Terms</Link>
                     <Link className="hover:underline hover:text-brand" href="/disclaimer" target="_blank">Disclaimer</Link>
                 </div>
 
