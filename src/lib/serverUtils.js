@@ -650,7 +650,7 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
 
         const details = { itemCount: res.metadata[0].total, jobs };
 
-        return details;
+        return JSON.parse(JSON.stringify(details));
 
     } catch (error) {
         console.error(error);
