@@ -1,6 +1,8 @@
 import { cacheLife, cacheTag } from "next/cache";
-import { connectDB } from "./dbConfig";
+
 import { ObjectId } from "mongodb";
+
+import { connectDB } from "./dbConfig";
 import { capitalize, formatLocation } from "./utils";
 
 const ITEM_PER_PAGE = 8;
@@ -459,9 +461,6 @@ export async function getRecruitmentBodies({ search, sector, page = 1 }) {
 
     'use cache';
     cacheLife('hours');
-    cacheTag('recruitment-bodies');
-
-    console.log('CACHE MISS - DB hit at:', new Date().toISOString());
 
     let query = {};
     if (search) {
