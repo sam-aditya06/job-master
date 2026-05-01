@@ -120,7 +120,11 @@ export default async function RecruitmentBodiesPage({ searchParams }) {
 async function MainContentWrapper({ sp }) {
     const { search, sector, page } = sp;
 
-    const { itemCount, recruitmentBodies } = await getRecruitmentBodies({ search, sector, page });
+    const recruitmentDetails = await getRecruitmentBodies({ search, sector, page });
+
+    console.log("Result: ", recruitmentDetails );
+
+    const { itemCount, recruitmentBodies } = recruitmentDetails || {};
 
 
     return (
