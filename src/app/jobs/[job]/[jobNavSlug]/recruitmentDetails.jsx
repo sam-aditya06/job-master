@@ -1,3 +1,5 @@
+import { Link } from 'next/link';
+
 export default function RecruitmentDetails({ job }) {
     return (
         <div className="cms-content">
@@ -58,9 +60,9 @@ export default function RecruitmentDetails({ job }) {
 
                         <ul>
                             <li>
-                                <a href="/recruitment/{this.slug}">
+                                <Link href="/recruitment/{this.slug}">
                                     {job.abbr || job.name} {job.recYear}
-                                </a> – Completed
+                                </Link> – Completed
                             </li>
                         </ul>
                     </section>

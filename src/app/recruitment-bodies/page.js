@@ -122,8 +122,6 @@ async function MainContentWrapper({ sp }) {
 
     const recruitmentDetails = await getRecruitmentBodies({ search, sector, page });
 
-    console.log("Result: ", recruitmentDetails );
-
     const { itemCount, recruitmentBodies } = recruitmentDetails || {};
 
 

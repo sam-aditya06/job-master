@@ -6,9 +6,6 @@ let cached = global._mongo || { client: null, db: null, promise: null };
 
 export async function connectDB() {
 
-  console.log('MONGODB_URI available:', !!process.env.MONGODB_URI);
-  console.log('URI starts with:', process.env.MONGODB_URI?.substring(0, 20));
-
   if (cached.db) return cached.db;
 
   if (!cached.promise) {
@@ -30,7 +27,6 @@ export async function connectDB() {
   global._mongo = cached;
 
   if (cached.db) {
-    console.log('Using cached DB connection');
     return cached.db;
   }
 }

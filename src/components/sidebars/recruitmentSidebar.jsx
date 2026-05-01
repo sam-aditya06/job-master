@@ -18,8 +18,6 @@ export default function RecruitmentSidebar({ details }) {
     const pathName = usePathname();
     const router = useRouter();
 
-    console.log({ details });
-
     const { setIsLoading } = useContentLoader();
 
     const paramFY = sp.get("fy");
