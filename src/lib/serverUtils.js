@@ -457,9 +457,6 @@ export async function getOrgDetails(orgSlug) {
 //For Recruitment bodies page
 export async function getRecruitmentBodies({ search, sector, page = 1 }) {
 
-    'use cache';
-    cacheLife('hours');
-
     let query = {};
     if (search) {
         query.$or = [
@@ -494,7 +491,8 @@ export async function getRecruitmentBodies({ search, sector, page = 1 }) {
         return JSON.parse(JSON.stringify(details));
 
     } catch (error) {
-        console.log(error);
+        console.error('getRecruitmentBodies error:', error);
+        throw error;
     }
 };
 
