@@ -36,6 +36,6 @@ export default function robots() {
         "/quick-links?search="
       ]
     },
-    sitemap: `${process.env.NEXT_PUBLIC_DOMAIN}/sitemap.xml`
+    sitemap: `${process.env.NEXT_PUBLIC_DOMAIN}/sitemap-index.xml`
   }
 }
