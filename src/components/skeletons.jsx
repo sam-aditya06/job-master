@@ -74,12 +74,29 @@ export function SearchListSkeleton({ type }) {
 //For Quick Links Page
 export function QuickLinkListSkeleton() {
     return (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {
                 Array.from({ length: 9 }).map((_, i) => (
                     <div key={i} className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-8 animate-pulse"></div>
                 ))
             }
+        </div>
+    )
+}
+
+export function QuickLinkMainContentSkeletion() {
+    return (
+        <div className="flex flex-col gap-5 p-5">
+            <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 w-1/5 h-9 animate-pulse"></div>
+            <div className="flex flex-col gap-2">
+                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse"></div>
+                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse"></div>
+                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse"></div>
+                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse"></div>
+            </div>
+            <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-9 animate-pulse"></div>
+            <div className="border w-full"></div>
+            <QuickLinkListSkeleton />
         </div>
     )
 }

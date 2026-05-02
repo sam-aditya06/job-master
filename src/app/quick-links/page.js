@@ -2,10 +2,11 @@ import { getQuickLinks } from "@/lib/serverUtils";
 import { Suspense } from "react";
 import QuickLinksHeader from "./quickLinksHeader";
 import QuickLinksList from "./quickLinksList";
-import { QuickLinkListSkeleton } from "@/components/skeletons";
+import { QuickLinkListSkeleton, QuickLinkMainContentSkeletion } from "@/components/skeletons";
+import { FilterProvider } from "@/lib/context/filterContext";
 
 export async function generateMetadata({ searchParams }) {
-    const { search } = await searchParams
+    const { search } = await searchParams;
 
     return {
         title: `Quick Links | ${process.env.NEXT_PUBLIC_NAME}`,
@@ -19,34 +20,32 @@ export async function generateMetadata({ searchParams }) {
     }
 }
 
-export default function QuickLinksPage({ searchParams }) {
+export default async function QuickLinksPage({ searchParams }) {
+    const sp = await searchParams;
     return (
-        <div className="flex flex-col gap-10 p-5">
-            <Suspense fallback={null}>
-                <MainContent searchParams={searchParams} />
+        <FilterProvider initialParams={sp}>
+            <Suspense fallback={<QuickLinkMainContentSkeletion />}>
+                <MainContent search={sp.search} />
+            </Suspense>
+        </FilterProvider>
+    )
+}
+
+async function MainContent({ search }) {
+
+    return (
+        <div className="flex flex-col gap-5">
+            <QuickLinksHeader />
+            <div className="border w-full"></div>
+            <Suspense key={search} fallback={<QuickLinkListSkeleton />}>
+                <Content search={search} />
             </Suspense>
         </div>
     )
 }
 
-async function MainContent({ searchParams }) {
-    const { search } = await searchParams;
-    return (
-        <>
-            <QuickLinksHeader />
-            <div className="border w-full"></div>
-            <Suspense key={search} fallback={<QuickLinkListSkeleton />}>
-                <Content searchParams={searchParams} />
-            </Suspense>
-        </>
-    )
-}
-
-async function Content({ searchParams }) {
-    const { search } = await searchParams;
+async function Content({ search }) {
     const quickLinks = await getQuickLinks(search);
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
 
     return (
         <QuickLinksList quickLinks={quickLinks} />

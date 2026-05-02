@@ -29,35 +29,35 @@ export async function generateMetadata({ searchParams }) {
 
     const sectorMeta = {
         "central-govt": {
-            title: "Central Government Recruitments | Latest Notifications",
+            title: `Central Government Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse latest central government recruitment notifications. Find UPSC, SSC, and other civil service recruitments with stages and results."
         },
         "state-govt": {
-            title: "State Government Recruitments | Latest Notifications",
+            title: `State Government Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse latest state government recruitment notifications. Find state PSC and other state-level recruitments with stages and results."
         },
         "psu": {
-            title: "PSU Recruitments | Latest Notifications",
+            title: `PSU Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse latest PSU recruitment notifications. Find ONGC, BHEL, NTPC, and other public sector undertaking recruitments."
         },
         "banking": {
-            title: "Banking Recruitments | Latest Bank Bharti Notifications",
+            title: `Banking Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse latest banking sector recruitment notifications. Find IBPS, SBI, RBI, and other public sector bank recruitments."
         },
         "defence": {
-            title: "Defence Recruitments | Latest Notifications",
+            title: `Defence Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse latest defence recruitment notifications. Find Army, Navy, Air Force, and other defence recruitments with stages and results."
         },
         "railways": {
-            title: "Railways Recruitments | Latest Notifications",
+            title: `Railways Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse latest Indian Railways recruitment notifications. Find RRB and other railway recruitments with stages and results."
         },
         "judiciary": {
-            title: "Judiciary Recruitments | Latest Notifications",
+            title: `Judiciary Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse latest judiciary recruitment notifications. Find court and judicial service recruitments with stages and results."
         },
         "police": {
-            title: "Police Recruitments | Latest Notifications",
+            title: `Police Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse latest police recruitment notifications. Find constable, SI, and officer level recruitments with stages and results."
         }
     }
@@ -68,18 +68,18 @@ export async function generateMetadata({ searchParams }) {
     } else if (isSingleByFilter) {
         const recruiterName = await getRecruiterNameFromSlug(by)
         meta = {
-            title: `${recruiterName} Recruitments | All ${recruiterName} Notifications`,
+            title: `${recruiterName} Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
             description: `Browse all recruitments conducted by ${recruiterName}. Find notifications, stages, and results for every ${recruiterName} recruitment.`
         }
     } else if (isSingleForFilter) {
         const orgName = await getNameFromSlug("orgs", forOrg)
         meta = {
-            title: `${orgName} Recruitment Notifications | Latest Bharti`,
+            title: `${orgName} Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
             description: `Browse all recruitments offering posts at ${orgName}. Find notifications, eligibility, and results.`
         }
     } else {
         meta = {
-            title: "Government Recruitments | Latest Sarkari Bharti",
+            title: `Government Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse latest government recruitment notifications. Find ongoing and upcoming recruitments across banking, defence, railways, PSU, and more."
         }
     }

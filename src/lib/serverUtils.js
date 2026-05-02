@@ -9,8 +9,6 @@ const ITEM_PER_PAGE = 8;
 
 //For Job and Recruitment Filters
 export async function getStates() {
-    'use cache';
-    cacheLife('hours');
 
     try {
         const db = await connectDB();
@@ -24,9 +22,6 @@ export async function getStates() {
 
 //For Recruitments Page
 export async function getRecruitments({ search, forSlug, bySlug, status, sector, qualification, expLvl, location, page = 1 } = {}) {
-
-    'use cache';
-    cacheLife('hours');
 
     let query = {};
 
@@ -53,7 +48,7 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
         const db = await connectDB();
         if (location) {
             if (location === 'all-india')
-                query = { ...query, 'location.isAllIndia': true };
+                query = { ...query, 'location.scope': 'all_india' };
             else {
                 const state = await db.collection('states').findOne({ slug: location });
                 if (!state) {
@@ -206,9 +201,6 @@ export async function getRecruiterNameFromSlug(slug) {
 //For Home Page, Org Page and Recruitment body page
 export async function getOngoingRecruitments(page, orgSlug, rBodySlug) {
 
-    'use cache';
-    cacheLife('hours');
-
     let aggregate = [];
 
     try {
@@ -283,9 +275,6 @@ export async function getOngoingRecruitments(page, orgSlug, rBodySlug) {
 //For Recruitment Page
 export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlug) {
 
-    'use cache';
-    year ? cacheLife('max') : cacheLife('hours');
-
     try {
         const db = await connectDB();
 
@@ -357,9 +346,6 @@ export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlu
 //For the Recruitment Page's Sidebar
 export async function getRecruitmentSidebarDetails(recSlug) {
 
-    'use cache';
-    cacheLife('hours');
-
     try {
         const db = await connectDB();
         const recruitment = await db.collection('recruitments').findOne(
@@ -388,9 +374,6 @@ export async function getRecruitmentSidebarDetails(recSlug) {
 
 //For Orgs Page
 export async function getOrgs({ search, sector, page }) {
-
-    'use cache';
-    cacheLife('hours');
 
     let query = {};
     if (search) {
@@ -437,9 +420,6 @@ export async function getOrgs({ search, sector, page }) {
 //For Org Page
 export async function getOrgDetails(orgSlug) {
 
-    'use cache';
-    cacheLife('hours');
-
     try {
         const db = await connectDB();
         const org = await db.collection('orgs').findOne({ slug: orgSlug });
@@ -458,9 +438,6 @@ export async function getOrgDetails(orgSlug) {
 
 //For Recruitment bodies page
 export async function getRecruitmentBodies({ search, sector, page = 1 }) {
-
-    'use cache';
-    cacheLife('hours');
 
     let query = {};
     if (search) {
@@ -503,9 +480,6 @@ export async function getRecruitmentBodies({ search, sector, page = 1 }) {
 
 //For Recruitment body page
 export async function getRecruitmentBodyDetails(rBodySlug) {
-
-    'use cache';
-    cacheLife('hours');
 
     try {
         const db = await connectDB();
@@ -558,8 +532,6 @@ export async function getRecruitmentBodyDetails(rBodySlug) {
 
 //For Jobs Page
 export async function getJobs({ search, orgSlug, rStatus, sector, qualification, expLvl, location, page = 1 } = {}) {
-    'use cache';
-    cacheLife('hours');
 
     let query = {};
     if (search) {
@@ -582,7 +554,7 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
         const db = await connectDB();
         if (location) {
             if (location === 'all-india')
-                query = { ...query, 'location.isAllIndia': true };
+                query = { ...query, 'location.scope': 'all_india' };
             else {
                 const state = await db.collection('states').findOne({ slug: location });
                 if (!state) {
@@ -664,9 +636,6 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
 //For Home Page
 export async function getPopularJobs() {
 
-    'use cache';
-    cacheLife('hours');
-
     try {
         const db = await connectDB();
         // const sectorWisePopularJobs = await db.collection('jobs').aggregate([
@@ -726,9 +695,6 @@ export function formatEducation(education) {
 //For Job and JobNav page's metadata and for Job page's JSON-LD
 export async function getJobDetails(jobSlug) {
 
-    'use cache';
-    cacheLife('hours');
-
     try {
         const db = await connectDB();
         const jobDetails = await db.collection('jobs')
@@ -750,9 +716,6 @@ export async function getJobDetails(jobSlug) {
 }
 
 export async function getJobContent(jobSlug, jobNavSlug) {
-
-    'use cache';
-    cacheLife('hours');
 
     const dbKey = jobNavSlug?.split('-').map((word, index) => {
         if (index > 0)
@@ -783,8 +746,6 @@ export async function getJobContent(jobSlug, jobNavSlug) {
 }
 
 export async function getJobRecruitmentDetails(jobSlug) {
-    'use cache';
-    cacheLife('hours');
 
     try {
         const db = await connectDB();
@@ -847,8 +808,8 @@ export async function getJobSidebarFields(jobSlug) {
 }
 
 export async function getRecruiters() {
-    'use cache';
-    cacheLife('hours');
+
+
     try {
         const db = await connectDB();
         const res = await db.collection('recruiters').find().toArray();
@@ -886,8 +847,8 @@ export async function getRecruiters() {
 
 export async function getQuickLinks(search) {
 
-    // 'use cache';
-    // cacheLife('hours');
+    // 
+    // 
 
     let query = {};
     if (search) {
@@ -907,8 +868,8 @@ export async function getQuickLinks(search) {
 
 export async function getAllSlugs(collectionName) {
 
-    'use cache';
-    cacheLife('hours');
+
+
 
     let projection;
 
@@ -939,8 +900,8 @@ export async function getAllSlugs(collectionName) {
 
 export async function getNameFromSlug(collectionName, slug) {
 
-    'use cache';
-    cacheLife('hours');
+
+
 
     try {
         const db = await connectDB();

@@ -1,9 +1,14 @@
+'use client';
+
+import { useRef, useState } from "react";
 import Link from "next/link";
 
-import { ArrowRight, Briefcase, Clock, MapPin } from "lucide-react";
+import { ArrowRight, BadgeQuestionMark, Briefcase, CircleQuestionMark, Clock, Info, MapPin } from "lucide-react";
 import { format, isAfter, isSameDay, parseISO } from "date-fns";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
 import { formatLocation } from "@/lib/utils";
 
 export default function RecruitmentCard({ recruitment, icon }) {
@@ -28,6 +33,16 @@ export default function RecruitmentCard({ recruitment, icon }) {
         status === 'ongoing' ?
             "green-700" :
             "gray-400";
+
+    const triggerRef = useRef(null);
+
+    const [open, setOpen] = useState(false);
+
+    const handleClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setOpen((prev) => !prev);
+    };
 
     return (
         <Link className="group" href={`/recruitments/${recruitment.slug}`}>
@@ -71,9 +86,27 @@ export default function RecruitmentCard({ recruitment, icon }) {
                                 (
                                     <>
                                         <div className="border border-r-muted-foreground h-4"></div>
-                                        <span className="flex items-center gap-1 text-xs text-amber-600">
-                                            <Clock className="w-3 h-3" /> {format(parseISO(recruitment.registrationDeadline), "MMM dd, yyyy")}
-                                        </span>
+                                        <div className="flex items-center gap-1">
+                                            <span className="flex items-center gap-1 text-xs text-amber-600">
+                                                <Clock className="w-3 h-3" /> {format(parseISO(recruitment.registrationDeadline), "MMM dd, yyyy")}
+                                            </span>
+                                            <Tooltip open={open} onOpenChange={setOpen}>
+                                                <TooltipTrigger asChild>
+                                                    <button
+                                                        ref={triggerRef}
+                                                        type="button"
+                                                        onClick={handleClick}
+                                                        className="inline-flex items-center justify-center focus:outline-none"
+                                                        aria-label="Salary information"
+                                                    >
+                                                        <CircleQuestionMark className="w-4 h-4" />
+                                                    </button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    Registration Deadline
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </div>
                                     </>
                                 )
                             }

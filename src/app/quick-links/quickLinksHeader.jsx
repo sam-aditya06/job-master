@@ -1,45 +1,46 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { Search, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+import { useFilter } from "@/lib/context/filterContext";
 
 export default function QuickLinksHeader() {
 
     const sp = useSearchParams();
-    const router = useRouter();
-    const pathName = usePathname();
 
     const search = sp.get('search');
+
+    const { applyFilter, removeFilter } = useFilter();
 
     const [inputValue, setInputValue] = useState(search || '');
 
     useEffect(() => {
         if (!inputValue) {
-            if (search) {
-                const sParams = new URLSearchParams(sp);
-                sParams.delete('search');
-                router.replace(`${pathName}?${sParams.toString()}`);
-            }
+            search && removeFilter('search');
             return;
         }
         const timoutId = setTimeout(() => {
-            const sParams = new URLSearchParams(sp);
-            sParams.set('search', inputValue);
-            router.replace(`${pathName}?${sParams.toString()}`);
+            applyFilter({ search: inputValue });
         }, 500);
         return () => {
             clearTimeout(timoutId);
         }
     }, [inputValue]);
 
+    useEffect(() => {
+        if (search !== inputValue)
+            !search ? setInputValue('') : setInputValue(search)
+    }, [search]);
+
     const handleClearSearch = () => {
-        setInputValue('');
-        router.replace(pathName);
+        setInputValue('')
+        removeFilter('search')
     }
 
     return (
@@ -51,13 +52,13 @@ export default function QuickLinksHeader() {
                 and government jobs.
             </p>
             <div className="relative">
-                <Input className='mt-5' placeholder='search an organisation' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
+                <Input className='mt-5' placeholder='Search' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
                 <Button
                     className='absolute right-2 top-7 bg-transparent hover:bg-transparent dark:text-white p-0 w-5 h-5 cursor-pointer'
                     size="icon"
                     onClick={handleClearSearch}
                 >
-                    {inputValue ? <X className="!w-4 !h-4" /> : <Search className="!w-4 !h-4" />}
+                    {inputValue ? <X className="!w-4 !h-4 stroke-muted-foreground" /> : <Search className="!w-4 !h-4 stroke-muted-foreground" />}
                 </Button>
             </div>
         </>

@@ -56,6 +56,7 @@ export default function JobsHeader({ org }) {
                 <p>Filters:</p>
                 {Object.keys(optimisticParams).filter(key => key !== 'page').map(key => {
                     const displayedParam = key === 'org' ? org : key === 'search' ? sp.get(key) : deslugify(sp.get(key));
+                    const displayedFilter = key === 'search' ? `${key}: ${displayedParam}` : key === 'rStatus' ? `Recruitment ${displayedParam}` : displayedParam;
                     if (displayedParam && (
                         key === 'org' ?
                             displayedParam === org :
@@ -65,7 +66,7 @@ export default function JobsHeader({ org }) {
                     ))
                         return (
                             <div key={key} className="flex items-center gap-1 border rounded-full pl-2 pr-1 py-1">
-                                <p className="text-sm">{`${key}: ${displayedParam}`}</p>
+                                <p className="text-sm">{displayedFilter}</p>
                                 <Button
                                     className='rounded-full !h-6 !w-6 cursor-pointer'
                                     size="icon"

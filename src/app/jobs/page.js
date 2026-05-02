@@ -25,51 +25,51 @@ export async function generateMetadata({ searchParams }) {
 
     const sectorMeta = {
         "central-govt": {
-            title: "Central Government Jobs | Sarkari Naukri",
+            title: `Central Government Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse all central government job roles in India. Find IAS, IPS, IFS, and other civil service posts with eligibility and job details."
         },
         "state-govt": {
-            title: "State Government Jobs | Sarkari Naukri",
+            title: `State Government Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse state government job roles across India. Find state civil service posts, eligibility criteria, and responsibilities."
         },
         "psu": {
-            title: "PSU Jobs | Sarkari Naukri",
+            title: `PSU Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse Public Sector Undertaking job roles in India. Find PSU posts across ONGC, BHEL, NTPC, and more with full job details."
         },
         "banking": {
-            title: "Government Banking Jobs | Sarkari Naukri",
+            title: `Government Banking Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse government banking job roles in India. Find SBI, RBI, NABARD, and other public sector bank posts with eligibility and perks."
         },
         "defence": {
-            title: "Defence Jobs | Sarkari Naukri",
+            title: `Defence Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse defence job roles in India. Find Army, Navy, Air Force, and other defence posts with eligibility and physical standards."
         },
         "railways": {
-            title: "Railways Jobs | Sarkari Naukri",
+            title: `Railways Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse Indian Railways job roles. Find RRB posts across all railway zones with eligibility, responsibilities, and perks."
         },
         "judiciary": {
-            title: "Judiciary Jobs | Sarkari Naukri",
+            title: `Judiciary Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse judiciary job roles in India. Find court clerk, stenographer, and judicial service posts with eligibility and details."
         },
         "police": {
-            title: "Police Jobs | Sarkari Naukri",
+            title: `Police Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse police job roles in India. Find constable, SI, and officer posts with eligibility, physical standards, and perks."
         }
     }
 
     let meta
-    if (isSingleSectorFilter && sectorMeta[sector]) {
+    if (isSingleSectorFilter && sectorMeta[sector]) {   
         meta = sectorMeta[sector]
     } else if (isSingleOrgFilter) {
         const orgName = await getNameFromSlug('orgs', org);
         meta = {
-            title: `${orgName} Jobs | All ${orgName} Govt Roles`,
+            title: `${orgName} Jobs | All ${orgName} Roles`,
             description: `Browse all job roles at ${orgName}. Find eligibility criteria, responsibilities, perks, and latest recruitment details for every post.`
         }
     } else {
         meta = {
-            title: "Govt Jobs | Sarkari Naukri — Browse All Government Roles",
+            title: `Government Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse all government job roles across central, state, PSU, banking, defence, railways, and more. Find eligibility, responsibilities, and perks for every govt post."
         }
     }

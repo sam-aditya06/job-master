@@ -12,15 +12,16 @@ import { deslugify, formatLocation } from "@/lib/utils";
 export default function JobCard({ job, page }) {
     const bgColor = page === 'home' ? 'dark:bg-neutral-800' : 'dark:bg-neutral-900 dark:sm:bg-neutral-800';
 
+    const displayedLocation = formatLocation(job.location);
+
     const triggerRef = useRef(null);
 
     const [open, setOpen] = useState(false);
 
-    const displayedLocation = formatLocation(job.location);
 
     const handleClick = (e) => {
-        e.preventDefault();      // prevent Link navigation
-        e.stopPropagation();     // prevent event bubbling to card Link
+        e.preventDefault();
+        e.stopPropagation();
         setOpen((prev) => !prev);
     };
 

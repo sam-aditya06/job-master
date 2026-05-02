@@ -19,7 +19,8 @@ export function slugify(str) {
 }
 
 export function deslugify(str) {
-  return str?.split('-')
+  return str?.replace('psu', 'PSU')
+    .split('-')
     .map(([first, ...rest]) => first.toUpperCase() + rest.join(''))
     .join(' ');
 }

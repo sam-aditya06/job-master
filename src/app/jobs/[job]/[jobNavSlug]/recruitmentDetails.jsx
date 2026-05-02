@@ -48,9 +48,9 @@ export default function RecruitmentDetails({ job }) {
                         Check application dates, admit cards, results, and complete recruitment details for the latest cycle.
                     </p>
 
-                    <a href={`/recruitments/${job.recSlug}`} className="link-btn btn-primary">
+                    <Link href={`/recruitments/${job.recSlug}`} className="link-btn btn-primary">
                         View Latest Recruitment →
-                    </a>
+                    </Link>
                 </section>
 
                 {
