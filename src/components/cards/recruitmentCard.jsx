@@ -9,7 +9,7 @@ import { format, isAfter, isSameDay, parseISO } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-import { formatLocation } from "@/lib/utils";
+import { deslugify, formatLocation } from "@/lib/utils";
 
 export default function RecruitmentCard({ recruitment, icon }) {
 
@@ -50,11 +50,11 @@ export default function RecruitmentCard({ recruitment, icon }) {
                 style={{ '--hover-color': `var(--color-${borderHoverColor})` }}
                 className={`border rounded-xl p-5 group-hover:border-[var(--hover-color)] hover:shadow-md dark:bg-neutral-800 h-full transition-all cursor-pointer`}
             >
-                <CardContent className='flex flex-col px-0 w-full h-full'>
-                    <div className="flex items-start justify-between mb-1">
+                <CardContent className='flex flex-col gap-2 px-0 w-full h-full'>
+                    <div className="flex items-start justify-between">
                         <div>
                             <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1 block">
-                                {recruitment.sector}
+                                {deslugify(recruitment.sector)}
                             </span>
                             <h3 className="font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
                                 {recruitment.name}

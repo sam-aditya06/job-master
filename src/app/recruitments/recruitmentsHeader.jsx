@@ -55,6 +55,7 @@ export default function RecruitmentsHeader({ forOrg, by }) {
                 <p>Filters:</p>
                 {Object.keys(optimisticParams).filter(key => key !== 'page').map(key => {
                     const displayedParam = key === 'for' ? forOrg : key === 'by' ? by : key === 'search' ? sp.get(key) : deslugify(sp.get(key));
+                    const displayedFilter = key === 'search' ? `${key}: ${displayedParam}` : displayedParam;
                     if (displayedParam && (
                         key === 'for' ?
                             displayedParam === forOrg :
@@ -66,7 +67,7 @@ export default function RecruitmentsHeader({ forOrg, by }) {
                     ))
                         return (
                             <div key={key} className="flex items-center gap-1 border rounded-full pl-2 pr-1 py-1">
-                                <p className="text-sm">{`${key}: ${displayedParam}`}</p>
+                                <p className="text-sm">{displayedFilter}</p>
                                 <Button
                                     className='rounded-full !h-6 !w-6 cursor-pointer'
                                     size="icon"

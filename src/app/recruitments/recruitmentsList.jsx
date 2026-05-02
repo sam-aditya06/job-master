@@ -21,8 +21,8 @@ export default function RecruitmentsList({ itemCount = 0, currentPage = 1, recru
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mx-2 sm:mx-0">
                             {recruitments.map(recruitment => {
                                 const stageStatus = recruitment.stageStatus;
-                                const key = Object.keys(statusConfig).find(status => recruitment.stageStatus.includes(status));
-                                const { icon } = recruitment.stageStatus.includes("Completed") ? statusConfig["Completed"] : statusConfig[key];
+                                const key = Object.keys(statusConfig).find(status => stageStatus.includes(status));
+                                const { icon } = stageStatus.includes("Completed") ? statusConfig["Completed"] : statusConfig[key];
                                 return (
                                     <RecruitmentCard key={recruitment._id} recruitment={recruitment} icon={icon} />
                                 )
