@@ -38,7 +38,7 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
         query.sector = sector;
     if (status)
         query.status = status;
-    
+
     try {
         const db = await connectDB();
         if (location) {
@@ -70,6 +70,48 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
             }
             query.recruiterId = recruiter._id.toString();
         }
+
+        let jobs;
+
+        if (forSlug || qualification || expLvl) {
+            let jobQuery = {};
+
+            if (forSlug) {
+                const org = await db.collection('orgs').findOne({ slug: forSlug }, { projection: { _id: 1 } });
+                if (!org) {
+                    console.warn(`getRecruitments: no org found for forSlug "${forSlug}"`);
+                    return [];
+                }
+                jobQuery.orgId = org._id.toString();
+            }
+
+            if (qualification) {
+                jobQuery = { ...jobQuery, 'education.level': { $regex: qualification, $options: 'i' } };
+            }
+
+            if (expLvl) {
+                if (expLvl === 'fresher')
+                    jobQuery = { ...jobQuery, 'experience.maxYears': 0 };
+                else if (expLvl === 'experienced')
+                    jobQuery = { ...jobQuery, 'experience.minYears': { $gt: 0 } };
+                else
+                    return [];
+            }
+
+            jobs = await db.collection('jobs')
+                .find(jobQuery)
+                .project({ orgId: 1, recruitmentId: 1, education: 1, experience: 1 })
+                .toArray();
+
+            if (jobs.length > 0) {
+                const recruitmentIds = [...new Set(jobs.map(job => new ObjectId(job.recruitmentId)))];
+                query._id = { $in: recruitmentIds };
+            }
+            else
+                return [];
+
+        }
+
         const recruitmentsInfo = await db.collection('recruitments').aggregate([
             { $match: query },
             {
@@ -106,61 +148,21 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
         if (recruitments.length === 0)
             return { itemCount: 0, recruitments };
 
-        const recruitmentIds = recruitments.map((r) => r._id.toString());
+        const recruitmentIds = recruitments.map(rec => rec._id.toString());
 
-        const jobs = await db.collection('jobs').find({
-            recruitmentId: { $in: recruitmentIds },
-        }).project({ orgId: 1, recruitmentId: 1, education: 1, experience: 1 }).toArray();
+        jobs = await db.collection('jobs')
+            .find({ _id: { $in: recruitmentIds } })
+            .project({ orgId: 1, recruitmentId: 1, education: 1, experience: 1 })
+            .toArray();
 
-        let recruitmentsList = recruitments;
-
-        if (forSlug) {
-
-            const org = await db.collection('orgs').findOne({ slug: forSlug }, { projection: { _id: 1 } });
-            if (!org) {
-                console.warn(`getRecruitments: no org found for forSlug "${forSlug}"`);
-                return [];
-            }
-
-            const matchedJobs = jobs.filter(recJob => recJob.orgId === org._id.toString());
-
-            const recruitmentIdsWithJobs = new Set(matchedJobs.map((j) => j.recruitmentId));
-
-            recruitmentsList = recruitmentsList.filter((r) =>
-                recruitmentIdsWithJobs.has(r._id.toString())
-            )
-        }
-
-        if (qualification) {
-
-            const matchedJobs = jobs.filter(recJob => recJob.education.find(ed => ed.level.toLowerCase() === qualification));
-
-            const recruitmentIdsWithJobs = new Set(matchedJobs.map((j) => j.recruitmentId));
-
-            recruitmentsList = recruitmentsList.filter((r) =>
-                recruitmentIdsWithJobs.has(r._id.toString())
-            )
-        }
-
-        if (expLvl) {
-
-            const matchedJobs = jobs.filter(recJob => expLvl === 'fresher' ? recJob.experience.maxYears === 0 : recJob.experience.minYears > 0);
-
-            const recruitmentIdsWithJobs = new Set(matchedJobs.map((j) => j.recruitmentId));
-
-            recruitmentsList = recruitmentsList.filter((r) =>
-                recruitmentIdsWithJobs.has(r._id.toString())
-            )
-        }
-
-        const finalRecruitmentsList = recruitmentsList.map(recruitment => {
+        const finalRecruitmentsList = recruitments.map(recruitment => {
             const recruitmentJobs = jobs.filter(job => job.recruitmentId === recruitment._id.toString());
             const minYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.minYears)]) || 0;
             const maxYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.maxYears)]) || 0;
             return { ...recruitment, experienceRange: { minYears, maxYears } };
         });
 
-        const details = { itemCount: forSlug ? finalRecruitmentsList.length : metadata[0].total, recruitments: finalRecruitmentsList };
+        const details = { itemCount: metadata[0].total, recruitments: finalRecruitmentsList };
 
         return JSON.parse(JSON.stringify(details));
 
@@ -232,7 +234,7 @@ export async function getOngoingRecruitments(page, orgSlug, rBodySlug) {
                 return [];
             const orgJobs = await db.collection('jobs').find({ orgId: org._id.toString() }).project({ recruitmentId: 1 }).toArray();
 
-            const recruitmentIds = [...new Set(orgJobs.map(job => job.recruitmentId))];
+            const recruitmentIds = [...new Set(orgJobs.map(job => new ObjectId(job.recruitmentId)))];
 
             aggregate.push({ $match: { _id: { $in: recruitmentIds }, status: 'ongoing' } });
         }
