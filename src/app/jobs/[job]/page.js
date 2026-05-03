@@ -13,7 +13,7 @@ export const generateMetadata = async ({ params }) => {
     const loc = jobDetails.location;
 
     return {
-        title: `${jobDetails.name} | ${jobDetails.org}`,
+        title: `Overview — ${jobDetails.name} | ${jobDetails.org}`,
         description: `Complete details about the ${jobDetails.name} role.${edu ? ` Qualification: ${edu}.` : ""}${loc ? ` Location: ${loc}.` : ""} Check eligibility, responsibilities, perks, and latest recruitment.`,
         alternates: {
             canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/jobs/${job}`
@@ -44,6 +44,7 @@ async function MainContent({ params }) {
     const location = () => {
         if (jobDetails.location.scope === 'all_india') return { "@type": "Country", "name": "India" }
         if (jobDetails.location.state) return { "@type": "AdministrativeArea", "name": capitalize(jobDetails.location.state) }
+        if (jobDetails.location.scope === 'international') return { "@type": "AdministrativeArea", "name": "Worldwide" }
         return null
     }
 

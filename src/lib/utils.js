@@ -37,6 +37,8 @@ export function formatLocation(location, sector) {
   let formattedLocation = '';
   if (scope === 'state')
     formattedLocation = capitalize(state);
+  else if (scope === 'international')
+    formattedLocation = 'Worldwide';
   else
     formattedLocation = distribution === 'none' ? `All India` : `All India${distLabel}`;
   return formattedLocation;

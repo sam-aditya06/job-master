@@ -20,27 +20,27 @@ export const generateMetadata = async ({ params }) => {
 
     const metaMap = {
         "eligibility-criteria": {
-            title: `${jobDetails.name} — Eligibility Criteria`,
+            title: `Eligibility Criteria — ${jobDetails.name} | ${jobDetails.org}`,
             description: `Eligibility criteria for the ${jobDetails.name} role.${edu ? ` Minimum qualification: ${edu}.` : ""}${loc ? ` Location: ${loc}.` : ""} Check age limit, experience, and category-wise relaxations.`
         },
         "responsibilities": {
-            title: `${jobDetails.name} — Job Profile & Responsibilities`,
+            title: `Responsibilities — ${jobDetails.name} | ${jobDetails.org}`,
             description: `Job profile and responsibilities of the ${jobDetails.name} role. Key duties, day-to-day work, and what to expect in this position.`
         },
         "perks": {
-            title: `${jobDetails.name} — Perks & Benefits`,
+            title: `Perks & Benefits — ${jobDetails.name} | ${jobDetails.org}`,
             description: `Perks and benefits of the ${jobDetails.name} role. Check salary structure, allowances, job security, and other benefits.`
         },
         "physical-standards": {
-            title: `${jobDetails.name} — Physical Standards`,
+            title: `Physical Standards — ${jobDetails.name} | ${jobDetails.org}`,
             description: `Physical standards required for the ${jobDetails.name} role. Check height, weight, chest measurements, and other physical requirements.`
         },
         "medical-standards": {
-            title: `${jobDetails.name} — Medical Standards`,
+            title: `Medical Standards — ${jobDetails.name} | ${jobDetails.org}`,
             description: `Medical standards required for the ${jobDetails.name} role. Check vision, hearing, and other health requirements for eligibility.`
         },
         "recruitment-details": {
-            title: `${jobDetails.name} — Recruitment Details`,
+            title: `Recruitment Details — ${jobDetails.name} | ${jobDetails.org}`,
             description: `Latest recruitment details for the ${jobDetails.name} role. Check the current recruitment status, stages, and official notification.`
         }
     }
