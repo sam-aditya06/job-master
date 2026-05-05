@@ -17,7 +17,7 @@ export default function RecruitmentsList({ itemCount = 0, currentPage = 1, recru
             {
                 (isPending || isPaginating) ? <SearchListSkeleton type={'recruitment'} /> :
                     <div className="flex flex-col gap-5 mt-5">
-                        <h1 className="text-2xl">Results ({itemCount})</h1>
+                        <h1 className="text-2xl font-bold">Results ({itemCount})</h1>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mx-2 sm:mx-0">
                             {recruitments.map(recruitment => {
                                 const stageStatus = recruitment.stageStatus;

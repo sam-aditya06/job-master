@@ -14,7 +14,7 @@ export default function RecruitmentBodiesList({ itemCount, currentPage = 1, recr
             {
                 (isPending || isPaginating) ? <SearchListSkeleton type={'org'} /> :
                     <div className="flex flex-col gap-5 mt-5">
-                        <h1 className="text-2xl">Results ({itemCount})</h1>
+                        <h1 className="text-2xl font-bold">Results ({itemCount})</h1>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                             {
                                 recruitmentBodies?.map(recruitmentBody => (

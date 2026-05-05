@@ -78,16 +78,17 @@ export default function JobCard({ job, page }) {
                             </Tooltip>
                         </div>
                         <span className={`text-brand dark:text-green-100 text-xs ml-auto`}>
-                            {job.payScale.abbr || `Pay Level ${job.payScale.level}`}
+                            {job.payScale.abbr ?? (job.payScale.level && `Pay Level ${job.payScale.level}`)}
                         </span>
                     </div>
 
                     <div className="flex items-center gap-3">
                         <p className="flex items-center gap-1 text-xs text-muted-foreground leading-relaxed"><Briefcase className="w-3 h-3" />
                             {
-                                job.experience.minYears === job.experience.maxYears ?
-                                    `${job.experience.minYears} years` :
-                                    `${job.experience.minYears} - ${job.experience.maxYears} years`}
+                                job.experience.maYears ?
+                                    `${job.experience.minYears} - ${job.experience.maxYears} years` :
+                                    `${job.experience.minYears} years`
+                            }
                         </p>
                     </div>
 

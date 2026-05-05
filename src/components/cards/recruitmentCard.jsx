@@ -69,9 +69,9 @@ export default function RecruitmentCard({ recruitment, icon }) {
                         <div className="flex items-center gap-3 mb-4">
                             <p className="flex items-center gap-1 text-xs text-muted-foreground leading-relaxed"><Briefcase className="w-3 h-3" />
                                 {
-                                    recruitment.experienceRange.minYears === recruitment.experienceRange.maxYears ?
-                                        `${recruitment.experienceRange.minYears} years` :
-                                        `${recruitment.experienceRange.minYears} - ${recruitment.experienceRange.maxYears} years`
+                                    recruitment.experienceRange.maxYears ?
+                                        `${recruitment.experienceRange.minYears} - ${recruitment.experienceRange.maxYears} years` :
+                                        `${recruitment.experienceRange.minYears} years`
                                 }
                             </p>
                             <div className="border border-r-muted-foreground h-4"></div>
@@ -88,7 +88,7 @@ export default function RecruitmentCard({ recruitment, icon }) {
                                         <div className="border border-r-muted-foreground h-4"></div>
                                         <div className="flex items-center gap-1">
                                             <span className="flex items-center gap-1 text-xs text-amber-600">
-                                                <Clock className="w-3 h-3" /> {format(parseISO(recruitment.registrationDeadline), "MMM dd, yyyy")}
+                                                <Clock className="w-3 h-3" /> {format(parseISO(recruitment.registrationDeadline), "dd MMM, yyyy")}
                                             </span>
                                             <Tooltip open={open} onOpenChange={setOpen}>
                                                 <TooltipTrigger asChild>

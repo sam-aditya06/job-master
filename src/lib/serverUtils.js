@@ -151,7 +151,7 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
         const recruitmentIds = recruitments.map(rec => rec._id.toString());
 
         jobs = await db.collection('jobs')
-            .find({ _id: { $in: recruitmentIds } })
+            .find({ recruitmentId: { $in: recruitmentIds } })
             .project({ orgId: 1, recruitmentId: 1, education: 1, experience: 1 })
             .toArray();
 
