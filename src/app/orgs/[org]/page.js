@@ -33,10 +33,11 @@ export default function OrgPage({ params }) {
 }
 
 async function MainContent({ params }) {
-    const { org } = await params
+    const { org } = await params;
+    console.log({ org });
     const orgDetails = await getOrgDetails(org)
 
-    if (!orgDetails) notFound()
+    if (!orgDetails) notFound();
 
     const jsonLd = {
         "@context": "https://schema.org",
@@ -52,8 +53,6 @@ async function MainContent({ params }) {
             "alternateName": orgDetails.abbr
         })
     }
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
 
     return (
         <>
