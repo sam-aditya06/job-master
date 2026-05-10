@@ -11,56 +11,44 @@ import { FilterProvider } from "@/lib/context/filterContext";
 import ScrollContainer from "@/components/scrollContainer";
 
 export async function generateMetadata({ searchParams }) {
-    const { search, sector, org, expLvl, location, rStatus, qualification } = await searchParams;
+    const { search, cat, org, expLvl, location, rStatus, qualification } = await searchParams;
 
-    const isSingleSectorFilter = sector && !org && !expLvl && !location && !rStatus && !qualification && !search;
-    const isSingleOrgFilter = org && !sector && !expLvl && !location && !rStatus && !qualification && !search;
-    const isIndexed = isSingleSectorFilter || isSingleOrgFilter || (!sector && !org && !expLvl && !location && !rStatus && !qualification && !search);
+    const isSingleCatFilter = cat && !org && !expLvl && !location && !rStatus && !qualification && !search;
+    const isSingleOrgFilter = org && !cat && !expLvl && !location && !rStatus && !qualification && !search;
+    const isIndexed = isSingleCatFilter || isSingleOrgFilter || (!cat && !org && !expLvl && !location && !rStatus && !qualification && !search);
 
-    const canonical = sector
-        ? `${process.env.NEXT_PUBLIC_DOMAIN}/jobs?sector=${sector}`
+    const canonical = cat
+        ? `${process.env.NEXT_PUBLIC_DOMAIN}/jobs?cat=${cat}`
         : org
             ? `${process.env.NEXT_PUBLIC_DOMAIN}/jobs?org=${org}`
             : `${process.env.NEXT_PUBLIC_DOMAIN}/jobs`
 
-    const sectorMeta = {
-        "central-govt": {
-            title: `Central Government Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse all central government job roles in India. Find IAS, IPS, IFS, and other civil service posts with eligibility and job details."
-        },
-        "state-govt": {
-            title: `State Government Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse state government job roles across India. Find state civil service posts, eligibility criteria, and responsibilities."
-        },
-        "psu": {
-            title: `PSU Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse Public Sector Undertaking job roles in India. Find PSU posts across ONGC, BHEL, NTPC, and more with full job details."
-        },
+    const catMeta = {
         "banking": {
             title: `Government Banking Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse government banking job roles in India. Find SBI, RBI, NABARD, and other public sector bank posts with eligibility and perks."
         },
-        "defence": {
-            title: `Defence Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse defence job roles in India. Find Army, Navy, Air Force, and other defence posts with eligibility and physical standards."
+        "civil-services": {
+            title: `Civil Services Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
+            description: "Browse civil services job roles in India. Find UPSC, state PCS, administrative, police, and allied service posts with eligibility details and exam information."
+        },
+        "it": {
+            title: `IT Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
+            description: "Browse IT job roles in India. Find software development, cybersecurity, data science, cloud computing, and other technology posts with eligibility and skill requirements."
         },
         "railways": {
             title: `Railways Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
             description: "Browse Indian Railways job roles. Find RRB posts across all railway zones with eligibility, responsibilities, and perks."
         },
-        "judiciary": {
-            title: `Judiciary Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse judiciary job roles in India. Find court clerk, stenographer, and judicial service posts with eligibility and details."
-        },
-        "police": {
-            title: `Police Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse police job roles in India. Find constable, SI, and officer posts with eligibility, physical standards, and perks."
+        "taxation": {
+            title: `Taxation Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
+            description: "Browse taxation job roles in India. Find income tax, GST, customs, and other taxation-related posts with eligibility, qualifications, and exam details."
         }
     }
 
     let meta
-    if (isSingleSectorFilter && sectorMeta[sector]) {   
-        meta = sectorMeta[sector]
+    if (isSingleCatFilter && catMeta[cat]) {
+        meta = catMeta[cat]
     } else if (isSingleOrgFilter) {
         const orgName = await getNameFromSlug('orgs', org);
         meta = {
@@ -144,9 +132,9 @@ async function SidebarWrapper({ type }) {
 }
 
 async function MainContentWrapper({ sp }) {
-    const { search, org: orgSlug, rStatus, sector, qualification, expLvl, location, page } = sp;
+    const { search, org: orgSlug, rStatus, cat, qualification, expLvl, location, page } = sp;
     const [{ itemCount, jobs }, orgName] = await Promise.all([
-        getJobs({ search, orgSlug, rStatus, sector, qualification, expLvl, location, page }),
+        getJobs({ search, orgSlug, rStatus, cat, qualification, expLvl, location, page }),
         orgSlug ? await getNameFromSlug('orgs', orgSlug) : undefined
     ]);
     return (

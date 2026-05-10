@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import Org from "./org";
 import { getOrgDetails } from "@/lib/serverUtils";
 import { OrgsPageSkeleton } from "@/components/skeletons";
-import { deslugify } from "@/lib/utils";
 
 export const generateMetadata = async ({ params }) => {
     const { org } = await params
@@ -14,8 +13,8 @@ export const generateMetadata = async ({ params }) => {
 
     return {
         title: orgDetails.abbr
-            ? `${orgDetails.name} (${orgDetails.abbr}) | ${deslugify(orgDetails.sector)}`
-            : `${orgDetails.name} | ${deslugify(orgDetails.sector)}`,
+            ? `${orgDetails.name} (${orgDetails.abbr}) | ${orgDetails.sector.join(" / ")}`
+            : `${orgDetails.name} | ${orgDetails.sector.join(" / ")}`,
         description: orgDetails.shortDescription,
         alternates: {
             canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/orgs/${org}`
@@ -34,7 +33,6 @@ export default function OrgPage({ params }) {
 
 async function MainContent({ params }) {
     const { org } = await params;
-    console.log({ org });
     const orgDetails = await getOrgDetails(org)
 
     if (!orgDetails) notFound();

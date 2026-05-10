@@ -79,10 +79,7 @@ async function MainContent({ params }) {
     }
     else {
         const content = await getJobContent(job, jobNavSlug);
-        if (content)
-            return <Content content={content} />
-        else
-            notFound();
+       return <Content content={content} />
 
     }
 }

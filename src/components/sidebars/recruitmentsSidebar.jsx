@@ -13,6 +13,7 @@ export default function RecruitmentsSidebar({ orgs = [], states = [], recruiters
 
     const { optimisticParams, applyFilter, removeFilter } = useFilter();
 
+    const cat = optimisticParams.cat;
     const sector = optimisticParams.sector;
     const paramsFor = optimisticParams.for;
     const paramsBy = optimisticParams.by;
@@ -121,8 +122,8 @@ export default function RecruitmentsSidebar({ orgs = [], states = [], recruiters
                         </RadioGroup>
                     </AccordionContent>
                 </AccordionItem>
-                <AccordionItem value='jobSector'>
-                    <AccordionTrigger className='rounded-none px-1 !py-2 font-bold cursor-pointer hover:no-underline'>Job Sector</AccordionTrigger>
+                <AccordionItem value='orgSector'>
+                    <AccordionTrigger className='rounded-none px-1 !py-2 font-bold cursor-pointer hover:no-underline'>Organisation Sector</AccordionTrigger>
                     <AccordionContent className='mt-2 px-2'>
                         <RadioGroup className="flex flex-col gap-3" value={sector ?? ""} onValueChange={(value) => applyFilter({sector: value})}>
                             <div className="flex justify-between items-center">
@@ -156,6 +157,33 @@ export default function RecruitmentsSidebar({ orgs = [], states = [], recruiters
                             <div className="flex justify-between items-center">
                                 <Label className="text-sm" htmlFor='police'>Police</Label>
                                 <RadioGroupItem id='police' value='police' />
+                            </div>
+                        </RadioGroup>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value='jobCategories'>
+                    <AccordionTrigger className='rounded-none px-1 !py-2 font-bold cursor-pointer hover:no-underline'>Job Categories</AccordionTrigger>
+                    <AccordionContent className='mt-2 px-2'>
+                        <RadioGroup className="flex flex-col gap-3" value={cat ?? ""} onValueChange={(value) => applyFilter({cat: value})}>
+                            <div className="flex justify-between items-center">
+                                <Label className="text-sm" htmlFor='banking'>Banking</Label>
+                                <RadioGroupItem id='banking' value='banking' />
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <Label className="text-sm" htmlFor='civil-services'>Civil Services</Label>
+                                <RadioGroupItem id='civil-services' value='civil-services' />
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <Label className="text-sm" htmlFor='it'>IT</Label>
+                                <RadioGroupItem id='it' value='it' />
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <Label className="text-sm" htmlFor='railways'>Railways</Label>
+                                <RadioGroupItem id='railways' value='railways' />
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <Label className="text-sm" htmlFor='taxation'>Taxation</Label>
+                                <RadioGroupItem id='taxation' value='taxation' />
                             </div>
                         </RadioGroup>
                     </AccordionContent>

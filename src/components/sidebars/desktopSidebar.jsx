@@ -1,6 +1,7 @@
 'use client';
 
 import { useParams, usePathname } from "next/navigation";
+
 import RecruitmentSidebar from "./recruitmentSidebar";
 import RecruitmentsSidebar from "./recruitmentsSidebar";
 import JobsSidebar from "./jobsSidebar";

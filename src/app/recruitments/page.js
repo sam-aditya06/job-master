@@ -154,10 +154,10 @@ async function Sidebar({ type }) {
 }
 
 async function MainContentWrapper({ sp }) {
-    const { search, for: forSlug, by: bySlug, status, sector, qualification, expLvl, location, page } = sp;
+    const { search, for: forSlug, by: bySlug, status, cat, sector, qualification, expLvl, location, page } = sp;
 
     const [{ itemCount, recruitments }, forOrg, by] = await Promise.all([
-        getRecruitments({ search, forSlug, bySlug, status, sector, qualification, expLvl, location, page }),
+        getRecruitments({ search, forSlug, bySlug, status, cat, sector, qualification, expLvl, location, page }),
         forSlug ? getNameFromSlug('orgs', forSlug) : undefined,
         bySlug ? getRecruiterNameFromSlug(bySlug) : undefined,
     ]);

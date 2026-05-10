@@ -38,7 +38,7 @@ async function MainContent({ params }) {
         getJobDetails(job)
     ]);
 
-    if(!content || !jobDetails)
+    if(!jobDetails)
         notFound();
 
     const location = () => {
@@ -46,17 +46,6 @@ async function MainContent({ params }) {
         if (jobDetails.location.state) return { "@type": "AdministrativeArea", "name": capitalize(jobDetails.location.state) }
         if (jobDetails.location.scope === 'international') return { "@type": "AdministrativeArea", "name": "Worldwide" }
         return null
-    }
-
-    const industryMap = {
-        "central-govt": "Government",
-        "state-govt": "Government",
-        "psu": "Public Sector",
-        "banking": "Banking",
-        "defence": "Defence",
-        "railways": "Railways",
-        "judiciary": "Judiciary",
-        "police": "Police"
     }
 
     const jsonLd = {
@@ -85,7 +74,7 @@ async function MainContent({ params }) {
                 }
             }
         }),
-        "industry": industryMap[jobDetails.sector] ?? deslugify(jobDetails.sector)
+        "industry": jobDetails.categories.join(", ")
     }
 
     return (

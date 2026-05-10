@@ -13,7 +13,7 @@ export function OrgCard({ org }) {
             <Card className='border hover:border-brand rounded-xl hover:shadow-md dark:bg-neutral-900 dark:sm:bg-neutral-800 p-5'>
                 <CardContent className="flex flex-col gap-4 px-0">
                     <div className="flex items-center gap-2">
-                        <div className="flex items-center border rounded-full p-1.5 w-18 h-18">
+                        <div className="shrink-0 flex items-center border rounded-full p-1.5 w-18 h-18">
                             <div className="rounded-full flex justify-center items-center bg-white w-full h-full overflow-hidden">
                                 <img
                                     src={`${process.env.NEXT_PUBLIC_CDN_URL}/${org.logoSrc}`}
@@ -23,7 +23,7 @@ export function OrgCard({ org }) {
                         </div>
                         <div className="flex flex-col">
                             <span className="font-semibold line-clamp-1">{org.name}</span>
-                            <span className="text-sm text-muted-foreground">{deslugify(org.sector)}</span>
+                            <span className="text-sm text-muted-foreground">{org.sector.join(' / ')}</span>
                         </div>
                     </div>
                     <p className="text-xs text-muted-foreground line-clamp-3">{org.description}</p>

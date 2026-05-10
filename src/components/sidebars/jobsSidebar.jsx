@@ -1,16 +1,10 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
-import { Search, X } from "lucide-react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { useFilter } from "@/lib/context/filterContext";
@@ -19,7 +13,7 @@ export default function JobsSidebar({ orgs = [], states = [] }) {
 
     const { optimisticParams, applyFilter, removeFilter } = useFilter();
 
-    const sector = optimisticParams.sector;
+    const cat = optimisticParams.cat;
     const paramsOrg = optimisticParams.org;
     const paramsLocation = optimisticParams.location;
     const qualification = optimisticParams.qualification;
@@ -98,41 +92,29 @@ export default function JobsSidebar({ orgs = [], states = [] }) {
                         </RadioGroup>
                     </AccordionContent>
                 </AccordionItem>
-                <AccordionItem value='jobSector'>
-                    <AccordionTrigger className='rounded-none px-1 !py-2 font-bold cursor-pointer hover:no-underline'>Job Sector</AccordionTrigger>
+                <AccordionItem value='jobCategories'>
+                    <AccordionTrigger className='rounded-none px-1 !py-2 font-bold cursor-pointer hover:no-underline'>Job Categories</AccordionTrigger>
                     <AccordionContent className='mt-2 px-2'>
-                        <RadioGroup className="flex flex-col gap-3" value={sector ?? ""} onValueChange={(value) => applyFilter({ sector: value })}>
-                            <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='central-govt'>Central Govt</Label>
-                                <RadioGroupItem id='central-govt' value='central-govt' />
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='state-govt'>State Govt</Label>
-                                <RadioGroupItem id='state-govt' value='state-govt' />
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='psu'>PSU</Label>
-                                <RadioGroupItem id='psu' value='psu' />
-                            </div>
+                        <RadioGroup className="flex flex-col gap-3" value={cat ?? ""} onValueChange={(value) => applyFilter({ cat: value })}>
                             <div className="flex justify-between items-center">
                                 <Label className="text-sm" htmlFor='banking'>Banking</Label>
                                 <RadioGroupItem id='banking' value='banking' />
                             </div>
                             <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='defence'>Defence</Label>
-                                <RadioGroupItem id='defence' value='defence' />
+                                <Label className="text-sm" htmlFor='civil-services'>Civil Services</Label>
+                                <RadioGroupItem id='civil-services' value='civil-services' />
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <Label className="text-sm" htmlFor='it'>IT</Label>
+                                <RadioGroupItem id='it' value='it' />
                             </div>
                             <div className="flex justify-between items-center">
                                 <Label className="text-sm" htmlFor='railways'>Railways</Label>
                                 <RadioGroupItem id='railways' value='railways' />
                             </div>
                             <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='judiciary'>Judiciary</Label>
-                                <RadioGroupItem id='judiciary' value='judiciary' />
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='police'>Police</Label>
-                                <RadioGroupItem id='police' value='police' />
+                                <Label className="text-sm" htmlFor='taxation'>Taxation</Label>
+                                <RadioGroupItem id='taxation' value='taxation' />
                             </div>
                         </RadioGroup>
                     </AccordionContent>

@@ -1,5 +1,3 @@
-import { cacheLife, cacheTag } from "next/cache";
-
 import { ObjectId } from "mongodb";
 
 import { connectDB } from "./dbConfig";
@@ -21,7 +19,7 @@ export async function getStates() {
 }
 
 //For Recruitments Page
-export async function getRecruitments({ search, forSlug, bySlug, status, sector, qualification, expLvl, location, page = 1 } = {}) {
+export async function getRecruitments({ search, forSlug, bySlug, status, cat, sector, qualification, expLvl, location, page = 1 } = {}) {
 
     let query = {};
 
@@ -71,9 +69,9 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
             query.recruiterId = recruiter._id.toString();
         }
 
-        let jobs;
+        let jobs = undefined;
 
-        if (forSlug || qualification || expLvl) {
+        if (forSlug || qualification || expLvl || cat || sector) {
             let jobQuery = {};
 
             if (forSlug) {
@@ -98,9 +96,21 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
                     return [];
             }
 
+            if (cat) {
+                jobQuery = { ...jobQuery, categories: { $regex: cat.replace("-", " "), $options: 'i' } };
+            }
+
+            if (sector) {
+                const orgs = await db.collections("orgs")
+                    .find({ sector })
+                    .project({ _id: 1 });
+                const orgIds = orgs.map(org => org._id.toString());
+                jobQuery = { ...jobQuery, orgId: { $in: orgIds } }
+            }
+
             jobs = await db.collection('jobs')
                 .find(jobQuery)
-                .project({ orgId: 1, recruitmentId: 1, education: 1, experience: 1 })
+                .project({ orgId: 1, recruitmentId: 1, categories: 1, education: 1, experience: 1 })
                 .toArray();
 
             if (jobs.length > 0) {
@@ -150,16 +160,26 @@ export async function getRecruitments({ search, forSlug, bySlug, status, sector,
 
         const recruitmentIds = recruitments.map(rec => rec._id.toString());
 
-        jobs = await db.collection('jobs')
-            .find({ recruitmentId: { $in: recruitmentIds } })
-            .project({ orgId: 1, recruitmentId: 1, education: 1, experience: 1 })
-            .toArray();
+        if (!jobs)
+            jobs = await db.collection('jobs')
+                .find({ recruitmentId: { $in: recruitmentIds } })
+                .project({ orgId: 1, recruitmentId: 1, categories: 1, education: 1, experience: 1 })
+                .toArray();
+
+        const jobOrgIds = jobs.map(job => new ObjectId(job.orgId));
+        const orgs = await db.collection('orgs')
+            .find({ _id: { $in: jobOrgIds } })
+            .project({ sector: 1 }).toArray();
 
         const finalRecruitmentsList = recruitments.map(recruitment => {
             const recruitmentJobs = jobs.filter(job => job.recruitmentId === recruitment._id.toString());
+            const recruitmentOrgIds = recruitmentJobs.map(job => job.orgId);
+            const recruitmentOrgs = orgs.filter(org => recruitmentOrgIds.includes(org._id.toString()));
+            const sectors = [...new Set(recruitmentOrgs.flatMap(org => org.sector))].sort();
+            const categories = [...new Set(recruitmentJobs.flatMap(job => job.categories))].sort();
             const minYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.minYears)]) || 0;
             const maxYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.maxYears)]) || 0;
-            return { ...recruitment, experienceRange: { minYears, maxYears } };
+            return { ...recruitment, experienceRange: { minYears, maxYears }, sectors, categories };
         });
 
         const details = { itemCount: metadata[0].total, recruitments: finalRecruitmentsList };
@@ -273,13 +293,19 @@ export async function getOngoingRecruitments(page, orgSlug, rBodySlug) {
         if (!recruitments.length) return [];
 
         const recruitmentIds = recruitments.map(recruitment => recruitment._id.toString());
-        const jobs = await db.collection('jobs').find({ recruitmentId: { $in: recruitmentIds } }).project({ recruitmentId: 1, experience: 1 }).toArray();
+        const jobs = await db.collection('jobs').find({ recruitmentId: { $in: recruitmentIds } }).project({ orgId: 1, recruitmentId: 1, categories: 1, experience: 1 }).toArray();
+        const orgIds = [...new Set(jobs.map(job => new ObjectId(job.orgId)))];
+        const orgs = await db.collection('orgs').find({ _id: { $in: orgIds } }).project({ sector: 1 }).toArray();
 
         const finalRecruitmentsList = recruitments.map(recruitment => {
             const recruitmentJobs = jobs.filter(job => job.recruitmentId === recruitment._id.toString());
+            const recruitmentOrgIds = recruitmentJobs.map(job => job.orgId);
+            const recruitmentOrgs = orgs.filter(org => recruitmentOrgIds.includes(org._id.toString()));
+            const sectors = [...new Set(recruitmentOrgs.flatMap(org => org.sector))].sort();
+            const categories = [...new Set(recruitmentJobs.flatMap(job => job.categories))].sort();
             const minYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.minYears)]) || 0;
             const maxYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.maxYears)]) || 0;
-            return { ...recruitment, experienceRange: { minYears, maxYears } };
+            return { ...recruitment, experienceRange: { minYears, maxYears }, sectors, categories };
         })
 
         return JSON.parse(JSON.stringify(finalRecruitmentsList));
@@ -292,7 +318,6 @@ export async function getOngoingRecruitments(page, orgSlug, rBodySlug) {
 
 //For Recruitment Page
 export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlug) {
-
     try {
         const db = await connectDB();
 
@@ -330,7 +355,7 @@ export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlu
 
                 const { name, link, completedContent, pendingContent, status } = stage;
 
-                const stageCard = generateStageCard(name, link, status);
+                const stageCard = generateStageCard(recruitment.name, name, link, status);
 
                 if (status === 'pending')
                     content = pendingContent.replace('stage-card', stageCard);
@@ -391,7 +416,7 @@ export async function getRecruitmentSidebarDetails(recSlug) {
 };
 
 //For Orgs Page
-export async function getOrgs({ search, sector, page }) {
+export async function getOrgs({ search, sector, page = 1 }) {
 
     let query = {};
     if (search) {
@@ -403,7 +428,7 @@ export async function getOrgs({ search, sector, page }) {
         ];
     }
     if (sector)
-        query.sector = sector;
+        query.sector = { $regex: sector.replace('-', ' '), $options: "i" };
 
     try {
         const db = await connectDB();
@@ -466,7 +491,7 @@ export async function getRecruitmentBodies({ search, sector, page = 1 }) {
         ];
     }
     if (sector)
-        query.sector = sector;
+        query.sector = { $regex: sector.replace('-', ' '), $options: "i" };
 
     try {
         const db = await connectDB();
@@ -549,7 +574,7 @@ export async function getRecruitmentBodyDetails(rBodySlug) {
 };
 
 //For Jobs Page
-export async function getJobs({ search, orgSlug, rStatus, sector, qualification, expLvl, location, page = 1 } = {}) {
+export async function getJobs({ search, orgSlug, rStatus, cat, qualification, expLvl, location, page = 1 } = {}) {
 
     let query = {};
     if (search) {
@@ -560,8 +585,10 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
             { abbr: searchRegex }
         ];
     }
-    if (sector)
-        query.sector = sector;
+    if (cat) {
+        const modifiedCat = cat.replace(/-/g, " ");
+        query.categories = { $regex: modifiedCat, $options: "i" };
+    }
     if (qualification)
         query['education.level'] = new RegExp(qualification, 'i');
     if (expLvl) {
@@ -612,7 +639,7 @@ export async function getJobs({ search, orgSlug, rStatus, sector, qualification,
                         { $sort: { popularityScore: -1 } },
                         { $skip: (page - 1) * ITEM_PER_PAGE },
                         { $limit: ITEM_PER_PAGE },
-                        { $project: { orgId: 1, recruitmentId: 1, name: 1, slug: 1, abbr: 1, sector: 1, location: 1, experience: 1, payScale: 1 } }
+                        { $project: { orgId: 1, recruitmentId: 1, name: 1, slug: 1, abbr: 1, categories: 1, location: 1, experience: 1, payScale: 1 } }
                     ]
                 }
             }
@@ -677,7 +704,7 @@ export async function getPopularJobs() {
             .find({})
             .sort({ popularityScore: -1 })
             .limit(6)
-            .project({ orgId: 1, name: 1, slug: 1, abbr: 1, sector: 1, location: 1, experience: 1, payScale: 1 })
+            .project({ orgId: 1, name: 1, slug: 1, abbr: 1, categories: 1, location: 1, experience: 1, payScale: 1 })
             .toArray();
 
         const orgIds = [...new Set(jobsList.map(j => j.orgId))];
@@ -718,13 +745,13 @@ export async function getJobDetails(jobSlug) {
         const jobDetails = await db.collection('jobs')
             .findOne(
                 { slug: jobSlug },
-                { projection: { orgId: 1, name: 1, description: 1, sector: 1, location: 1, education: 1, payScale: 1 } }
+                { projection: { orgId: 1, name: 1, description: 1, categories: 1, location: 1, education: 1, payScale: 1 } }
             );
         if (!jobDetails)
             return null;
         const org = await db.collection('orgs').findOne({ _id: new ObjectId(jobDetails.orgId) }, { projection: { name: 1 } });
         let formattedEducation = formatEducation(jobDetails.education)
-        let formattedLocation = formatLocation(jobDetails.location, jobDetails.sector);
+        let formattedLocation = formatLocation(jobDetails.location);
         return JSON.parse(JSON.stringify({ ...jobDetails, location: formattedLocation, education: formattedEducation, org: org.name }));
 
     } catch (error) {
@@ -745,6 +772,8 @@ export async function getJobContent(jobSlug, jobNavSlug) {
         const db = await connectDB();
         let projection = jobNavSlug ? { [dbKey]: 1 } : { overview: 1 };
         const jobDetails = await db.collection('jobs').findOne({ slug: jobSlug }, { projection });
+
+        console.log({ jobDetails });
 
         if (!jobDetails)
             return null;
@@ -932,29 +961,52 @@ export async function getNameFromSlug(collectionName, slug) {
     }
 }
 
-export function generateStageCard(stage, link, status) {
+export function generateStageCard(recName, stage, link, status) {
 
-    switch (stage) {
-        case "Notification":
-            return status === "completed"
-                ? `
-          <div class="stage-card">
+    let stageCard = '';
+
+    if (stage === "Notification") {
+        if (status === "completed")
+            stageCard =
+                `<div class="stage-card">
             <p class="stage-label">${stage}</p>
             <a href="${link}" target="_blank">
               <div class="link-btn">View Notification PDF</div>
             </a>
             <p class="cms-note">Check the details carefully before applying.</p>
-          </div>
-        `
-                : `
-          <div class="stage-card">
+          </div>`
+        else
+            stageCard =
+                `<div class="stage-card">
             <p class="stage-label">Notification</p>
             <div class="link-btn-disabled">View Notification PDF</div>
             <p class="cms-note">The official notification PDF link will be activated once released.</p>
-          </div>
-        `;
-        case "Registration":
-            return status === "pending" ?
+          </div>`;
+    }
+    else if (stage === "Registration") {
+        if (recName === "IIFCL AGM") {
+            stageCard = status === "pending" ?
+                `<div class="stage-card">
+                <p class="stage-label">${stage}</p>
+                <div class="link-btn-disabled">Download Application Form</div>
+                <p class="cms-note">The link will be activated once registration begins.</p>
+            </div>` :
+                status === "ongoing" ?
+                    `<div class="stage-card">
+                <p class="stage-label">${stage}</p>
+                <a href="${link}" target="_blank">
+                <div class="link-btn">Download Application Form</div>
+                </a>
+                <p class="cms-note">Complete your registration before the last date.</p>
+            </div>` :
+                    `<div class="stage-card">
+                <p class="stage-label">${stage}</p>
+                <div class="link-btn-disabled">Download Application Form</div>
+                <p class="cms-note">The registration process has now closed.</p>
+            </div>`;
+        }
+        else {
+            stage = status === "pending" ?
                 `<div class="stage-card">
                 <p class="stage-label">${stage}</p>
                 <div class="link-btn-disabled">Apply Online</div>
@@ -973,52 +1025,65 @@ export function generateStageCard(stage, link, status) {
                 <div class="link-btn-disabled">Apply Online</div>
                 <p class="cms-note">The registration process has now closed.</p>
             </div>`;
-
-        case "Admit Card (Prelims)":
-        case "Admit Card (Mains)":
-        case "Admit Card (CBT 1)":
-        case "Admit Card (CBT 2)":
-        case "Admit Card (Online Test)":
-            return status === "pending" ?
+        }
+    }
+    else if (stage.includes("Admit Card")) {
+        stageCard = status === "pending" ?
+            `<div class="stage-card">
+                <p class="stage-label">${stage}</p>
+                <div class="link-btn-disabled">Download Admit Card</div>
+                <p class="cms-note">The link will be activated once registration begins.</p>
+            </div>` :
+            status === "ongoing" ?
+                `<div class="stage-card">
+                    <p class="stage-label">${stage}</p>
+                    <a href="${link}" target="_blank">
+                        <div class="link-btn">Download Admit Card</div>
+                    </a>
+                    <p class="cms-note">Download your admit card using the above link.</p>
+                </div>` :
                 `<div class="stage-card">
                     <p class="stage-label">${stage}</p>
                     <div class="link-btn-disabled">Download Admit Card</div>
-                    <p class="cms-note">The link will be activated once registration begins.</p>
+                    <p class="cms-note">The admit card link has expired.</p>
+                </div>`;
+    }
+    else if (stage.includes("Result")) {
+        stageCard = status === "pending" ?
+            `<div class="stage-card">
+                <p class="stage-label">Online Test</p>
+                <div class="link-btn-disabled">Check Result</div>
+                <p class="cms-note">The result link will be activated once declared.</p>
+            </div>` :
+            `<div class="stage-card">
+                <p class="stage-label">${stage}</p>
+                <a href="${link}" target="_blank">
+                    <div class="link-btn">Check Result</div>
+                </a>
+                <p class="cms-note">Use your registration details to check your result.</p>
+            </div>`;
+    }
+    else if (stage.includes("Call Letter")) {
+        stageCard = status === "pending" ?
+            `<div class="stage-card">
+                    <p class="stage-label">${stage}</p>
+                    <div class="link-btn-disabled">Download Call Letter</div>
+                    <p class="cms-note">The link will be activated once the call letter is released.</p>
                 </div>` :
-                status === "ongoing" ?
-                    `<div class="stage-card">
+            status === "ongoing" ?
+                `<div class="stage-card">
                         <p class="stage-label">${stage}</p>
                         <a href="${link}" target="_blank">
-                            <div class="link-btn">Download Admit Card</div>
+                            <div class="link-btn">Download Call Letter</div>
                         </a>
-                        <p class="cms-note">Download your admit card using the above link.</p>
+                        <p class="cms-note">Download your call letter using the above link.</p>
                     </div>` :
-                    `<div class="stage-card">
+                `<div class="stage-card">
                         <p class="stage-label">${stage}</p>
-                        <div class="link-btn-disabled">Download Admit Card</div>
-                        <p class="cms-note">The admit card link has expired.</p>
+                        <div class="link-btn-disabled">Download Call Letter</div>
+                        <p class="cms-note">The call letter link has expired.</p>
                     </div>`;
-
-        case "Result (Online Test)":
-            return status === "active"
-                ? `
-          <div class="stage-card">
-            <p class="stage-label">${stage}</p>
-            <a href="${link}" target="_blank">
-              <div class="link-btn">Check Result</div>
-            </a>
-            <p class="cms-note">Use your registration details to check your result.</p>
-          </div>
-        `
-                : `
-          <div class="stage-card">
-            <p class="stage-label">Online Test</p>
-            <div class="link-btn-disabled">Check Result</div>
-            <p class="cms-note">The result link will be activated once declared.</p>
-          </div>
-        `;
-
-        default:
-            return "";
     }
+
+    return stageCard;
 }

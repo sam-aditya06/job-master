@@ -115,7 +115,7 @@ export default function RecruitmentSidebar({ details }) {
                                             stage.status === 'completed' &&
                                             <div className="flex gap-2 items-center">
                                                 <div className="flex justify-center items-center h-6 w-6 border border-brand rounded-full bg-brand">
-                                                    <Check size={18} className="stroke-white" />
+                                                    <Check size={18} className="stroke-white stroke-3" />
                                                 </div>
                                                 <p className={`${selected === stage.slug ? 'text-brand font-bold' : 'hover:text-brand hover:font-bold'} cursor-pointer`} href={`/recruitments/${recruitment}?stage=${stage.slug}`} onClick={() => handleSelect(stage.slug)}>
                                                     {stage.name}

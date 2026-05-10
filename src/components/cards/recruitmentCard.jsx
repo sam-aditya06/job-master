@@ -3,17 +3,19 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 
-import { ArrowRight, BadgeQuestionMark, Briefcase, CircleQuestionMark, Clock, Info, MapPin } from "lucide-react";
+import { ArrowRight, Briefcase, CircleQuestionMark, Clock, MapPin } from "lucide-react";
 import { format, isAfter, isSameDay, parseISO } from "date-fns";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-import { deslugify, formatLocation } from "@/lib/utils";
+import { formatLocation } from "@/lib/utils";
 
 export default function RecruitmentCard({ recruitment, icon }) {
 
-    const { status, location } = recruitment;
+    const { status, location, sectors, categories } = recruitment;
+
+    console.log({ categories });
 
     const displayedLocation = formatLocation(location);
 
@@ -48,25 +50,38 @@ export default function RecruitmentCard({ recruitment, icon }) {
         <Link className="group" href={`/recruitments/${recruitment.slug}`}>
             <Card
                 style={{ '--hover-color': `var(--color-${borderHoverColor})` }}
-                className={`border rounded-xl p-5 group-hover:border-[var(--hover-color)] hover:shadow-md dark:bg-neutral-800 h-full transition-all cursor-pointer`}
+                className="aspect-auto border rounded-xl p-5 group-hover:border-[var(--hover-color)] hover:shadow-md dark:bg-neutral-800 h-56 transition-all cursor-pointer"
             >
                 <CardContent className='flex flex-col gap-2 px-0 w-full h-full'>
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1 block">
-                                {deslugify(recruitment.sector)}
-                            </span>
-                            <h3 className="font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
-                                {recruitment.name}
-                            </h3>
-                        </div>
-                        <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${color}`}>
+                    <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1 block max-w-1/2 truncate">
+                            {sectors[0] + (sectors.length > 1 ? ` +${sectors.length - 1}` : "")}
+                        </span>
+                        <span className={`shrink-0 flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${color}`}>
                             {icon} {recruitment.stageStatus}
                         </span>
                     </div>
+                    <h3 className="font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
+                        {recruitment.name}
+                    </h3>
                     <div className="grow flex flex-col justify-between">
-                        <p className="text-xs text-muted-foreground mb-2 leading-relaxed flex-1 line-clamp-1">{recruitment.fullName}</p>
-                        <div className="flex items-center gap-3 mb-4">
+                        <p className="text-xs text-muted-foreground leading-relaxed truncate">{recruitment.fullName}</p>
+                        <div className="flex flex-wrap gap-2">
+                            {recruitment.categories.slice(0, 3).map(cat => (
+                                <span
+                                    style={{ '--badge-color': `var(--color-${borderHoverColor})` }}
+                                    className="border border-[var(--badge-color)] rounded-full px-2 py-0.5 text-xs text-[var(--badge-color)]"
+                                >
+                                    {cat}
+                                </span>
+                            ))}
+                            {recruitment.categories.length > 3 && (
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                                    +{recruitment.categories.length - 3}
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-3">
                             <p className="flex items-center gap-1 text-xs text-muted-foreground leading-relaxed"><Briefcase className="w-3 h-3" />
                                 {
                                     recruitment.experienceRange.maxYears ?

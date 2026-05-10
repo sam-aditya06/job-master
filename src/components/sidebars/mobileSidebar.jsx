@@ -6,10 +6,13 @@ import { useParams, usePathname, useSearchParams } from "next/navigation"
 import { List } from "lucide-react"
 
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+
 import RecruitmentSidebar from "./recruitmentSidebar"
 import RecruitmentsSidebar from "./recruitmentsSidebar"
 import JobsSidebar from "./jobsSidebar"
 import JobSidebar from "./jobSidebar"
+import OrgsSidebar from "./orgsSidebar";
+import RecruitmentBodiesSidebar from "./recruitmentBodiesSidebar";
 
 export default function MobileSidebar({ orgs, states, recruiters, fields, details }) {
     const { recruitment } = useParams();
@@ -30,6 +33,8 @@ export default function MobileSidebar({ orgs, states, recruiters, fields, detail
                 {pathName === '/recruitments' && <RecruitmentsSidebar recruiters={recruiters} orgs={orgs} states={states} />}
                 {pathName === '/jobs' && <JobsSidebar recruiters={recruiters} orgs={orgs} states={states} />}
                 {pathName.includes('/jobs/') && <JobSidebar fields={fields} />}
+                {pathName === '/orgs' && <OrgsSidebar />}
+                {pathName === '/recruitment-bodies' && <RecruitmentBodiesSidebar />}
             </SheetContent>
         </Sheet>
     )

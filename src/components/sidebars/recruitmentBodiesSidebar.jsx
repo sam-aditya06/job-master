@@ -22,12 +22,12 @@ export default function RecruitmentBodiesSidebar() {
                     <AccordionContent className='mt-2 px-2'>
                         <RadioGroup className="flex flex-col gap-3" value={sector ?? ""} onValueChange={(value) => handleFilterSelect('sector', value)}>
                             <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='central-govt'>Central Govt</Label>
-                                <RadioGroupItem id='central-govt' value='central-govt' />
+                                <Label className="text-sm" htmlFor='central-government'>Central Government</Label>
+                                <RadioGroupItem id='central-government' value='central-government' />
                             </div>
                             <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='state-govt'>State Govt</Label>
-                                <RadioGroupItem id='state-govt' value='state-govt' />
+                                <Label className="text-sm" htmlFor='state-government'>State Government</Label>
+                                <RadioGroupItem id='state-government' value='state-government' />
                             </div>
                             <div className="flex justify-between items-center">
                                 <Label className="text-sm" htmlFor='psu'>PSU</Label>

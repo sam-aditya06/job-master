@@ -17,7 +17,7 @@ export default function Org({ orgDetails }) {
                 </div>
                 <div className="grow flex flex-col gap-1 h-fit">
                     <h1 className="text-xl sm:text-2xl">{orgDetails.name}{orgDetails.abbr ? ` (${orgDetails.abbr})` : ''}</h1>
-                    <p className="text-muted-foreground">{deslugify(orgDetails.sector)}</p>
+                    <p className="text-muted-foreground">{orgDetails.sector.join(" / ")}</p>
                 </div>
             </section>
             <section className="flex flex-col gap-2 mt-10">

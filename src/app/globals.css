@@ -191,12 +191,16 @@
   }
 
   .cms-content table {
-    @apply table-auto border border-collapse mx-auto w-full text-sm;
+    @apply table-auto border border-collapse mx-auto w-full !text-sm;
   }
 
   .cms-content th,
   .cms-content td {
-    @apply border h-8 text-center px-2;
+    @apply border h-8 text-center p-2;
+  }
+
+  .cms-content td > ul > li {
+    @apply text-sm;
   }
 
   .dark .cms-content td,

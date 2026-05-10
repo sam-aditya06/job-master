@@ -19,13 +19,15 @@ export function slugify(str) {
 }
 
 export function deslugify(str) {
-  return str?.replace('psu', 'PSU')
-    .split('-')
+  if (str === 'psu' || str === 'it')
+    return str.toUpperCase();
+
+  return str?.split('-')
     .map(([first, ...rest]) => first.toUpperCase() + rest.join(''))
     .join(' ');
 }
 
-export function formatLocation(location, sector) {
+export function formatLocation(location) {
   const { scope, state, distribution } = location;
   const distLabel = {
     none: '',
@@ -42,4 +44,29 @@ export function formatLocation(location, sector) {
   else
     formattedLocation = distribution === 'none' ? `All India` : `All India${distLabel}`;
   return formattedLocation;
+}
+
+export function getLogoStyles(name, forCard) {
+  let styles = {};
+
+  switch (name) {
+    case "Jammu and Kashmir Services Selection Board":
+      styles.containerStyles = { padding: forCard ? "6px" : "8px" };
+      styles.imgStyles = {};
+      break;
+    case "Punjab Subordinate Services Selection Board":
+    case "Haryana Staff Selection Commission":
+      styles.containerStyles = { padding: forCard ? "8px" : "10px" };
+      styles.imgStyles = {};
+      break;
+    case "Delhi Subordinate Services Selection Board":
+      styles.containerStyles = { padding: forCard ? "6px" : "10px" };
+      styles.imgStyles = { marginBottom: "8px" }
+      break;
+    default:
+      styles.containerStyles = {};
+      styles.imgStyles = {};
+  }
+
+  return styles;
 }

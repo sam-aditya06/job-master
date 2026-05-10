@@ -16,7 +16,7 @@ export default function JobSidebar({ fields }) {
     const handleSelect = (slug) => {
         setIsLoading(true);
         setSelected(slug);
-        router.replace(`/jobs/${job}/${slug}`);
+        slug === 'overview' ? router.replace(`/jobs/${job}`) : router.replace(`/jobs/${job}/${slug}`);
     }
 
     return (
@@ -24,15 +24,15 @@ export default function JobSidebar({ fields }) {
             <p className={`flex justify-center rounded-md pl-2 py-1 w-full${selected === 'overview' ? ' bg-brand text-white' : ' hover:bg-brand/40 hover:text-white'} cursor-pointer`} onClick={() => handleSelect('overview')}>
                 Overview
             </p>
-            {fields.includes('eligibilityCriteria') && <p className={`flex justify-center rounded-md pl-2 py-1 w-full${selected === 'eligibility-criteria' ? ' bg-brand text-white' : ' hover:bg-brand/40 hover:text-white'} cursor-pointer`} onClick={() => handleSelect('eligibility-criteria')}>
+            <p className={`flex justify-center rounded-md pl-2 py-1 w-full${selected === 'eligibility-criteria' ? ' bg-brand text-white' : ' hover:bg-brand/40 hover:text-white'} cursor-pointer`} onClick={() => handleSelect('eligibility-criteria')}>
                 Eligibility Criteria
-            </p>}
-            {fields.includes('responsibilities') && <p className={`flex justify-center rounded-md pl-2 py-1 w-full${selected === 'responsibilities' ? ' bg-brand text-white' : ' hover:bg-brand/40 hover:text-white'} cursor-pointer`} onClick={() => handleSelect('responsibilities')}>
+            </p>
+            <p className={`flex justify-center rounded-md pl-2 py-1 w-full${selected === 'responsibilities' ? ' bg-brand text-white' : ' hover:bg-brand/40 hover:text-white'} cursor-pointer`} onClick={() => handleSelect('responsibilities')}>
                 Responsibilities
-            </p>}
-            {fields.includes('perks') && <p className={`flex justify-center rounded-md pl-2 py-1 w-full${selected === 'perks' ? ' bg-brand text-white' : ' hover:bg-brand/40 hover:text-white'} cursor-pointer`} onClick={() => handleSelect('perks')}>
+            </p>
+            <p className={`flex justify-center rounded-md pl-2 py-1 w-full${selected === 'perks' ? ' bg-brand text-white' : ' hover:bg-brand/40 hover:text-white'} cursor-pointer`} onClick={() => handleSelect('perks')}>
                 Perks
-            </p>}
+            </p>
             {fields.includes('physicalStandards') && <p className={`flex justify-center rounded-md pl-2 py-1 w-full${selected === 'physical-standards' ? ' bg-brand text-white' : ' hover:bg-brand/40 hover:text-white'} cursor-pointer`} onClick={() => handleSelect('perks')}>
                 Physical Standards
             </p>}

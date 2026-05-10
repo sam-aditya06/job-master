@@ -6,22 +6,32 @@ import { ArrowRight } from "lucide-react";
 
 import RecruitmentCard from "@/components/cards/recruitmentCard";
 
-import { capitalize } from "@/lib/utils";
 import statusConfig from "@/lib/statusConfig";
+import { getLogoStyles } from "@/lib/utils";
 
 export default function RecruitmentBody({ recruitmentBodyDetails }) {
+
+    const { name } = recruitmentBodyDetails;
+
+    let { containerStyles, imgStyles } = getLogoStyles(name, false);
 
     return (
         <div className="sm:pr-3">
             <section className="flex items-center gap-2">
                 <div className="shrink-0 flex justify-center items-center border rounded-full h-12 sm:h-24 w-12 sm:w-24 p-2">
-                    <div className="rounded-full flex justify-center items-center bg-white w-full h-full overflow-hidden">
-                        <img src={`${process.env.NEXT_PUBLIC_CDN_URL}/${recruitmentBodyDetails.logoSrc}`} />
+                    <div
+                        className="rounded-full flex justify-center items-center bg-white w-full h-full overflow-hidden"
+                        style={containerStyles}
+                    >
+                        <img
+                            style={imgStyles}
+                            src={`${process.env.NEXT_PUBLIC_CDN_URL}/${recruitmentBodyDetails.logoSrc}`}
+                        />
                     </div>
                 </div>
                 <div className="grow flex flex-col gap-1 h-fit">
                     <h1 className="text-xl sm:text-2xl">{recruitmentBodyDetails.name} ({recruitmentBodyDetails.abbr})</h1>
-                    <p className="text-muted-foreground">{capitalize(recruitmentBodyDetails.sector)}</p>
+                    <p className="text-muted-foreground">{recruitmentBodyDetails.sector.join(" / ")}</p>
                 </div>
             </section>
             <section className="flex flex-col gap-2 mt-10">

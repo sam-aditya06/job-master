@@ -7,17 +7,15 @@ import { ArrowRight, Briefcase, Info, MapPin } from "lucide-react";
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { deslugify, formatLocation } from "@/lib/utils";
+import { formatLocation } from "@/lib/utils";
 
-export default function JobCard({ job, page }) {
-    const bgColor = page === 'home' ? 'dark:bg-neutral-800' : 'dark:bg-neutral-900 dark:sm:bg-neutral-800';
+export default function JobCard({ job }) {
 
     const displayedLocation = formatLocation(job.location);
 
     const triggerRef = useRef(null);
 
     const [open, setOpen] = useState(false);
-
 
     const handleClick = (e) => {
         e.preventDefault();
@@ -27,20 +25,22 @@ export default function JobCard({ job, page }) {
 
     return (
         <Link className="group" href={`/jobs/${job.slug}`} >
-            <Card className={`border hover:border-brand rounded-xl hover:shadow-md ${bgColor} p-5 transition-all cursor-pointer h-full`}>
-                <CardTitle className='hidden'>{job.name} ({job.abbr})</CardTitle>
+            <Card className="border hover:border-brand rounded-xl hover:shadow-md dark:sm:bg-neutral-800 p-5 transition-all cursor-pointer h-full">
+                <CardTitle className='hidden'>{job.name}</CardTitle>
                 <CardContent className='flex flex-col gap-3 w-full px-0'>
                     <div className="flex justify-between">
                         <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block">
-                                {deslugify(job.sector)}
+                                {job.categories.join(" / ")}
                             </span>
                             <h3 className="font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
                                 {job.abbr || job.name}
                             </h3>
                             <div className="flex items-center gap-1">
-                                <div className="border rounded-full h-fit w-fit p-[2px]">
-                                    <img className="h-3 w-3" src={`${process.env.NEXT_PUBLIC_CDN_URL}/${job.orgLogo}`} />
+                                <div className="border rounded-full h-5 w-5 p-[2px]">
+                                    <div className="rounded-full flex justify-center items-center bg-white w-full h-full overflow-hidden">
+                                        <img src={`${process.env.NEXT_PUBLIC_CDN_URL}/${job.orgLogo}`} />
+                                    </div>
                                 </div>
                                 <p className="text-xs text-muted-foreground leading-none">{job.orgName}</p>
                             </div>

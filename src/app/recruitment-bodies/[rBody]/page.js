@@ -14,8 +14,8 @@ export const generateMetadata = async ({ params }) => {
 
     return {
         title: rBodyDetails.abbr
-            ? `${rBodyDetails.name} (${rBodyDetails.abbr}) | ${deslugify(rBodyDetails.sector)}`
-            : `${rBodyDetails.name} | ${deslugify(rBodyDetails.sector)}`,
+            ? `${rBodyDetails.name} (${rBodyDetails.abbr}) | ${rBodyDetails.sector.join(" / ")}`
+            : `${rBodyDetails.name} | ${rBodyDetails.sector.join(" / ")}`,
         description: rBodyDetails.shortDescription,
         alternates: {
             canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/recruitment-bodies/${rBody}`
@@ -26,7 +26,7 @@ export const generateMetadata = async ({ params }) => {
 
 export default function RecruitmentBodyPage({ params }) {
     return (
-        <Suspense fallback={<OrgsPageSkeleton />}>
+        <Suspense fallback={<OrgsPageSkeleton type={"rBody"} />}>
             <MainContent params={params} />
         </Suspense>
     )
