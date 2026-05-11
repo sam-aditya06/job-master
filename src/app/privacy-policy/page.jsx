@@ -62,17 +62,16 @@ export default function PrivacyPolicyPage() {
                         </a>.
                     </p>
                     <p>
-                        <strong>Ezoic —</strong> We use Ezoic, a Google Certified Publishing Partner,
-                        to serve advertisements on our website. Ezoic and its partners use cookies
-                        and similar technologies to collect data about your browsing behaviour and
-                        device to show you relevant advertisements. This may include personalised
-                        ads based on your interests. Ezoic's privacy policy is available at{' '}
+                        <strong>Google AdSense —</strong> We use Google AdSense to serve advertisements on our website.
+                        Google and its partners use cookies and similar technologies to collect data about your browsing
+                        behaviour and device in order to show you relevant advertisements. This may include personalised
+                        ads based on your interests. You can learn more about how Google uses data when serving ads at{' '}
                         <a
-                            href="https://www.ezoic.com/privacy-policy"
+                            href="https://policies.google.com/technologies/ads"
                             target="_blank"
                             rel="noopener noreferrer"
                         >
-                            ezoic.com/privacy-policy
+                            policies.google.com/technologies/ads
                         </a>.
                     </p>
                 </section>
