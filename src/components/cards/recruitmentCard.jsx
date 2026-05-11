@@ -15,8 +15,6 @@ export default function RecruitmentCard({ recruitment, icon }) {
 
     const { status, location, sectors, categories } = recruitment;
 
-    console.log({ categories });
-
     const displayedLocation = formatLocation(location);
 
     const color = status === 'pending' ?

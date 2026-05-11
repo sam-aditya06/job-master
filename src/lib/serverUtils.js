@@ -773,8 +773,6 @@ export async function getJobContent(jobSlug, jobNavSlug) {
         let projection = jobNavSlug ? { [dbKey]: 1 } : { overview: 1 };
         const jobDetails = await db.collection('jobs').findOne({ slug: jobSlug }, { projection });
 
-        console.log({ jobDetails });
-
         if (!jobDetails)
             return null;
 
