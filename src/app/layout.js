@@ -8,15 +8,12 @@ import { Toaster } from "@/components/ui/sonner";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 
-export const metadata = {
-  verification: {
-    google: "ca-pub-9977184400515586"
-  }
-};
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="google-adsense-account" content="ca-pub-9977184400515586" />
+      </head>
       <body
         className='flex flex-col min-h-svh'
       >
