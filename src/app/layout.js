@@ -1,6 +1,7 @@
 import "./globals.css";
 
 import { Suspense } from "react";
+import Script from 'next/script';
 
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from "@/components/ui/sonner";
@@ -14,6 +15,16 @@ export default function RootLayout({ children }) {
       <head>
         <meta name="google-adsense-account" content="ca-pub-9977184400515586" />
       </head>
+      <Script async src="https://www.googletagmanager.com/gtag/js?id=G-B4KT3L5PV3" />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-B4KT3L5PV3');
+        `}
+      </Script>
       <body
         className='flex flex-col min-h-svh'
       >
