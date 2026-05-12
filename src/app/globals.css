@@ -199,8 +199,8 @@
     @apply border h-8 text-center p-2;
   }
 
-  .cms-content td > ul > li {
-    @apply text-sm;
+  .cms-content td > ul > li, .cms-content td > p {
+    @apply text-sm text-center;
   }
 
   .dark .cms-content td,
