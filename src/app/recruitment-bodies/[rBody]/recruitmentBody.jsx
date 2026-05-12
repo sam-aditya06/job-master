@@ -50,9 +50,10 @@ export default function RecruitmentBody({ recruitmentBodyDetails }) {
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
                         {
                             recruitmentBodyDetails.topRecruitments.map(recruitment => {
-                                const key = Object.keys(statusConfig).filter(status => recruitment.stageStatus.includes(status));
-                                const { color, icon } = statusConfig[key];
-                                return <RecruitmentCard key={recruitment._id} recruitment={recruitment} color={color} icon={icon} page={'recruitment-body'} />
+                                const stageStatus = recruitment.stageStatus;
+                                const key = Object.keys(statusConfig).find(status => stageStatus.includes(status));
+                                const { icon } = stageStatus.includes("Completed") ? statusConfig["Completed"] : statusConfig[key];
+                                return <RecruitmentCard key={recruitment._id} recruitment={recruitment} icon={icon} />
                             })
                         }
                     </div>
@@ -71,9 +72,10 @@ export default function RecruitmentBody({ recruitmentBodyDetails }) {
                         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
                             {
                                 recruitmentBodyDetails.ongoingRecruitments.map(recruitment => {
-                                    const key = Object.keys(statusConfig).filter(status => recruitment.stageStatus.includes(status));
-                                    const { color, icon } = statusConfig[key];
-                                    return <RecruitmentCard key={recruitment._id} recruitment={recruitment} color={color} icon={icon} page={'recruitment-body'} />
+                                    const stageStatus = recruitment.stageStatus;
+                                    const key = Object.keys(statusConfig).find(status => stageStatus.includes(status));
+                                    const { icon } = stageStatus.includes("Completed") ? statusConfig["Completed"] : statusConfig[key];
+                                    return <RecruitmentCard key={recruitment._id} recruitment={recruitment} icon={icon} />
                                 })
                             }
                         </div> :
