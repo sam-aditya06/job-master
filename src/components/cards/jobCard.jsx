@@ -34,7 +34,7 @@ export default function JobCard({ job }) {
                                 {job.categories.join(" / ")}
                             </span>
                             <h3 className="font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
-                                {job.abbr || job.name}
+                                {job.name}
                             </h3>
                             <div className="flex items-center gap-1">
                                 <div className="border rounded-full h-5 w-5 p-[2px]">

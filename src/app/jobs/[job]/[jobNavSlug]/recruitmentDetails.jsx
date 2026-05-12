@@ -5,7 +5,7 @@ export default function RecruitmentDetails({ job }) {
         <div className="cms-content">
             <article id="recruitment-details">
 
-                <h1>{job.abbr || job.name} – Recruitment Details</h1>
+                <h1>{job.name} – Recruitment Details</h1>
 
                 <section className="recruitment-intro">
                     <p>
@@ -61,7 +61,7 @@ export default function RecruitmentDetails({ job }) {
                         <ul>
                             <li>
                                 <Link href="/recruitment/{this.slug}">
-                                    {job.abbr || job.name} {job.recYear}
+                                    {job.name} {job.recYear}
                                 </Link> – Completed
                             </li>
                         </ul>

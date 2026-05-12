@@ -28,7 +28,6 @@ export async function getRecruitments({ search, forSlug, bySlug, status, cat, se
         query.$or = [
             { name: searchRegex },
             { slug: searchRegex },
-            { abbr: searchRegex },
             { keywords: searchRegex },
         ];
     }
@@ -581,8 +580,7 @@ export async function getJobs({ search, orgSlug, rStatus, cat, qualification, ex
         const searchRegex = { $regex: search, $options: "i" };
         query.$or = [
             { name: searchRegex },
-            { slug: searchRegex },
-            { abbr: searchRegex }
+            { slug: searchRegex }
         ];
     }
     if (cat) {
@@ -639,7 +637,7 @@ export async function getJobs({ search, orgSlug, rStatus, cat, qualification, ex
                         { $sort: { popularityScore: -1 } },
                         { $skip: (page - 1) * ITEM_PER_PAGE },
                         { $limit: ITEM_PER_PAGE },
-                        { $project: { orgId: 1, recruitmentId: 1, name: 1, slug: 1, abbr: 1, categories: 1, location: 1, experience: 1, payScale: 1 } }
+                        { $project: { orgId: 1, recruitmentId: 1, name: 1, slug: 1, categories: 1, location: 1, experience: 1, payScale: 1 } }
                     ]
                 }
             }
@@ -704,7 +702,7 @@ export async function getPopularJobs() {
             .find({})
             .sort({ popularityScore: -1 })
             .limit(6)
-            .project({ orgId: 1, name: 1, slug: 1, abbr: 1, categories: 1, location: 1, experience: 1, payScale: 1 })
+            .project({ orgId: 1, name: 1, slug: 1, categories: 1, location: 1, experience: 1, payScale: 1 })
             .toArray();
 
         const orgIds = [...new Set(jobsList.map(j => j.orgId))];
@@ -794,7 +792,7 @@ export async function getJobRecruitmentDetails(jobSlug) {
 
     try {
         const db = await connectDB();
-        const jobDetails = await db.collection('jobs').findOne({ slug: jobSlug }, { projection: { orgId: 1, recruitmentId: 1, name: 1, abbr: 1, location: 1 } });
+        const jobDetails = await db.collection('jobs').findOne({ slug: jobSlug }, { projection: { orgId: 1, recruitmentId: 1, name: 1, location: 1 } });
         if (!jobDetails)
             return null;
         const recruitmentDetails = await db.collection('recruitments')

@@ -220,6 +220,11 @@
     @apply mx-auto mt-2 text-sm;
   }
 
+  .cms-content p > a, .cms-content td > a {
+    text-decoration: underline;
+    color: var(--brand);
+  }
+
 }
 
 /* Custom Styling (General) */
