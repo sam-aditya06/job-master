@@ -540,19 +540,34 @@ export async function getRecruitmentBodyDetails(rBodySlug) {
 
         const jobs = await db.collection('jobs').find({
             recruitmentId: { $in: [...topRecruitmentIds, ...ongoingRecruitmentIds] },
-        }).project({ orgId: 1, recruitmentId: 1, experience: 1 }).toArray();
+        }).project({ orgId: 1, recruitmentId: 1, categories: 1, experience: 1 }).toArray();
+
+        const jobOrgIds = [...new Set(jobs.map(job => new ObjectId(job.orgId)))];
+
+        const orgs = await db.collection('orgs')
+            .find({ _id: { $in: jobOrgIds } })
+            .project({ sector: 1 })
+            .toArray();
 
         const finalTopRecruitmentsList = topRecruitments.map(recruitment => {
             const recruitmentJobs = jobs.filter(job => job.recruitmentId === recruitment._id.toString());
+            const recruitmentOrgIds = recruitmentJobs.map(job => job.orgId);
+            const recruitmentOrgs = orgs.filter(org => recruitmentOrgIds.includes(org._id.toString()));
+            const sectors = [...new Set(recruitmentOrgs.flatMap(org => org.sector))].sort();
+            const categories = [...new Set(recruitmentJobs.flatMap(job => job.categories))].sort();
             const minYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.minYears)]) || 0;
             const maxYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.maxYears)]) || 0;
-            return { ...recruitment, experienceRange: { minYears, maxYears } };
+            return { ...recruitment, experienceRange: { minYears, maxYears }, sectors, categories };
         });
         const finalOngoingRecruitmentsList = topRecruitments.map(recruitment => {
             const recruitmentJobs = jobs.filter(job => job.recruitmentId === recruitment._id.toString());
+            const recruitmentOrgIds = recruitmentJobs.map(job => job.orgId);
+            const recruitmentOrgs = orgs.filter(org => recruitmentOrgIds.includes(org._id.toString()));
+            const sectors = [...new Set(recruitmentOrgs.flatMap(org => org.sector))].sort();
+            const categories = [...new Set(recruitmentJobs.flatMap(job => job.categories))].sort();
             const minYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.minYears)]) || 0;
             const maxYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.maxYears)]) || 0;
-            return { ...recruitment, experienceRange: { minYears, maxYears } };
+            return { ...recruitment, experienceRange: { minYears, maxYears }, sectors, categories };
         });
         const rBodyDetails = ongoingRecruitments.length > 0 ?
             {

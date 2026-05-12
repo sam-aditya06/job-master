@@ -15,6 +15,8 @@ export default function RecruitmentCard({ recruitment, icon }) {
 
     const { status, location, sectors, categories } = recruitment;
 
+    console.log({ sectors, categories });
+
     const displayedLocation = formatLocation(location);
 
     const color = status === 'pending' ?
@@ -65,17 +67,18 @@ export default function RecruitmentCard({ recruitment, icon }) {
                     <div className="grow flex flex-col justify-between">
                         <p className="text-xs text-muted-foreground leading-relaxed truncate">{recruitment.fullName}</p>
                         <div className="flex flex-wrap gap-2">
-                            {recruitment.categories.slice(0, 3).map(cat => (
+                            {categories.slice(0, 3).map(cat => (
                                 <span
+                                    key={cat}
                                     style={{ '--badge-color': `var(--color-${borderHoverColor})` }}
                                     className="border border-[var(--badge-color)] rounded-full px-2 py-0.5 text-xs text-[var(--badge-color)]"
                                 >
                                     {cat}
                                 </span>
                             ))}
-                            {recruitment.categories.length > 3 && (
+                            {categories.length > 3 && (
                                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                                    +{recruitment.categories.length - 3}
+                                    +{categories.length - 3}
                                 </span>
                             )}
                         </div>
