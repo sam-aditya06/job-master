@@ -14,17 +14,22 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="google-adsense-account" content="ca-pub-9977184400515586" />
-      </head>
-      <Script async src="https://www.googletagmanager.com/gtag/js?id=G-B4KT3L5PV3" />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
+        {
+          process.env.NODE_ENV === 'production' && (
+            <>
+              <Script async src="https://www.googletagmanager.com/gtag/js?id=G-B4KT3L5PV3" />
+              <Script id="google-analytics" strategy="afterInteractive">
+                {`
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
 
         gtag('config', 'G-B4KT3L5PV3');
         `}
-      </Script>
+              </Script>
+            </>
+          )}
+      </head>
       <body
         className='flex flex-col min-h-svh'
       >

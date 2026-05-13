@@ -4,6 +4,7 @@ import Overview from "./overview";
 import { getJobContent, getJobDetails } from "@/lib/serverUtils";
 import { ContentSkeleton } from "@/components/skeletons";
 import { notFound } from "next/navigation";
+import { formatLocationJsonLd } from "@/lib/utils";
 
 export const generateMetadata = async ({ params }) => {
     const { job } = await params;
@@ -38,15 +39,10 @@ async function MainContent({ params }) {
         getJobDetails(job)
     ]);
 
-    if(!jobDetails)
+    if (!jobDetails)
         notFound();
 
-    const location = () => {
-        if (jobDetails.location.scope === 'all_india') return { "@type": "Country", "name": "India" }
-        if (jobDetails.location.state) return { "@type": "AdministrativeArea", "name": capitalize(jobDetails.location.state) }
-        if (jobDetails.location.scope === 'international') return { "@type": "AdministrativeArea", "name": "Worldwide" }
-        return null
-    }
+    const location = formatLocationJsonLd(jobDetails.location);
 
     const jsonLd = {
         "@context": "https://schema.org",

@@ -8,7 +8,7 @@ import Recruitment from "./recruitment";
 import { ContentSkeleton, SidebarSkeleton } from "@/components/skeletons";
 import { ContentLoadingProvider } from "@/lib/context/paginateContext";
 import ScrollProvider from "@/components/scrollProvider";
-import { capitalize } from "@/lib/utils";
+import { capitalize, formatLocationJsonLd } from "@/lib/utils";
 
 export const generateMetadata = async ({ params, searchParams }) => {
     const { recruitment } = await params
@@ -137,11 +137,7 @@ async function MainContent({ recruitmentDetails }) {
 
     const recruiterDetails = await getRecruiterFromId(recruitmentDetails.recruiterId)
     const recruiterName = recruiterDetails.name;
-    const location = () => {
-        if (recruitmentDetails.location.scope === 'all_india') return { "@type": "Country", "name": "India" }
-        if (recruitmentDetails.location.state) return { "@type": "AdministrativeArea", "name": capitalize(recruitmentDetails.location.state) }
-        return null
-    }
+    const location = formatLocationJsonLd(recruitmentDetails.location);
 
     const jsonLd = {
         "@context": "https://schema.org",

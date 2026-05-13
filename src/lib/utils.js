@@ -46,6 +46,13 @@ export function formatLocation(location) {
   return formattedLocation;
 }
 
+export function formatLocationJsonLd(location) {
+  if (location.scope === 'all_india') return { "@type": "Country", "name": "India" }
+  if (location.state) return { "@type": "AdministrativeArea", "name": capitalize(location.state) }
+  if (location.scope === 'international') return { "@type": "AdministrativeArea", "name": "Worldwide" }
+  return null
+}
+
 export function getLogoStyles(name, forCard) {
   let styles = {};
 

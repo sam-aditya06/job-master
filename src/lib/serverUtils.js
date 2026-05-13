@@ -758,14 +758,13 @@ export async function getJobDetails(jobSlug) {
         const jobDetails = await db.collection('jobs')
             .findOne(
                 { slug: jobSlug },
-                { projection: { orgId: 1, name: 1, description: 1, categories: 1, location: 1, education: 1, payScale: 1 } }
+                { projection: { name: 1, description: 1, categories: 1, location: 1, education: 1, payScale: 1 } }
             );
         if (!jobDetails)
             return null;
-        const org = await db.collection('orgs').findOne({ _id: new ObjectId(jobDetails.orgId) }, { projection: { name: 1 } });
         let formattedEducation = formatEducation(jobDetails.education)
         let formattedLocation = formatLocation(jobDetails.location);
-        return JSON.parse(JSON.stringify({ ...jobDetails, location: formattedLocation, education: formattedEducation, org: org.name }));
+        return JSON.parse(JSON.stringify({ ...jobDetails, location: formattedLocation, education: formattedEducation }));
 
     } catch (error) {
         console.error(error);
@@ -807,11 +806,11 @@ export async function getJobRecruitmentDetails(jobSlug) {
 
     try {
         const db = await connectDB();
-        const jobDetails = await db.collection('jobs').findOne({ slug: jobSlug }, { projection: { orgId: 1, recruitmentId: 1, name: 1, location: 1 } });
+        const jobDetails = await db.collection('jobs').findOne({ slug: jobSlug }, { projection: { orgId: 1, recruitmentId: 1, name: 1, description: 1, jobType: 1, location: 1 } });
         if (!jobDetails)
             return null;
         const recruitmentDetails = await db.collection('recruitments')
-            .findOne({ _id: new ObjectId(jobDetails.recruitmentId) }, { projection: { recruiterId: 1, name: 1, slug: 1, year: 1, status: 1 } });
+            .findOne({ _id: new ObjectId(jobDetails.recruitmentId) }, { projection: { recruiterId: 1, name: 1, slug: 1, year: 1, registrationDeadline: 1, status: 1 } });
 
         const { recruiterId, name, slug, year, status } = recruitmentDetails;
 
@@ -826,11 +825,10 @@ export async function getJobRecruitmentDetails(jobSlug) {
         const pastCycles = await db.collection('archives')
             .find({ recruitmentSlug: slug })
             .sort({ year: -1 })
-            .limit(6)
+            .limit(5)
             .toArray();
 
-        let formattedLocation = formatLocation(jobDetails.location, jobDetails.sector);
-        const finalJobDetails = { ...jobDetails, location: formattedLocation, recruiterName, recName: name, recSlug: slug, recYear: year, recStatus: status, pastCycles }
+        const finalJobDetails = { ...jobDetails, location, recruiterName, recName: name, recSlug: slug, recYear: year, registrationDeadline, recStatus: status, pastCycles }
         return finalJobDetails;
 
     } catch (error) {

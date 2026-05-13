@@ -87,6 +87,12 @@ async function getJobsSitemap() {
       lastModified: updatedAt,
       changeFrequency: "monthly",
       priority: 0.6
+    },
+    {
+      url: `${BASE_URL}/jobs/${slug}/recruitment-details`,
+      lastModified: updatedAt,
+      changeFrequency: "daily",
+      priority: 0.7
     }
   ])
 
