@@ -27,6 +27,17 @@ export function deslugify(str) {
     .join(' ');
 }
 
+export function formatEducation(education) {
+  const required = education.filter(e => e.isRequired)
+  const levels = [...new Set(required.map(e => e.level))]
+
+  if (levels.length === 0) return null
+  if (levels.length === 1) return levels[0]  // "Graduation"
+
+  // e.g. "Graduation / PG" or "10th / ITI / Diploma"
+  return levels.join(" / ")
+}
+
 export function formatLocation(location) {
   const { scope, state, distribution } = location;
   const distLabel = {
@@ -76,4 +87,22 @@ export function getLogoStyles(name, forCard) {
   }
 
   return styles;
+}
+
+export function validateFY(fy) {
+  // Match format YYYY-YY
+  const match = fy.match(/^(\d{4})-(\d{2})$/);
+
+  if (!match) return false;
+
+  const startYear = Number(match[1]);
+  const endYearShort = Number(match[2]);
+
+  if (startYear < (new Date().getFullYear() - 5))
+    return false;
+
+  // Expected end year should be last 2 digits of startYear + 1
+  const expectedEnd = (startYear + 1) % 100;
+
+  return endYearShort === expectedEnd;
 }

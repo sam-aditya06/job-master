@@ -1,32 +1,44 @@
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+
+import { XCircle } from "lucide-react";
+
+import Recruitment from "./recruitment";
 
 import DesktopSidebar from "@/components/sidebars/desktopSidebar";
 import MobileSidebar from "@/components/sidebars/mobileSidebar";
 import { getRecruiterFromId, getRecruitmentDetails, getRecruitmentSidebarDetails } from "@/lib/serverUtils";
-import Recruitment from "./recruitment";
 import { ContentSkeleton, SidebarSkeleton } from "@/components/skeletons";
 import { ContentLoadingProvider } from "@/lib/context/paginateContext";
 import ScrollProvider from "@/components/scrollProvider";
-import { capitalize, formatLocationJsonLd } from "@/lib/utils";
+
+import { formatLocationJsonLd, validateFY } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export const generateMetadata = async ({ params, searchParams }) => {
     const { recruitment } = await params
-    const { stage: stageSlug, year } = await searchParams;
+    const { stage: stageSlug, fy } = await searchParams;
 
-    const recruitmentDetails = await getRecruitmentDetails('md', recruitment)
-    if (!recruitmentDetails)
+    const isValidFY = fy && validateFY(fy);
+    if (fy && !isValidFY)
         return {};
 
-    const recruiter = await getRecruiterFromId(recruitmentDetails.recruiterId)
+    const { status, recruitmentDetails } = await getRecruitmentDetails('md', recruitment)
+    if (status === 'invalid recruitment')
+        return {};
+
+    const recruiter = await getRecruiterFromId(recruitmentDetails.recruiterId);
+
+
 
     // ?year=X — past cycle
-    if (year) {
+    if (fy) {
         return {
-            title: `${recruitmentDetails.name} ${year} — Overview | ${recruiter.name}`,
-            description: `Complete overview of ${recruitmentDetails.name} ${year} recruitment cycle. Check stage-wise cut-offs, and important dates.`,
+            title: `${recruitmentDetails.name} ${fy.substring(0, 4)} — Overview | ${recruiter.abbr || recruiter.name}`,
+            description: `Complete overview of ${recruitmentDetails.name} recruitment cycle for FY ${fy}. Check stage-wise cut-offs, and important dates.`,
             alternates: {
-                canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/recruitments/${recruitment}?year=${year}`
+                canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/recruitments/${recruitment}?fy=${fy}`
             },
             robots: { index: true, follow: true }
         }
@@ -35,10 +47,18 @@ export const generateMetadata = async ({ params, searchParams }) => {
     // ?stage=X — current cycle stage
     if (stageSlug) {
         const stage = recruitmentDetails.stages.find(s => s.slug === stageSlug)
-        if (!stage) return {}
+        if (!stage)
+            return {
+                robots: { index: false, follow: true }
+            }
+
+        if (stage.status === 'not-reached')
+            return {
+                robots: { index: false, follow: true }
+            }
 
         return {
-            title: `${recruitmentDetails.name} ${recruitmentDetails.year} ${stage.name} | ${recruiter.abbr || recruiter.name}`,
+            title: `${recruitmentDetails.name} ${recruitmentDetails.year} — ${stage.name} | ${recruiter.abbr || recruiter.name}`,
             description: `${recruitmentDetails.name} ${recruitmentDetails.year} ${stage.name}. ${stage.status === "pending"
                 ? "Check expected release date and steps."
                 : "Check direct link, steps, and important details."}`,
@@ -55,7 +75,7 @@ export const generateMetadata = async ({ params, searchParams }) => {
         : `${recruitmentDetails.name} ${recruitmentDetails.year} recruitment is ${recruitmentDetails.status}. Check important dates, stages, and latest updates.`
 
     return {
-        title: `${recruitmentDetails.name} Recruitment ${recruitmentDetails.year} | ${recruiter.name}`,
+        title: `${recruitmentDetails.name} Recruitment ${recruitmentDetails.year} | ${recruiter.abbr || recruiter.name}`,
         description,
         alternates: {
             canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/recruitments/${recruitment}`
@@ -109,28 +129,86 @@ async function Sidebar({ params, screen }) {
                 {screen === 'desktop' ? <DesktopSidebar details={sidebarDetails} /> : <MobileSidebar details={sidebarDetails} />}
             </Suspense>
         )
-    else
-        notFound();
 
 }
 
 async function MainContentWrapper({ params, searchParams }) {
     const { recruitment } = await params;
     const sp = await searchParams;
+
     const { fy, stage } = sp;
+
+    const isValidFY = fy && validateFY(fy);
+    if (fy && !isValidFY)
+        redirect(`/recruitments/${recruitment}`);
+
     const year = fy && parseInt(fy.substring(0, 4));
     const key = JSON.stringify(sp);
-    const recruitmentDetails = await getRecruitmentDetails("content", recruitment, year, stage);
-    if (recruitmentDetails)
-        return (
-            <>
-                <Suspense key={key} fallback={<ContentSkeleton />}>
-                    <MainContent recruitmentDetails={recruitmentDetails} />
-                </Suspense>
-            </>
-        )
-    else
-        notFound();
+    const { status, recruitmentDetails } = await getRecruitmentDetails("content", recruitment, year, stage);
+    switch (status) {
+        case 'off year':
+            return (
+                <div className="flex flex-col items-center gap-5">
+                    <div className="flex items-center gap-3">
+                        <XCircle className="w-12 h-12 stroke-white fill-red-700" />
+                        <h1 className="text-2xl font-semibold tracking-tight">
+                            Data not found
+                        </h1>
+                    </div>
+                    <p className="text-center text-muted-foreground text-sm">
+                        Either no recruitment happened in FY {fy} or it has not been added yet.
+                    </p>
+                </div>
+            )
+        case 'found':
+            return (
+                <>
+                    <Suspense key={key} fallback={<ContentSkeleton />}>
+                        <MainContent recruitmentDetails={recruitmentDetails} />
+                    </Suspense>
+                </>
+            )
+        case 'invalid stage':
+            return (
+                <div className="flex flex-col items-center gap-5">
+                    <div className="flex items-center gap-3">
+                        <XCircle className="w-12 h-12 stroke-white fill-red-700" />
+                        <h1 className="text-2xl font-semibold tracking-tight">
+                            Invalid stage
+                        </h1>
+                    </div>
+                    <p className="text-muted-foreground text-sm">
+                        The stage you're looking for doesn't exist.
+                    </p>
+                </div>
+            )
+        case 'not reached stage':
+            const latestStageIndex = recruitmentDetails.stages.findIndex(stage => stage.status === 'not-reached') - 1;
+            return (
+                <div className="flex flex-col items-center gap-5">
+                    <div className="flex items-center gap-3">
+                        <XCircle className="w-12 h-12 stroke-white fill-red-700" />
+                        <h1 className="text-2xl font-semibold tracking-tight">
+                            Stage not reached
+                        </h1>
+                    </div>
+                    <p className="text-muted-foreground text-sm">
+                        The recruitment hasn't reached this stage yet.
+                    </p>
+                    <div className="flex gap-3">
+                        <Button className="bg-brand hover:bg-brand/90 text-white" asChild>
+                            <Link href={`/recruitments/${recruitment}?stage=${recruitmentDetails.stages[latestStageIndex].slug}`}>View Latest Stage</Link>
+                        </Button>
+
+                        <Button variant="outline" asChild>
+                            <Link href={`/recruitments/${recruitment}`}>Go to Overview</Link>
+                        </Button>
+                    </div>
+                </div>
+            )
+        default:
+            notFound();
+    }
 }
 
 async function MainContent({ recruitmentDetails }) {

@@ -1,109 +1,55 @@
 import { Suspense } from "react";
 
-import { getNameFromSlug, getOrgs, getRecruiterNameFromSlug, getRecruiters, getRecruitments, getStates } from "@/lib/serverUtils";
-import { SearchMainSectionSkeleton, SearchPageSkeleton, SidebarSkeleton } from "@/components/skeletons";
+import { getJobsFilters, getNameFromSlug, getRecruitments, getRecruitmentsMetadata } from "@/lib/serverUtils";
+import { SearchMainSectionSkeleton, SidebarSkeleton } from "@/components/skeletons";
 import DesktopSidebar from "@/components/sidebars/desktopSidebar";
 import MobileSidebar from "@/components/sidebars/mobileSidebar";
+import ScrollContainer from "@/components/scrollContainer";
 import RecruitmentsList from "./recruitmentsList";
 import RecruitmentsHeader from "./recruitmentsHeader";
 
 import { FilterProvider } from "@/lib/context/filterContext";
 import { redirect } from "next/navigation";
-import ScrollContainer from "@/components/scrollContainer";
 
 export async function generateMetadata({ searchParams }) {
-    const { sector, by, for: forOrg, status, search, expLvl, location, qualification } = await searchParams;
+    const { search, org, recruiter, status, sector, cat, qualification, expLvl, location } = await searchParams
 
-    const isSingleSectorFilter = sector && !by && !forOrg && !status && !search && !expLvl && !location && !qualification
-    const isSingleByFilter = by && !sector && !forOrg && !status && !search && !expLvl && !location && !qualification
-    const isSingleForFilter = forOrg && !sector && !by && !status && !search && !expLvl && !location && !qualification
-    const isIndexed = isSingleSectorFilter || isSingleByFilter || isSingleForFilter || (!sector && !by && !forOrg && !status && !search && !expLvl && !location && !qualification)
+    const [meta, { itemCount }] = await Promise.all([
+        getRecruitmentsMetadata({ org, recruiter, status, sector, cat, qualification, expLvl, location }),
+        getRecruitments({ org, recruiter, status, sector, cat, qualification, expLvl, location })
+    ])
 
-    const canonical = isSingleSectorFilter
-        ? `${process.env.NEXT_PUBLIC_DOMAIN}/recruitments?sector=${sector}`
-        : isSingleByFilter
-            ? `${process.env.NEXT_PUBLIC_DOMAIN}/recruitments?by=${by}`
-            : isSingleForFilter
-                ? `${process.env.NEXT_PUBLIC_DOMAIN}/recruitments?for=${forOrg}`
-                : `${process.env.NEXT_PUBLIC_DOMAIN}/recruitments`
-
-    const sectorMeta = {
-        "central-govt": {
-            title: `Central Government Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse latest central government recruitment notifications. Find UPSC, SSC, and other civil service recruitments with stages and results."
-        },
-        "state-govt": {
-            title: `State Government Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse latest state government recruitment notifications. Find state PSC and other state-level recruitments with stages and results."
-        },
-        "psu": {
-            title: `PSU Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse latest PSU recruitment notifications. Find ONGC, BHEL, NTPC, and other public sector undertaking recruitments."
-        },
-        "banking": {
-            title: `Banking Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse latest banking sector recruitment notifications. Find IBPS, SBI, RBI, and other public sector bank recruitments."
-        },
-        "defence": {
-            title: `Defence Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse latest defence recruitment notifications. Find Army, Navy, Air Force, and other defence recruitments with stages and results."
-        },
-        "railways": {
-            title: `Railways Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse latest Indian Railways recruitment notifications. Find RRB and other railway recruitments with stages and results."
-        },
-        "judiciary": {
-            title: `Judiciary Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse latest judiciary recruitment notifications. Find court and judicial service recruitments with stages and results."
-        },
-        "police": {
-            title: `Police Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse latest police recruitment notifications. Find constable, SI, and officer level recruitments with stages and results."
-        }
-    }
-
-    let meta
-    if (isSingleSectorFilter && sectorMeta[sector]) {
-        meta = sectorMeta[sector]
-    } else if (isSingleByFilter) {
-        const recruiterName = await getRecruiterNameFromSlug(by)
-        meta = {
-            title: `${recruiterName} Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: `Browse all recruitments conducted by ${recruiterName}. Find notifications, stages, and results for every ${recruiterName} recruitment.`
-        }
-    } else if (isSingleForFilter) {
-        const orgName = await getNameFromSlug("orgs", forOrg)
-        meta = {
-            title: `${orgName} Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: `Browse all recruitments offering posts at ${orgName}. Find notifications, eligibility, and results.`
-        }
-    } else {
-        meta = {
-            title: `Government Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse latest government recruitment notifications. Find ongoing and upcoming recruitments across banking, defence, railways, PSU, and more."
-        }
+    const buildCanonical = () => {
+        const url = new URL(`${process.env.NEXT_PUBLIC_DOMAIN}/recruitments`)
+        const indexableParams = { org, recruiter, status, sector, cat, qualification, expLvl, location }
+        Object.entries(indexableParams).forEach(([key, value]) => {
+            if (value) url.searchParams.set(key, value)
+        })
+        return url.toString();
     }
 
     return {
         ...meta,
-        alternates: { canonical },
-        robots: isIndexed
-            ? { index: true, follow: true }
-            : { index: false, follow: true }
+        alternates: {
+            canonical: buildCanonical()
+        },
+        robots: (search || itemCount === 0)
+            ? { index: false, follow: true }
+            : { index: true, follow: true }
     }
 }
 
 export default async function RecruitmentsPage({ searchParams }) {
     const sp = await searchParams;
 
-    const { page } = sp;
+    const { search, org, recruiter, status, cat, sector, qualification, expLvl, location, page } = sp;
 
     const pageNum = page ? parseInt(page) : 1;
-    if (isNaN(pageNum) || pageNum < 1)
+    if (isNaN(pageNum) || pageNum < 1 || ((org || recruiter) && sector))
         redirect('/recruitments');
 
     return (
-        <FilterProvider initialParams={sp}>
+        <FilterProvider initialParams={{ search, org, recruiter, status, cat, sector, qualification, expLvl, location, page }}>
             <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
                 <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
                     <div className="p-2 h-full">
@@ -140,31 +86,30 @@ export default async function RecruitmentsPage({ searchParams }) {
 }
 
 async function Sidebar({ type }) {
-    const { orgs } = await getOrgs({});
-    const states = await getStates();
-    const recruiters = await getRecruiters();
+
+    const recruitmentsFilters = await getJobsFilters();
 
     return (
         <>
             {
-                type === 'desktop' ? <DesktopSidebar recruiters={recruiters} orgs={orgs} states={states} /> : <MobileSidebar recruiters={recruiters} orgs={orgs} states={states} />
+                type === 'desktop' ? <DesktopSidebar recruitmentsFilters={recruitmentsFilters} /> : <MobileSidebar recruitmentsFilters={recruitmentsFilters} />
             }
         </>
     )
 }
 
 async function MainContentWrapper({ sp }) {
-    const { search, for: forSlug, by: bySlug, status, cat, sector, qualification, expLvl, location, page } = sp;
+    const { search, org, recruiter, status, cat, sector, qualification, expLvl, location, page } = sp;
 
-    const [{ itemCount, recruitments }, forOrg, by] = await Promise.all([
-        getRecruitments({ search, forSlug, bySlug, status, cat, sector, qualification, expLvl, location, page }),
-        forSlug ? getNameFromSlug('orgs', forSlug) : undefined,
-        bySlug ? getRecruiterNameFromSlug(bySlug) : undefined,
+    const [{ itemCount, recruitments }, orgName, recruiterName] = await Promise.all([
+        getRecruitments({ search, org, recruiter, status, cat, sector, qualification, expLvl, location, page }),
+        org ? getNameFromSlug("orgs", org) : undefined,
+        recruiter ? getNameFromSlug("orgs", recruiter) : undefined,
     ]);
 
     return (
         <>
-            <RecruitmentsHeader forOrg={forOrg} by={by} />
+            <RecruitmentsHeader org={orgName} recruiter={recruiterName} />
             <RecruitmentsList itemCount={itemCount} currentPage={page ? parseInt(page) : page} recruitments={recruitments} />
         </>
     )

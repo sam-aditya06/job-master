@@ -48,7 +48,6 @@ export default function Header() {
                     <Link className={`hidden lg:block border border-transparent rounded-md ${pathName.includes('jobs') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:border-brand hover:text-brand dark:hover:border-neutral-700 dark:hover:text-white'} px-2 py-1`} href='/jobs'>Jobs</Link>
                     <Link className={`hidden lg:block border border-transparent rounded-md ${pathName.includes('recruitments') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:border-brand hover:text-brand dark:hover:border-neutral-700 dark:hover:text-white'} px-2 py-1`} href='/recruitments'>Recruitments</Link>
                     <Link className={`hidden lg:block border border-transparent rounded-md ${pathName.includes('orgs') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:border-brand hover:text-brand dark:hover:border-neutral-700 dark:hover:text-white'} px-2 py-1`} href='/orgs'>Organisations</Link>
-                    <Link className={`hidden lg:block border border-transparent rounded-md ${pathName.includes('recruitment-bodies') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:border-brand hover:text-brand dark:hover:border-neutral-700 dark:hover:text-white'} px-2 py-1`} href='/recruitment-bodies'>Recruitment Bodies</Link>
                     <Link className={`hidden lg:block border border-transparent rounded-md ${pathName.includes('feedback') ? 'bg-brand dark:bg-neutral-700 text-white' : 'hover:border-brand hover:text-brand dark:hover:border-neutral-700 dark:hover:text-white'} px-2 py-1`} href='/feedback'>Feedback</Link>
                 </div>
                 <Tooltip>
@@ -76,7 +75,6 @@ export default function Header() {
                                 <SheetClose asChild><Link href='/jobs'>Jobs</Link></SheetClose>
                                 <SheetClose asChild><Link href='/recruitments'>Recruitments</Link></SheetClose>
                                 <SheetClose asChild><Link href='/orgs'>Organisations</Link></SheetClose>
-                                <SheetClose asChild><Link href='/recruitment-bodies'>Recruitment Bodies</Link></SheetClose>
                                 <SheetClose asChild><Link href='/feedback'>Feedback</Link></SheetClose>
                             </div>
                         </SheetContent>

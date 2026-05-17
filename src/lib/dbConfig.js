@@ -9,13 +9,7 @@ export async function connectDB() {
   if (cached.db) return cached.db;
 
   if (!cached.promise) {
-    const client = new MongoClient(uri, {
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-      },
-    });
+    const client = new MongoClient(uri);
 
     cached.promise = client.connect();
     cached.client = client;

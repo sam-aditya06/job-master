@@ -49,12 +49,9 @@ export default function RecruitmentSidebar({ details }) {
             if (paramFY)
                 searchParams.delete('fy');
         }
+        setIsLoading(true);
         setSelectedFY(year);
         router.push(`${pathName}?${searchParams.toString()}`);
-    }
-
-    const handleClick = () => {
-
     }
 
     return (

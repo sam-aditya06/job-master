@@ -12,9 +12,8 @@ import RecruitmentsSidebar from "./recruitmentsSidebar"
 import JobsSidebar from "./jobsSidebar"
 import JobSidebar from "./jobSidebar"
 import OrgsSidebar from "./orgsSidebar";
-import RecruitmentBodiesSidebar from "./recruitmentBodiesSidebar";
 
-export default function MobileSidebar({ orgs, states, recruiters, fields, details }) {
+export default function MobileSidebar({ jobsFilters, recruitmentsFilters, sectors, fields, details }) {
     const { recruitment } = useParams();
     const sp = useSearchParams();
     const pathName = usePathname()
@@ -30,11 +29,10 @@ export default function MobileSidebar({ orgs, states, recruiters, fields, detail
             <SheetContent side='left'>
                 <SheetTitle className='hidden'>Menu</SheetTitle>
                 {recruitment && <RecruitmentSidebar details={details} />}
-                {pathName === '/recruitments' && <RecruitmentsSidebar recruiters={recruiters} orgs={orgs} states={states} />}
-                {pathName === '/jobs' && <JobsSidebar recruiters={recruiters} orgs={orgs} states={states} />}
+                {pathName === '/recruitments' && <RecruitmentsSidebar recruitmentsFilters={recruitmentsFilters} />}
+                {pathName === '/jobs' && <JobsSidebar jobsFilters={jobsFilters} />}
                 {pathName.includes('/jobs/') && <JobSidebar fields={fields} />}
-                {pathName === '/orgs' && <OrgsSidebar />}
-                {pathName === '/recruitment-bodies' && <RecruitmentBodiesSidebar />}
+                {pathName === '/orgs' && <OrgsSidebar sectors={sectors} />}
             </SheetContent>
         </Sheet>
     )

@@ -5,6 +5,7 @@ import Content from "./content";
 import { ContentSkeleton } from "@/components/skeletons";
 
 import { getJobContent, getJobDetails } from "@/lib/serverUtils";
+import { notFound } from "next/navigation";
 
 export const generateMetadata = async ({ params }) => {
     const { job, jobNavSlug } = await params;
@@ -15,28 +16,30 @@ export const generateMetadata = async ({ params }) => {
 
     const base = `${process.env.NEXT_PUBLIC_DOMAIN}/jobs/${job}`
 
+    const content = getJobContent(job, jobNavSlug);
+
     const indexedSlugs = ["eligibility-criteria", "responsibilities"]
-    const isIndexed = indexedSlugs.includes(jobNavSlug)
+    const isIndexed = indexedSlugs.includes(jobNavSlug) && content;
 
     const metaMap = {
         "eligibility-criteria": {
-            title: `${jobDetails.name} — Eligibility Criteria`,
+            title: `${jobDetails.name} — Eligibility Criteria | ${jobDetails.org}`,
             description: `Eligibility criteria for the ${jobDetails.name} role.${edu ? ` Minimum qualification: ${edu}.` : ""}${loc ? ` Location: ${loc}.` : ""} Check age limit, experience, and category-wise relaxations.`
         },
         "responsibilities": {
-            title: `${jobDetails.name} — Responsibilities`,
+            title: `${jobDetails.name} — Responsibilities | ${jobDetails.org}`,
             description: `Job profile and responsibilities of the ${jobDetails.name} role. Key duties, day-to-day work, and what to expect in this position.`
         },
         "perks": {
-            title: `${jobDetails.name} — Perks & Benefits`,
+            title: `${jobDetails.name} — Perks & Benefits | ${jobDetails.org}`,
             description: `Perks and benefits of the ${jobDetails.name} role. Check salary structure, allowances, job security, and other benefits.`
         },
         "physical-standards": {
-            title: `${jobDetails.name} — Physical Standards`,
+            title: `${jobDetails.name} — Physical Standards | ${jobDetails.org}`,
             description: `Physical standards required for the ${jobDetails.name} role. Check height, weight, chest measurements, and other physical requirements.`
         },
         "medical-standards": {
-            title: `${jobDetails.name} — Medical Standards`,
+            title: `${jobDetails.name} — Medical Standards | ${jobDetails.org}`,
             description: `Medical standards required for the ${jobDetails.name} role. Check vision, hearing, and other health requirements for eligibility.`
         }
     }
@@ -65,6 +68,18 @@ export default function JobDetailPage({ params }) {
 
 async function MainContent({ params }) {
     const { job, jobNavSlug } = await params;
+    const validNavSlugs = [
+        'overview',
+        'eligibility-criteria',
+        'responsibilities',
+        'perks',
+        'physical-standards',
+        'medical-standards',
+        'recruitment-details'
+    ]
+    if (!validNavSlugs.includes(jobNavSlug))
+        notFound();
+
     const content = await getJobContent(job, jobNavSlug);
     return <Content content={content} />
 }

@@ -1,17 +1,18 @@
 'use client';
 
 import { useContentLoader } from "@/lib/context/paginateContext";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function JobSidebar({ fields }) {
 
     const { job, jobNavSlug } = useParams();
     const router = useRouter();
+    const pathName = usePathname();
 
     const { setIsLoading } = useContentLoader();
 
-    const [selected, setSelected] = useState(() => jobNavSlug || 'overview');
+    const [selected, setSelected] = useState(() => jobNavSlug || (pathName.includes('/recruitment-details') && 'recruitment-details') || 'overview');
 
     const handleSelect = (slug) => {
         setIsLoading(true);

@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFilter } from "@/lib/context/filterContext";
 import { ChipSkeleton } from "@/components/skeletons";
-import { deslugify } from "@/lib/utils";
 
 export default function OrgsHeader() {
 
@@ -54,13 +53,14 @@ export default function OrgsHeader() {
             <div className="flex flex-wrap items-center gap-2">
                 <p>Filters:</p>
                 {Object.keys(optimisticParams).filter(key => key !== 'page').map(key => {
-                    const param = key === 'search' ? sp.get(key) : deslugify(sp.get(key));
-                    if (param && (key === 'search' ? param === optimisticParams[key] : param === deslugify(optimisticParams[key])))
+                    const value = sp.get(key);
+                    const param = key === 'search' ? value : value === 'org' ? 'Organisation' : 'Recruitment Body';
+                    if (param && (key === 'search' ? param === optimisticParams[key] : param === (optimisticParams[key] === 'org' ? 'Organisation' : 'Recruitment Body')))
                         return (
                             <div key={key} className="flex items-center gap-1 border rounded-full pl-2 pr-1 py-1">
-                                <p className="text-sm">{`${key}: ${param}`}</p>
+                                <p className="text-sm">{param}</p>
                                 <Button
-                                    className='rounded-full !h-6 !w-6 cursor-pointer'
+                                    className='rounded-full !h-6 !w-6 cursor-pointer'   
                                     size="icon"
                                     onClick={() => removeFilter(key)}
                                 >

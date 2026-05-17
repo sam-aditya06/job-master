@@ -1,73 +1,40 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
-import { SearchListSkeleton, SearchMainSectionSkeleton, SidebarSkeleton } from "@/components/skeletons";
+import { SearchMainSectionSkeleton, SidebarSkeleton } from "@/components/skeletons";
 import DesktopSidebar from "@/components/sidebars/desktopSidebar";
 import MobileSidebar from "@/components/sidebars/mobileSidebar";
-import { getJobs, getNameFromSlug, getOrgs, getStates } from "@/lib/serverUtils";
+import { getJobs, getJobsFilters, getJobsMetadata, getNameFromSlug, getOrgs, getStates } from "@/lib/serverUtils";
 import JobsHeader from "./jobsHeader";
 import JobsList from "./jobsList";
 import { FilterProvider } from "@/lib/context/filterContext";
 import ScrollContainer from "@/components/scrollContainer";
 
 export async function generateMetadata({ searchParams }) {
-    const { search, cat, org, expLvl, location, rStatus, qualification } = await searchParams;
+    const { search, org, rStatus, sector, cat, qualification, expLvl, location } = await searchParams
 
-    const isSingleCatFilter = cat && !org && !expLvl && !location && !rStatus && !qualification && !search;
-    const isSingleOrgFilter = org && !cat && !expLvl && !location && !rStatus && !qualification && !search;
-    const isIndexed = isSingleCatFilter || isSingleOrgFilter || (!cat && !org && !expLvl && !location && !rStatus && !qualification && !search);
+    const [meta, { itemCount }] = await Promise.all([
+        getJobsMetadata({ org, rStatus, sector, cat, qualification, expLvl, location }),
+        getJobs({ org, rStatus, sector, cat, qualification, expLvl, location })
+    ])
 
-    const canonical = cat
-        ? `${process.env.NEXT_PUBLIC_DOMAIN}/jobs?cat=${cat}`
-        : org
-            ? `${process.env.NEXT_PUBLIC_DOMAIN}/jobs?org=${org}`
-            : `${process.env.NEXT_PUBLIC_DOMAIN}/jobs`
-
-    const catMeta = {
-        "banking": {
-            title: `Government Banking Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse government banking job roles in India. Find SBI, RBI, NABARD, and other public sector bank posts with eligibility and perks."
-        },
-        "civil-services": {
-            title: `Civil Services Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse civil services job roles in India. Find UPSC, state PCS, administrative, police, and allied service posts with eligibility details and exam information."
-        },
-        "it": {
-            title: `IT Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse IT job roles in India. Find software development, cybersecurity, data science, cloud computing, and other technology posts with eligibility and skill requirements."
-        },
-        "railways": {
-            title: `Railways Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse Indian Railways job roles. Find RRB posts across all railway zones with eligibility, responsibilities, and perks."
-        },
-        "taxation": {
-            title: `Taxation Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse taxation job roles in India. Find income tax, GST, customs, and other taxation-related posts with eligibility, qualifications, and exam details."
-        }
-    }
-
-    let meta
-    if (isSingleCatFilter && catMeta[cat]) {
-        meta = catMeta[cat]
-    } else if (isSingleOrgFilter) {
-        const orgName = await getNameFromSlug('orgs', org);
-        meta = {
-            title: `${orgName} Jobs | All ${orgName} Roles`,
-            description: `Browse all job roles at ${orgName}. Find eligibility criteria, responsibilities, perks, and latest recruitment details for every post.`
-        }
-    } else {
-        meta = {
-            title: `Government Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
-            description: "Browse all government job roles across central, state, PSU, banking, defence, railways, and more. Find eligibility, responsibilities, and perks for every govt post."
-        }
+    const buildCanonical = () => {
+        const url = new URL(`${process.env.NEXT_PUBLIC_DOMAIN}/jobs`)
+        const indexableParams = { org, rStatus, sector, cat, qualification, expLvl, location }
+        Object.entries(indexableParams).forEach(([key, value]) => {
+            if (value) url.searchParams.set(key, value)
+        })
+        return url.toString()
     }
 
     return {
         ...meta,
-        alternates: { canonical },
-        robots: isIndexed
-            ? { index: true, follow: true }
-            : { index: false, follow: true }
+        alternates: {
+            canonical: buildCanonical()
+        },
+        robots: (search || itemCount === 0)
+            ? { index: false, follow: true }
+            : { index: true, follow: true }
     }
 }
 
@@ -75,14 +42,16 @@ export default async function JobsPage({ searchParams }) {
 
     const sp = await searchParams;
 
-    const { page } = sp;
+    const { search, org, rStatus, sector, cat, qualification, expLvl, location, page } = sp;
 
     const pageNum = page ? parseInt(page) : 1;
-    if (isNaN(pageNum) || pageNum < 1)
+    if (isNaN(pageNum) || pageNum < 1 || (sector && org))
         redirect('/jobs');
 
+
+
     return (
-        <FilterProvider initialParams={sp}>
+        <FilterProvider initialParams={{ search, org, rStatus, sector, cat, qualification, expLvl, location, page }}>
             <div className="flex mx-auto max-w-7xl gap-2 sm:py-2 sm:max-[1281px]:px-2 min-h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-7rem)] overflow-hidden">
                 <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
                     <div className="p-2 h-full">
@@ -119,24 +88,25 @@ export default async function JobsPage({ searchParams }) {
 }
 
 async function SidebarWrapper({ type }) {
-    const { orgs } = await getOrgs({});
-    const states = await getStates();
+
+    const jobsFilters = await getJobsFilters();
 
     return (
         <>
             {
-                type === 'desktop' ? <DesktopSidebar orgs={orgs} states={states} /> : <MobileSidebar orgs={orgs} states={states} />
+                type === 'desktop' ? <DesktopSidebar jobsFilters={jobsFilters} /> : <MobileSidebar jobsFilters={jobsFilters} />
             }
         </>
     )
 }
 
 async function MainContentWrapper({ sp }) {
-    const { search, org: orgSlug, rStatus, cat, qualification, expLvl, location, page } = sp;
+    const { search, org, rStatus, sector, cat, qualification, expLvl, location, page } = sp;
     const [{ itemCount, jobs }, orgName] = await Promise.all([
-        getJobs({ search, orgSlug, rStatus, cat, qualification, expLvl, location, page }),
-        orgSlug ? await getNameFromSlug('orgs', orgSlug) : undefined
+        getJobs({ search, org, rStatus, sector, cat, qualification, expLvl, location, page }),
+        org ? getNameFromSlug('orgs', org) : undefined
     ]);
+
     return (
         <>
             <JobsHeader org={orgName} />

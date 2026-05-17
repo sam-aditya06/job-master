@@ -6,11 +6,13 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useFilter } from "@/lib/context/filterContext";
+import { slugify } from "@/lib/utils";
 
-export default function OrgsSidebar() {
+export default function OrgsSidebar({ sectors }) {
     const { optimisticParams, applyFilter } = useFilter();
 
     const sector = optimisticParams.sector;
+    const type = optimisticParams.type;
 
     const handleFilterSelect = (key, value) => {
         applyFilter({ [key]: value });
@@ -19,42 +21,33 @@ export default function OrgsSidebar() {
 
     return (
         <div className="flex flex-col gap-5 mt-12 lg:mt-2 p-2">
-            <Accordion type='single' collapsible defaultValue='sector'>
+            <Accordion type='multiple' collapsible defaultValue={['sector', 'type']}>
                 <AccordionItem value='sector'>
-                    <AccordionTrigger className='border-b rounded-none px-1 !py-2 font-bold cursor-pointer hover:no-underline'>Sector</AccordionTrigger>
+                    <AccordionTrigger className='border-b rounded-none px-1 !py-2 text-brand font-bold cursor-pointer hover:no-underline'>Sector</AccordionTrigger>
                     <AccordionContent className='mt-2 px-2'>
                         <RadioGroup className="flex flex-col gap-3" value={sector ?? ""} onValueChange={(value) => handleFilterSelect('sector', value)}>
+                            {
+                                sectors.map(sector => (
+                                    <div className="flex justify-between items-center">
+                                        <Label className="text-sm" htmlFor={slugify(sector)}>{sector}</Label>
+                                        <RadioGroupItem id={slugify(sector)} value={slugify(sector)} />
+                                    </div>
+                                ))
+                            }
+                        </RadioGroup>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value='type'>
+                    <AccordionTrigger className='border-b rounded-none px-1 !py-2 text-brand font-bold cursor-pointer hover:no-underline'>Type</AccordionTrigger>
+                    <AccordionContent className='mt-2 px-2'>
+                        <RadioGroup className="flex flex-col gap-3" value={type ?? ""} onValueChange={(value) => handleFilterSelect('type', value)}>
                             <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='central-government'>Central Government</Label>
-                                <RadioGroupItem id='central-government' value='central-government' />
+                                <Label className="text-sm" htmlFor='org'>Organisation</Label>
+                                <RadioGroupItem id='org' value='org' />
                             </div>
                             <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='state-government'>State Government</Label>
-                                <RadioGroupItem id='state-government' value='state-government' />
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='psu'>PSU</Label>
-                                <RadioGroupItem id='psu' value='psu' />
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='banking'>Banking</Label>
-                                <RadioGroupItem id='banking' value='banking' />
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='defence'>Defence</Label>
-                                <RadioGroupItem id='defence' value='defence' />
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='railways'>Railways</Label>
-                                <RadioGroupItem id='railways' value='railways' />
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='judiciary'>Judiciary</Label>
-                                <RadioGroupItem id='judiciary' value='judiciary' />
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <Label className="text-sm" htmlFor='police'>Police</Label>
-                                <RadioGroupItem id='police' value='police' />
+                                <Label className="text-sm" htmlFor="rBody">Recruitment Body</Label>
+                                <RadioGroupItem id="rBody" value="rBody" />
                             </div>
                         </RadioGroup>
                     </AccordionContent>

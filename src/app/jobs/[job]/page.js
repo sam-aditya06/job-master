@@ -14,7 +14,7 @@ export const generateMetadata = async ({ params }) => {
     const loc = jobDetails.location;
 
     return {
-        title: `Overview — ${jobDetails.name} | ${jobDetails.org}`,
+        title: `${jobDetails.name} — Overview | ${jobDetails.org}`,
         description: `Complete details about the ${jobDetails.name} role.${edu ? ` Qualification: ${edu}.` : ""}${loc ? ` Location: ${loc}.` : ""} Check eligibility, responsibilities, perks, and latest recruitment.`,
         alternates: {
             canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/jobs/${job}`
@@ -70,7 +70,8 @@ async function MainContent({ params }) {
                 }
             }
         }),
-        "industry": jobDetails.categories.join(", ")
+        "industry": jobDetails.sectors.join(", "),
+        "occupationalCategory": jobDetails.categories.join(", ")
     }
 
     return (

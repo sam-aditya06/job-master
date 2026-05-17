@@ -1,73 +1,39 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
+import OrgsList from "./orgsList";
+
 import OrgsHeader from "./orgsHeader";
 import { SearchMainSectionSkeleton, SidebarSkeleton } from "@/components/skeletons";
 import DesktopSidebar from "@/components/sidebars/desktopSidebar";
 import MobileSidebar from "@/components/sidebars/mobileSidebar";
-import { getOrgs } from "@/lib/serverUtils";
-import OrgsList from "./orgsList";
-import { FilterProvider } from "@/lib/context/filterContext";
 import ScrollContainer from "@/components/scrollContainer";
 
+import { getOrgs, getOrgsFilters, getOrgsMetadata } from "@/lib/serverUtils";
+import { FilterProvider } from "@/lib/context/filterContext";
+
 export async function generateMetadata({ searchParams }) {
-    const { sector, search } = await searchParams
+    const { search, sector, type } = await searchParams
 
-    const isSingleSectorFilter = sector && !search
-    const isIndexed = isSingleSectorFilter || (!sector && !search)
+    const [meta, { itemCount }] = await Promise.all([
+        getOrgsMetadata({ sector }),
+        getOrgs({ sector, type })
+    ])
 
-    const canonical = isSingleSectorFilter
-        ? `${process.env.NEXT_PUBLIC_DOMAIN}/orgs?sector=${sector}`
-        : `${process.env.NEXT_PUBLIC_DOMAIN}/orgs`
-
-    const sectorMeta = {
-        "central-govt": {
-            title: "Central Government Organisations | Sarkari Vibhag",
-            description: "Browse central government organisations in India. Find ministries, departments, and central govt bodies with their jobs and recruitments."
-        },
-        "state-govt": {
-            title: "State Government Organisations | Rajya Sarkar Vibhag",
-            description: "Browse state government organisations across India. Find state departments and bodies with their jobs and recruitments."
-        },
-        "psu": {
-            title: "Public Sector Undertakings | PSU Organisations in India",
-            description: "Browse PSU organisations in India. Find ONGC, BHEL, NTPC, and other public sector undertakings with their jobs and recruitments."
-        },
-        "banking": {
-            title: "Government Banking Organisations | Public Sector Banks",
-            description: "Browse public sector banking organisations in India. Find SBI, RBI, NABARD, and other govt banks with their jobs and recruitments."
-        },
-        "defence": {
-            title: "Defence Organisations in India | Govt Defence Bodies",
-            description: "Browse defence organisations in India. Find Army, Navy, Air Force, and other defence bodies with their jobs and recruitments."
-        },
-        "railways": {
-            title: "Indian Railways Organisations | Railway Zones & Boards",
-            description: "Browse Indian Railways organisations. Find railway zones, boards, and bodies with their jobs and recruitments."
-        },
-        "judiciary": {
-            title: "Judiciary Organisations in India | Courts & Tribunals",
-            description: "Browse judiciary organisations in India. Find courts, tribunals, and judicial bodies with their jobs and recruitments."
-        },
-        "police": {
-            title: "Police Organisations in India | Govt Police Bodies",
-            description: "Browse police organisations in India. Find state police, central armed forces, and other police bodies with their jobs and recruitments."
-        }
+    const buildCanonical = () => {
+        const url = new URL(`${process.env.NEXT_PUBLIC_DOMAIN}/orgs`)
+        if (sector && !type) url.searchParams.set("sector", sector)
+        return url.toString();
     }
-
-    const meta = isSingleSectorFilter && sectorMeta[sector]
-        ? sectorMeta[sector]
-        : {
-            title: "Government Organisations | Browse PSUs, Banks & More",
-            description: "Browse government organisations in India. Find PSUs, banks, defence, railways, and other govt organisations with their jobs and recruitments."
-        }
 
     return {
         ...meta,
-        alternates: { canonical },
-        robots: isIndexed
-            ? { index: true, follow: true }
-            : { index: false, follow: true }
+        alternates: {
+            canonical: buildCanonical()
+        },
+        robots: (search || type || itemCount === 0)
+            ? { index: false, follow: true }
+            : { index: true, follow: true }
     }
 }
 
@@ -87,7 +53,7 @@ export default async function OrgsPage({ searchParams }) {
                 <aside className="hidden xl:flex-[2] xl:flex flex-col rounded-md bg-white dark:bg-neutral-900">
                     <div className="p-2 h-full">
                         <Suspense fallback={<SidebarSkeleton />}>
-                            <DesktopSidebar />
+                            <SidebarWrapper type={'desktop'} />
                         </Suspense>
                     </div>
                 </aside>
@@ -95,8 +61,8 @@ export default async function OrgsPage({ searchParams }) {
                     <ScrollContainer>
                         <div className="xl:hidden relative flex justify-center items-center">
                             <div className="absolute left-0 top-0">
-                                <Suspense fallback={<SidebarSkeleton />}>
-                                    <MobileSidebar />
+                                <Suspense fallback={null}>
+                                    <SidebarWrapper type={'mobile'} />
                                 </Suspense>
                             </div>
                         </div>
@@ -118,9 +84,22 @@ export default async function OrgsPage({ searchParams }) {
     )
 }
 
+async function SidebarWrapper({ type }) {
+
+    const sectors = await getOrgsFilters();
+
+    return (
+        <>
+            {
+                type === 'desktop' ? <DesktopSidebar sectors={sectors} /> : <MobileSidebar sectors={sectors} />
+            }
+        </>
+    )
+}
+
 async function MainContentWrapper({ sp }) {
-    const { search, sector, page } = sp;
-    const { itemCount, orgs } = await getOrgs({ search, sector, page: page || 1 });
+    const { search, sector, type, page } = sp;
+    const { itemCount, orgs } = await getOrgs({ search, sector, type, page: page || 1 });
 
     return (
         <>

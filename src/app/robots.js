@@ -2,15 +2,7 @@ export default function robots() {
   return {
     rules: {
       userAgent: "*",
-      allow: [
-        "/",
-        "/about",
-        "/contact",
-        "/disclaimer",
-        "/feedback",
-        "/privacy-policy",
-        "/terms"
-      ],
+      allow: "/",
       disallow: [
         // jobs
         "/jobs?search=",
@@ -29,10 +21,7 @@ export default function robots() {
         // orgs
         "/orgs?search=",
 
-        // recruitment-bodies
-        "/recruitment-bodies?search=",
-
-        //quick-links
+        // quick-links
         "/quick-links?search="
       ]
     },

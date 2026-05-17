@@ -1,21 +1,29 @@
 "use client";
 
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react";
-import { capitalize, cn, deslugify } from "@/lib/utils";
 import Link from "next/link";
 
+import { ArrowRight } from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { getLogoStyles } from "@/lib/utils";
+
 export function OrgCard({ org }) {
+
+    const { name } = org;
+    let { containerStyles, imgStyles } = getLogoStyles(name, true);
+
     return (
         <Link className="group" href={`/orgs/${org.slug}`}>
-            <Card className='border hover:border-brand rounded-xl hover:shadow-md dark:bg-neutral-900 dark:sm:bg-neutral-800 p-5'>
+            <Card className='border hover:border-brand rounded-xl hover:shadow-md dark:bg-neutral-900 dark:sm:bg-neutral-800 p-4'>
                 <CardContent className="flex flex-col gap-4 px-0">
                     <div className="flex items-center gap-2">
                         <div className="shrink-0 flex items-center border rounded-full p-1.5 w-18 h-18">
-                            <div className="rounded-full flex justify-center items-center bg-white w-full h-full overflow-hidden">
+                            <div
+                                className="rounded-full flex justify-center items-center bg-white w-full h-full overflow-hidden"
+                                style={containerStyles}
+                            >
                                 <img
+                                    style={imgStyles}
                                     src={`${process.env.NEXT_PUBLIC_CDN_URL}/${org.logoSrc}`}
                                     alt={`${org.name} logo`}
                                 />
@@ -26,8 +34,9 @@ export function OrgCard({ org }) {
                             <span className="text-sm text-muted-foreground">{org.sector.join(' / ')}</span>
                         </div>
                     </div>
-                    <p className="text-xs text-muted-foreground line-clamp-3">{org.description}</p>
-                    <div className="flex justify-end pt-3 border-t">
+                    <p className="text-xs text-justify text-muted-foreground line-clamp-3">{org.description}</p>
+                    <div className="flex justify-between pt-3 border-t">
+                        <div className="text-xs text-muted-foreground">{org.isRecruitmentBody ? 'RB' : "Org"}</div>
                         <div className="flex items-center gap-1 text-xs font-medium text-emerald-500 dark:text-emerald-600 group-hover:gap-2 group-hover:!text-brand transition-all">
                             View Details <ArrowRight className="w-3.5 h-3.5" />
                         </div>

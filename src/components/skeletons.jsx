@@ -8,19 +8,23 @@ export function ChipSkeleton() {
 //For main section (header + item lists) of Search Pages
 export function SearchMainSectionSkeleton({ type }) {
     return (
-        <div className="flex flex-col gap-7">
-            <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 mx-auto w-1/3 h-9 animate-pulse"></div>
-            <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-9 animate-pulse"></div>
-            <div className="flex flex-wrap items-center gap-2">
-                <p>Filters:</p>
-                {
-                    Array.from({ length: 4 }).map((_, i) => (
-                        <ChipSkeleton key={i} />
-                    ))
-                }
+        <>
+            <div className="flex flex-col gap-7">
+                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 mx-auto w-1/3 h-9 animate-pulse"></div>
+                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-9 animate-pulse"></div>
+                <div className="flex flex-wrap items-center gap-2">
+                    <p>Filters:</p>
+                    {
+                        Array.from({ length: 4 }).map((_, i) => (
+                            <ChipSkeleton key={i} />
+                        ))
+                    }
+                </div>
             </div>
-            <SearchListSkeleton type={type} />
-        </div>
+            <div className="flex flex-col gap-10">
+                <SearchListSkeleton type={type} />
+            </div>
+        </>
     )
 }
 
@@ -187,7 +191,7 @@ export function ContentSkeleton() {
 
 export function JobCardSkeleton() {
     return (
-        <div className='border rounded-xl p-5 h-full'>
+        <div className='border rounded-xl p-4 h-full'>
             <div className='flex flex-col gap-3 w-full px-0'>
                 <div className="flex justify-between w-full">
                     <div className="flex flex-col gap-1 w-full">
@@ -200,13 +204,22 @@ export function JobCardSkeleton() {
                     </div>
                     <div className="h-3 w-3 rounded-full bg-neutral-300 dark:bg-neutral-800 translate-y-[1.5px]"></div>
                 </div>
-                <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 h-9 animate-pulse'></div>
+                <div className="flex flex-wrap gap-2">
+                    <div className='flex-[5] border rounded-full bg-neutral-300 dark:bg-neutral-800 h-4 animate-pulse'></div>
+                    <div className='flex-[5] border rounded-full bg-neutral-300 dark:bg-neutral-800 h-4 animate-pulse'></div>
+                    <div className='flex-[5] border rounded-full bg-neutral-300 dark:bg-neutral-800 h-4 animate-pulse'></div>
+                </div>
                 <div className="flex items-center gap-3">
                     <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
                     <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
                     <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
+                    <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
+                    <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
                 </div>
-                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 animate-pulse"></div>
+                <div className="flex justify-between border-t pt-3">
+                    <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 w-1/3 h-4 animate-pulse"></div>
+                    <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 w-1/3 h-4 animate-pulse"></div>
+                </div>
             </div>
         </div>
     )
@@ -214,7 +227,7 @@ export function JobCardSkeleton() {
 
 export function OrgCardSkeleton() {
     return (
-        <div className='border rounded-xl p-5 h-full'>
+        <div className='border rounded-xl p-4 h-full'>
             <div className='flex flex-col gap-4 w-full'>
                 <div className="flex items-center gap-2">
                     <div className="shrink-0 border w-18 h-18 rounded-full p-1.5 overflow-hidden">
@@ -230,7 +243,10 @@ export function OrgCardSkeleton() {
                     <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 h-4 animate-pulse'></div>
                     <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 h-4 animate-pulse'></div>
                 </div>
-                <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 animate-pulse"></div>
+                <div className="flex justify-between border-t pt-3">
+                    <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 w-1/3 h-4 animate-pulse"></div>
+                    <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 w-1/3 h-4 animate-pulse"></div>
+                </div>
             </div>
         </div>
     )
@@ -238,30 +254,37 @@ export function OrgCardSkeleton() {
 
 export function RecruitmentCardSkeleton() {
     return (
-        <div className='border rounded-xl p-5 h-full'>
-            <div className='flex flex-col px-0 w-full h-full'>
-                <div className="flex items-start justify-between mb-2">
-                    <div className="w-1/3">
-                        <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 mb-1 w-4/5 h-4 animate-pulse"></div>
-                        <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 animate-pulse"></div>
-                    </div>
-                    <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 w-1/3 h-6 animate-pulse"></div>
+        <div className='border rounded-xl p-5 h-56'>
+            <div className='flex flex-col gap-2 px-0 w-full h-full'>
+                <div className="flex items-end justify-between">
+                    <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 w-1/4 h-4 animate-pulse"></div>
+                    <div className="border rounded-full bg-neutral-300 dark:bg-neutral-800 w-3/5 h-7 animate-pulse"></div>
                 </div>
-                <div className="grow flex flex-col justify-between">
-                    <div className="grow border rounded-sm bg-neutral-300 dark:bg-neutral-800 h-4 mb-2 animate-pulse"></div>
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
-                        <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
-                        <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
+                <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 w-1/2 h-6 animate-pulse"></div>
+                <div className="grow flex flex-col gap-3">
+                    <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 h-3 animate-pulse"></div>
+                    <div className="flex flex-wrap gap-2">
+                        <div className='flex-[5] border rounded-full bg-neutral-300 dark:bg-neutral-800 h-4 animate-pulse'></div>
+                        <div className='flex-[5] border rounded-full bg-neutral-300 dark:bg-neutral-800 h-4 animate-pulse'></div>
+                        <div className='flex-[5] border rounded-full bg-neutral-300 dark:bg-neutral-800 h-4 animate-pulse'></div>
                     </div>
-                    <div className="border rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 animate-pulse"></div>
+                    <div className="flex items-center gap-3">
+                        <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-4 animate-pulse'></div>
+                        <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
+                        <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-4 animate-pulse'></div>
+                        <div className='border rounded-md bg-neutral-300 dark:bg-neutral-800 h-5 animate-pulse'></div>
+                        <div className='flex-[5] border rounded-md bg-neutral-300 dark:bg-neutral-800 h-4 animate-pulse'></div>
+                    </div>
+                    <div className="border-t pt-3">
+                        <div className="border rounded-sm bg-neutral-300 dark:bg-neutral-800 w-1/3 h-4 animate-pulse"></div>
+                    </div>
                 </div>
             </div>
         </div>
     )
 }
 
-export function OrgsPageSkeleton({ type }) {
+export function OrgsPageSkeleton() {
 
     return (
         <div className="sm:pr-3">
@@ -287,14 +310,25 @@ export function OrgsPageSkeleton({ type }) {
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
                     {
                         Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i}>
-                                {type === 'org' && <JobCardSkeleton />}
-                                {type === 'rBody' && <RecruitmentCardSkeleton />}
-                            </div>
+                            <JobCardSkeleton key={i} />
                         ))
                     }
                 </div>
             </section>
+            <section className="flex flex-col gap-8 mt-10">
+                <div className="flex justify-between">
+                    <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 w-40 animate-pulse"></div>
+                    <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 w-20 animate-pulse"></div>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
+                    {
+                        Array.from({ length: 3 }).map((_, i) => (
+                            <RecruitmentCardSkeleton key={i} />
+                        ))
+                    }
+                </div>
+            </section>
+
             <section className="flex flex-col gap-8 mt-10">
                 <div className="flex justify-between">
                     <div className="rounded-md bg-neutral-300 dark:bg-neutral-800 h-7 w-40 animate-pulse"></div>

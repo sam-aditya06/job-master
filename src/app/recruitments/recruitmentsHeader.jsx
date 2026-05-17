@@ -12,7 +12,7 @@ import { ChipSkeleton } from "@/components/skeletons";
 import { useFilter } from "@/lib/context/filterContext";
 import { deslugify } from "@/lib/utils";
 
-export default function RecruitmentsHeader({ forOrg, by }) {
+export default function RecruitmentsHeader({ org, recruiter }) {
     const sp = useSearchParams();
 
     const { optimisticParams, applyFilter, removeFilter } = useFilter();
@@ -54,13 +54,13 @@ export default function RecruitmentsHeader({ forOrg, by }) {
             <div className="flex flex-wrap items-center gap-2">
                 <p>Filters:</p>
                 {Object.keys(optimisticParams).filter(key => key !== 'page').map(key => {
-                    const displayedParam = key === 'for' ? forOrg : key === 'by' ? by : key === 'search' ? sp.get(key) : deslugify(sp.get(key));
+                    const displayedParam = key === 'org' ? org : key === 'recruiter' ? recruiter : key === 'search' ? sp.get(key) : deslugify(sp.get(key));
                     const displayedFilter = key === 'search' ? `${key}: ${displayedParam}` : displayedParam;
                     if (displayedParam && (
-                        key === 'for' ?
-                            displayedParam === forOrg :
-                            key === 'by' ?
-                                displayedParam === by :
+                        key === 'org' ?
+                            displayedParam === org :
+                            key === 'recruiter' ?
+                                displayedParam === recruiter :
                                 key === 'search' ?
                                     displayedParam === optimisticParams[key] :
                                     displayedParam === deslugify(optimisticParams[key])

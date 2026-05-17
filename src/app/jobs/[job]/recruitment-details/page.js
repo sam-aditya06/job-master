@@ -33,6 +33,7 @@ export default function JobRecruitmentDetailsPage({ params }) {
 async function MainContent({ params }) {
     const { job } = await params;
     const details = await getJobRecruitmentDetails(job);
+    console.log({ details });
     if (!details)
         notFound();
 

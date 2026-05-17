@@ -15,8 +15,6 @@ export default function RecruitmentCard({ recruitment, icon }) {
 
     const { status, location, sectors, categories } = recruitment;
 
-    console.log({ sectors, categories });
-
     const displayedLocation = formatLocation(location);
 
     const color = status === 'pending' ?
@@ -53,8 +51,8 @@ export default function RecruitmentCard({ recruitment, icon }) {
                 className="aspect-auto border rounded-xl p-5 group-hover:border-[var(--hover-color)] hover:shadow-md dark:bg-neutral-800 h-56 transition-all cursor-pointer"
             >
                 <CardContent className='flex flex-col gap-2 px-0 w-full h-full'>
-                    <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1 block max-w-1/2 truncate">
+                    <div className="flex items-end justify-between gap-2">
+                        <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground block max-w-1/2 truncate">
                             {sectors[0] + (sectors.length > 1 ? ` +${sectors.length - 1}` : "")}
                         </span>
                         <span className={`shrink-0 flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${color}`}>
@@ -64,7 +62,7 @@ export default function RecruitmentCard({ recruitment, icon }) {
                     <h3 className="font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
                         {recruitment.name}
                     </h3>
-                    <div className="grow flex flex-col justify-between">
+                    <div className="grow flex flex-col gap-3">
                         <p className="text-xs text-muted-foreground leading-relaxed truncate">{recruitment.fullName}</p>
                         <div className="flex flex-wrap gap-2">
                             {categories.slice(0, 3).map(cat => (
@@ -103,7 +101,7 @@ export default function RecruitmentCard({ recruitment, icon }) {
                                     <>
                                         <div className="border border-r-muted-foreground h-4"></div>
                                         <div className="flex items-center gap-1">
-                                            <span className="flex items-center gap-1 text-xs text-amber-600">
+                                            <span className="flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400">
                                                 <Clock className="w-3 h-3" /> {format(parseISO(recruitment.registrationDeadline), "dd MMM, yyyy")}
                                             </span>
                                             <Tooltip open={open} onOpenChange={setOpen}>
@@ -113,7 +111,7 @@ export default function RecruitmentCard({ recruitment, icon }) {
                                                         type="button"
                                                         onClick={handleClick}
                                                         className="inline-flex items-center justify-center focus:outline-none"
-                                                        aria-label="Salary information"
+                                                        aria-label="Registration Deadline information"
                                                     >
                                                         <CircleQuestionMark className="w-4 h-4" />
                                                     </button>

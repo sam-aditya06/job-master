@@ -1,19 +1,9 @@
 // app/sitemap.js
 
-import { getAllSlugs, getRecruiterFromId } from "@/lib/serverUtils"
+import { getDetailsForSitemap, getJobsFilters } from "@/lib/serverUtils"
+import { slugify } from "@/lib/utils";
 
-const BASE_URL = process.env.NEXT_PUBLIC_DOMAIN
-
-const sectors = [
-  "central-govt",
-  "state-govt",
-  "psu",
-  "banking",
-  "defence",
-  "railways",
-  "judiciary",
-  "police"
-];
+const BASE_URL = process.env.NEXT_PUBLIC_DOMAIN;
 
 const staticPages = [
   { url: `${BASE_URL}/about`, changeFrequency: "monthly", priority: 0.5 },
@@ -30,7 +20,6 @@ export async function generateSitemaps() {
     { id: "jobs" },
     { id: "orgs" },
     { id: "recruitments" },
-    { id: "recruitment-bodies" },
     { id: "static" }
   ]
 }
@@ -41,15 +30,20 @@ export default async function sitemap({ id }) {
     case "jobs": return await getJobsSitemap();
     case "orgs": return await getOrgsSitemap();
     case "recruitments": return await getRecruitmentsSitemap();
-    case "recruitment-bodies": return await getRecruitmentBodiesSitemap();
     case "static": return staticPages;
     default: return []
   }
 }
 
 async function getJobsSitemap() {
-  const jobSlugs = await getAllSlugs('jobs');
-  const orgSlugs = await getAllSlugs('orgs');
+  const [jobDetails, filters] = await Promise.all([
+    getDetailsForSitemap('jobs'),
+    getJobsFilters()
+  ]);
+
+  if (!filters) return [];
+
+  const { orgs, sectors, categories, qualifications, expLvls, states, rStatuses } = filters;
 
   const jobsBase = {
     url: `${BASE_URL}/jobs`,
@@ -58,18 +52,48 @@ async function getJobsSitemap() {
   }
 
   const sectorEntries = sectors.map(sector => ({
-    url: `${BASE_URL}/jobs?sector=${sector}`,
+    url: `${BASE_URL}/jobs?sector=${slugify(sector)}`,
     changeFrequency: "daily",
+    priority: 0.9
+  }))
+
+  const catEntries = categories.map(category => ({
+    url: `${BASE_URL}/jobs?cat=${slugify(category)}`,
+    changeFrequency: "weekly",
     priority: 0.9
   }));
 
-  const orgFilterEntries = orgSlugs.map(slug => ({
+  const orgFilterEntries = orgs.map(({ slug }) => ({
     url: `${BASE_URL}/jobs?org=${slug}`,
     changeFrequency: "weekly",
     priority: 0.8
-  }));
+  }))
 
-  const jobEntries = jobSlugs.flatMap(({ slug, updatedAt }) => [
+  const qualificationEntries = qualifications.map(q => ({
+    url: `${BASE_URL}/jobs?qualification=${slugify(q)}`,
+    changeFrequency: "weekly",
+    priority: 0.8
+  }))
+
+  const expLvlEntries = expLvls.map(expLvl => ({
+    url: `${BASE_URL}/jobs?expLvl=${slugify(expLvl)}`,
+    changeFrequency: "weekly",
+    priority: 0.8
+  }))
+
+  const stateEntries = states.map(state => ({
+    url: `${BASE_URL}/jobs?location=${slugify(state)}`,
+    changeFrequency: "weekly",
+    priority: 0.8
+  }))
+
+  const rStatusEntries = rStatuses.map(rStatus => ({
+    url: `${BASE_URL}/jobs?rStatus=${slugify(rStatus)}`,
+    changeFrequency: "daily",
+    priority: 0.8
+  }))
+
+  const jobEntries = jobDetails.flatMap(({ slug, updatedAt }) => [
     {
       url: `${BASE_URL}/jobs/${slug}`,
       lastModified: updatedAt,
@@ -96,11 +120,28 @@ async function getJobsSitemap() {
     }
   ])
 
-  return [jobsBase, ...sectorEntries, ...orgFilterEntries, ...jobEntries]
+  return [
+    jobsBase,
+    ...sectorEntries,
+    ...catEntries,
+    ...orgFilterEntries,
+    ...qualificationEntries,
+    ...expLvlEntries,
+    ...stateEntries,
+    ...rStatusEntries,
+    ...jobEntries
+  ]
 }
 
 async function getOrgsSitemap() {
-  const orgSlugs = await getAllSlugs('orgs');
+  const [orgDetails, filters] = await Promise.all([
+    getDetailsForSitemap('orgs'),
+    getJobsFilters()
+  ])
+
+  if (!filters) return [];
+
+  const { sectors } = filters;
 
   const orgsBase = {
     url: `${BASE_URL}/orgs`,
@@ -109,12 +150,12 @@ async function getOrgsSitemap() {
   }
 
   const sectorEntries = sectors.map(sector => ({
-    url: `${BASE_URL}/orgs?sector=${sector}`,
+    url: `${BASE_URL}/orgs?sector=${slugify(sector)}`,
     changeFrequency: "weekly",
     priority: 0.9
   }))
 
-  const orgEntries = orgSlugs.map(({ slug, updatedAt }) => ({
+  const orgEntries = orgDetails.map(({ slug, updatedAt }) => ({
     url: `${BASE_URL}/orgs/${slug}`,
     lastModified: updatedAt,
     changeFrequency: "monthly",
@@ -125,17 +166,15 @@ async function getOrgsSitemap() {
 }
 
 async function getRecruitmentsSitemap() {
-  const [recruitmentSlugs, archiveSlugs, orgSlugs] = await Promise.all([
-    getAllSlugs('recruitments'),
-    getAllSlugs('archives'),
-    getAllSlugs('orgs')
+  const [recruitmentDetails, archiveDetails, filters] = await Promise.all([
+    getDetailsForSitemap('recruitments'),
+    getDetailsForSitemap('archives'),
+    getJobsFilters()
   ]);
 
-  const uniqueRecruiterIds = [...new Set(recruitmentSlugs.map(r => r.recruiterId.toString()))]
-  const recruiters = await Promise.all(uniqueRecruiterIds.map(id => getRecruiterFromId(id)))
-  const recruiterSlugs = recruiters
-    .filter(Boolean)
-    .map(r => r.slug)
+  if (!filters) return [];
+
+  const { orgs, sectors, categories, qualifications, expLvls, states, rStatuses: statuses } = filters
 
   const recruitmentsBase = {
     url: `${BASE_URL}/recruitments`,
@@ -143,26 +182,56 @@ async function getRecruitmentsSitemap() {
     priority: 1.0
   }
 
-  const recruiterFilterEntries = recruiterSlugs.map(slug => ({
-    url: `${BASE_URL}/recruitments?by=${slug}`,
-    changeFrequency: "weekly",
-    priority: 0.8
-  }))
-
   const sectorEntries = sectors.map(sector => ({
-    url: `${BASE_URL}/recruitments?sector=${sector}`,
+    url: `${BASE_URL}/recruitments?sector=${slugify(sector)}`,
     changeFrequency: "daily",
     priority: 0.9
   }))
 
-  const orgFilterEntries = orgSlugs.map(({ slug }) => ({
-    url: `${BASE_URL}/recruitments?for=${slug}`,
+  const catEntries = categories.map(cat => ({
+    url: `${BASE_URL}/recruitments?cat=${slugify(cat)}`,
+    changeFrequency: "daily",
+    priority: 0.9
+  }))
+
+  const orgFilterEntries = orgs.map(({ slug }) => ({
+    url: `${BASE_URL}/recruitments?org=${slug}`,
     changeFrequency: "weekly",
     priority: 0.8
   }))
 
+  const recruiterFilterEntries = orgs.map(({ slug }) => ({
+    url: `${BASE_URL}/recruitments?recruiter=${slug}`,
+    changeFrequency: "weekly",
+    priority: 0.8
+  }))
+
+  const qualificationEntries = qualifications.map(q => ({
+    url: `${BASE_URL}/recruitments?qualification=${slugify(q)}`,
+    changeFrequency: "weekly",
+    priority: 0.8
+  }))
+
+  const expLvlEntries = expLvls.map(expLvl => ({
+    url: `${BASE_URL}/recruitments?expLvl=${slugify(expLvl)}`,
+    changeFrequency: "weekly",
+    priority: 0.8
+  }))
+
+  const stateEntries = states.map(state => ({
+    url: `${BASE_URL}/recruitments?location=${slugify(state)}`,
+    changeFrequency: "weekly",
+    priority: 0.8
+  }))
+
+  const statusEntries = statuses.map(status => ({
+    url: `${BASE_URL}/recruitments?status=${slugify(status)}`,
+    changeFrequency: "daily",
+    priority: 0.8
+  }))
+
   // /recruitments/[recruitment] — current cycle overview
-  const recruitmentEntries = recruitmentSlugs.map(({ slug, updatedAt }) => ({
+  const recruitmentEntries = recruitmentDetails.map(({ slug, updatedAt }) => ({
     url: `${BASE_URL}/recruitments/${slug}`,
     lastModified: updatedAt,
     changeFrequency: "daily",
@@ -170,18 +239,20 @@ async function getRecruitmentsSitemap() {
   }))
 
   // /recruitments/[recruitment]?stage=X — current cycle stages
-  const stageEntries = recruitmentSlugs.flatMap(({ slug, updatedAt, stages }) =>
-    stages.map(({ slug: stageSlug }) => ({
-      url: `${BASE_URL}/recruitments/${slug}?stage=${stageSlug}`,
-      lastModified: updatedAt,
-      changeFrequency: "daily",
-      priority: 0.8
-    }))
+  const stageEntries = recruitmentDetails.flatMap(({ slug, updatedAt, stages }) =>
+    stages
+      .filter(stage => stage.status !== "not-reached")
+      .map(({ slug: stageSlug }) => ({
+        url: `${BASE_URL}/recruitments/${slug}?stage=${stageSlug}`,
+        lastModified: updatedAt,
+        changeFrequency: "daily",
+        priority: 0.8
+      }))
   )
 
   // /recruitments/[recruitment]?year=X — past cycles
-  const archiveEntries = archiveSlugs.map(({ recruitmentSlug, year, updatedAt }) => ({
-    url: `${BASE_URL}/recruitments/${recruitmentSlug}?year=${year}`,
+  const archiveEntries = archiveDetails.map(({ recruitmentSlug, year, updatedAt }) => ({
+    url: `${BASE_URL}/recruitments/${recruitmentSlug}?fy=${year}-${(year + 1).toString().slice(-2)}`,
     lastModified: updatedAt,
     changeFrequency: "monthly",
     priority: 0.6
@@ -190,35 +261,15 @@ async function getRecruitmentsSitemap() {
   return [
     recruitmentsBase,
     ...sectorEntries,
+    ...catEntries,
     ...orgFilterEntries,
     ...recruiterFilterEntries,
+    ...qualificationEntries,
+    ...expLvlEntries,
+    ...stateEntries,
+    ...statusEntries,
     ...recruitmentEntries,
     ...stageEntries,
     ...archiveEntries
   ]
-}
-
-async function getRecruitmentBodiesSitemap() {
-  const rBodySlugs = await getAllSlugs('recruitment-bodies')
-
-  const rBodiesBase = {
-    url: `${BASE_URL}/recruitment-bodies`,
-    changeFrequency: "weekly",
-    priority: 1.0
-  }
-
-  const sectorEntries = sectors.map(sector => ({
-    url: `${BASE_URL}/recruitment-bodies?sector=${sector}`,
-    changeFrequency: "weekly",
-    priority: 0.9
-  }))
-
-  const rBodyEntries = rBodySlugs.map(({ slug, updatedAt }) => ({
-    url: `${BASE_URL}/recruitment-bodies/${slug}`,
-    lastModified: updatedAt,
-    changeFrequency: "monthly",
-    priority: 0.8
-  }))
-
-  return [rBodiesBase, ...sectorEntries, ...rBodyEntries]
 }

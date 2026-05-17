@@ -12,8 +12,20 @@ export function FilterProvider({ children, initialParams = {} }) {
     const [isPaginating, setIsPaginating] = useState(false);
 
     function applyFilter(newParams) {
-        const {page, ...rest} = optimisticParams;
-        const merged = { ...rest, ...newParams };
+        const { page, ...rest } = optimisticParams;
+        let merged;
+        if (newParams.sector) {
+            const { org, recruiter, ...others } = rest;
+            merged = { ...others, ...newParams };
+
+        }
+        else if (newParams.org || newParams.recruiter) {
+            const { sector, ...others } = rest;
+            merged = { ...others, ...newParams };
+        }
+        else
+            merged = { ...rest, ...newParams };
+        
         const cleaned = Object.fromEntries(
             Object.entries(merged).filter(([_, v]) => v != null && v !== '')
         )

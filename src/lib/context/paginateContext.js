@@ -16,6 +16,6 @@ export function ContentLoadingProvider({ children }) {
 
 export function useContentLoader() {
     const ctx = useContext(ContentLoadingContext)
-    if (!ctx) throw new Error('useFilter must be used within FilterProvider')
+    if (!ctx) throw new Error('useFilter must be used within ContentLoadingProvider')
     return ctx;
 }

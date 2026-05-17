@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 
 import { connectDB } from "./dbConfig";
-import { capitalize, formatLocation } from "./utils";
+import { capitalize, deslugify, formatEducation, formatLocation } from "./utils";
 
 const ITEM_PER_PAGE = 8;
 
@@ -19,7 +19,7 @@ export async function getStates() {
 }
 
 //For Recruitments Page
-export async function getRecruitments({ search, forSlug, bySlug, status, cat, sector, qualification, expLvl, location, page = 1 } = {}) {
+export async function getRecruitments({ search, org, recruiter, status, cat, sector, qualification, expLvl, location, page = 1 } = {}) {
 
     let query = {};
 
@@ -31,8 +31,6 @@ export async function getRecruitments({ search, forSlug, bySlug, status, cat, se
             { keywords: searchRegex },
         ];
     }
-    if (sector)
-        query.sector = sector;
     if (status)
         query.status = status;
 
@@ -41,6 +39,8 @@ export async function getRecruitments({ search, forSlug, bySlug, status, cat, se
         if (location) {
             if (location === 'all-india')
                 query = { ...query, 'location.scope': 'all_india' };
+            else if (location === 'worldwide')
+                query = { ...query, 'location.scope': 'international' };
             else {
                 const state = await db.collection('states').findOne({ slug: location });
                 if (!state) {
@@ -50,36 +50,29 @@ export async function getRecruitments({ search, forSlug, bySlug, status, cat, se
                 query['location.state'] = state.name;
             }
         }
-        if (bySlug) {
-            const org = await db.collection('orgs').findOne({ slug: bySlug });
-            const rBody = await db.collection('recruitment-bodies').findOne({ slug: bySlug });
+        if (recruiter) {
+            const org = await db.collection('orgs').findOne({ slug: recruiter });
 
-            const entity = org ?? rBody;
-            if (!entity) {
-                console.warn(`getRecruitments: no org or recruitment-body found for slug "${bySlug}"`);
+            if (!org) {
+                console.warn(`getRecruitments: no org found for slug "${recruiter}"`);
                 return [];
             }
 
-            const recruiter = await db.collection('recruiters').findOne({ refId: entity._id.toString() });
-            if (!recruiter) {
-                console.warn(`getRecruitments: no recruiter found for refId "${entity._id}"`);
-                return [];
-            }
-            query.recruiterId = recruiter._id.toString();
+            query.recruiterId = org._id.toString();
         }
 
-        let jobs = undefined;
+        let jobs;
 
-        if (forSlug || qualification || expLvl || cat || sector) {
+        if (org || qualification || expLvl || cat || sector) {
             let jobQuery = {};
 
-            if (forSlug) {
-                const org = await db.collection('orgs').findOne({ slug: forSlug }, { projection: { _id: 1 } });
-                if (!org) {
-                    console.warn(`getRecruitments: no org found for forSlug "${forSlug}"`);
+            if (org) {
+                const orgDetails = await db.collection('orgs').findOne({ slug: org }, { projection: { _id: 1 } });
+                if (!orgDetails) {
+                    console.warn(`getRecruitments: no org found for forSlug "${org}"`);
                     return [];
                 }
-                jobQuery.orgId = org._id.toString();
+                jobQuery.orgId = orgDetails._id.toString();
             }
 
             if (qualification) {
@@ -100,9 +93,10 @@ export async function getRecruitments({ search, forSlug, bySlug, status, cat, se
             }
 
             if (sector) {
-                const orgs = await db.collections("orgs")
-                    .find({ sector })
-                    .project({ _id: 1 });
+                const orgs = await db.collection("orgs")
+                    .find({ sector: { $regex: sector.replace("-", " "), $options: "i" } })
+                    .project({ _id: 1 })
+                    .toArray();
                 const orgIds = orgs.map(org => org._id.toString());
                 jobQuery = { ...jobQuery, orgId: { $in: orgIds } }
             }
@@ -146,7 +140,7 @@ export async function getRecruitments({ search, forSlug, bySlug, status, cat, se
                         { $sort: { statusOrder: 1, updatedAt: -1 } },
                         { $skip: (page - 1) * ITEM_PER_PAGE },
                         { $limit: ITEM_PER_PAGE },
-                        { $project: { name: 1, fullName: 1, slug: 1, sector: 1, location: 1, vacancies: 1, registrationDeadline: 1, status: 1, stageStatus: 1 } }
+                        { $project: { name: 1, fullName: 1, slug: 1, location: 1, vacancies: 1, registrationDeadline: 1, status: 1, stageStatus: 1 } }
                     ]
                 }
             }
@@ -191,52 +185,90 @@ export async function getRecruitments({ search, forSlug, bySlug, status, cat, se
     }
 };
 
+//For Recruitments Page Metadata
+export async function getRecruitmentsMetadata({ org, recruiter, status, sector, cat, qualification, expLvl, location } = {}) {
+    try {
+        const db = await connectDB()
+
+        const allParams = { org, recruiter, status, sector, cat, qualification, expLvl, location }
+
+        const activeParams = Object.entries(allParams)
+            .filter(([_, value]) => value)
+            .map(([key]) => key)
+            .sort()
+
+        const meta = await db.collection("metadata").findOne(
+            { page: "recruitments", params: activeParams },
+            { projection: { title: 1, description: 1, _id: 0 } }
+        )
+
+        if (!meta)
+            return {
+                title: `Government Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
+                description: "Browse latest government recruitment notifications. Find ongoing and upcoming recruitments across banking, defence, railways, PSU, and more."
+            }
+
+        const orgName = org ? await getNameFromSlug("orgs", org) : null
+        const recruiterName = recruiter ? await getNameFromSlug("orgs", recruiter) : null
+        const statusLabel = {
+            "ongoing": "Ongoing",
+            "pending": "Upcoming",
+            "completed": "Completed"
+        }[status] ?? null
+        const expLvlLabel = {
+            "fresher": "Fresher",
+            "entry": "Entry Level",
+            "mid": "Mid Level",
+            "senior": "Senior Level"
+        }[expLvl] ?? null
+
+        const displayParams = {
+            org: orgName,
+            recruiter: recruiterName,
+            status: statusLabel,
+            sector: deslugify(sector),
+            cat: deslugify(cat),
+            qualification: deslugify(qualification),
+            expLvl: expLvlLabel,
+            location: deslugify(location),
+            siteName: process.env.NEXT_PUBLIC_NAME
+        }
+
+        const replace = (template) =>
+            template.replace(/{{(\w+)}}/g, (_, key) => displayParams[key] ?? "")
+
+        return {
+            title: replace(meta.title),
+            description: replace(meta.description)
+        }
+
+    } catch (error) {
+        return {
+            title: `Government Recruitments | ${process.env.NEXT_PUBLIC_NAME}`,
+            description: "Browse latest government recruitment notifications. Find ongoing and upcoming recruitments across banking, defence, railways, PSU, and more."
+        }
+    }
+}
+
+//For Recruitment Page Metadata
 export async function getRecruiterFromId(recruiterId) {
     try {
         const db = await connectDB();
-        const recruiter = await db.collection('recruiters').findOne(
-            { _id: ObjectId.createFromHexString(recruiterId) }
+        const recruiter = await db.collection('orgs').findOne(
+            { _id: ObjectId.createFromHexString(recruiterId) },
+            { projection: { name: 1, slug: 1, abbr: 1, _id: 0 } }
         )
         if (!recruiter) return null;
 
-        const collection = recruiter.recruiterType === 'org' ? 'orgs' : 'recruitment-bodies'
-        const entity = await db.collection(collection).findOne(
-            { _id: ObjectId.createFromHexString(recruiter.refId) },
-            { projection: { name: 1, slug: 1, abbr: 1, _id: 0 } }
-        )
-
-        if (!entity) {
-            console.warn(`getRecruiterFromId: no entity found for recruiterId ${recruiterId}`)
-            return null
-        }
-
-        return entity;
+        return recruiter;
 
     } catch (error) {
         return null
     }
 }
 
-export async function getRecruiterNameFromSlug(slug) {
-    try {
-        const db = await connectDB();
-        const org = await db.collection('orgs').findOne({ slug: slug });
-        const rBody = await db.collection('recruitment-bodies').findOne({ slug: slug });
-
-        const entity = org ?? rBody;
-        if (!entity) {
-            console.warn(`getRecruiterName: invalid recruiter id`);
-            return null;
-        }
-        return entity.name;
-
-    } catch (error) {
-
-    }
-}
-
 //For Home Page, Org Page and Recruitment body page
-export async function getOngoingRecruitments(page, orgSlug, rBodySlug) {
+export async function getOngoingRecruitments(page, orgSlug) {
 
     let aggregate = [];
 
@@ -257,31 +289,7 @@ export async function getOngoingRecruitments(page, orgSlug, rBodySlug) {
 
             aggregate.push({ $match: { _id: { $in: recruitmentIds }, status: 'ongoing' } });
         }
-        else if (page === 'rBody') {
-            if (!rBodySlug)
-                return [];
-            const rBody = await db.collection('recruitment-bodies').findOne({ slug: rBodySlug });
-            const recruiter = await db.collection('recruiters').findOne({ refId: rBody._id.toString() });
-            aggregate.push({ $match: { recruiterId: recruiter._id.toString(), status: 'ongoing' } });
-
-        }
         if (page === 'home') {
-            // aggregate.push(
-            // { $sort: { sector: 1, statusOrder: 1, updatedAt: -1 } },
-            // {
-            //         $group: {
-            //             _id: "$sector",
-            //             recruitments: { $push: "$$ROOT" }
-            //         }
-            //     },
-            //     {
-            //         $project: {
-            //             _id: 0,
-            //             sector: "$_id",
-            //             recruitments: { $slice: ["$recruitments", 6] }
-            //         }
-            // }
-            // );
             aggregate.push({ $sort: { updatedAt: -1 } }, { $limit: 6 });
         }
         else {
@@ -336,8 +344,10 @@ export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlu
             db.collection('recruitments').findOne({ slug: recSlug }, { projection }),
             year && db.collection('archives').findOne({ recruitmentSlug: recSlug, year })
         ]);
-        if (!recruitment || (year && !pastRecruitmentInfo))
-            return null;
+        if (!recruitment)
+            return { status: 'invalid recruitment' }
+        else if (year && !pastRecruitmentInfo)
+            return { status: 'off year' };
 
 
         let finalDetails = recruitment;
@@ -350,9 +360,12 @@ export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlu
 
                 const stage = recruitment.stages.find(s => s.slug === stageSlug);
                 if (!stage)
-                    return null;
+                    return { status: 'invalid stage' };
 
                 const { name, link, completedContent, pendingContent, status } = stage;
+
+                if (status === 'not-reached')
+                    return { status: 'not reached stage', recruitmentDetails: recruitment };
 
                 const stageCard = generateStageCard(recruitment.name, name, link, status);
 
@@ -378,26 +391,28 @@ export async function getRecruitmentDetails(mdOrContent, recSlug, year, stageSlu
 
         const { _id, ...finalRecruitmentDetails } = finalDetails;
 
-        return finalRecruitmentDetails;
+        return { status: 'found', recruitmentDetails: finalRecruitmentDetails };
     } catch (error) {
         console.error("getRecruitmentDetails failed:", error);
         throw error;
     }
 };
 
-//For the Recruitment Page's Sidebar
+//For Recruitment Page Sidebar
 export async function getRecruitmentSidebarDetails(recSlug) {
 
     try {
         const db = await connectDB();
-        const recruitment = await db.collection('recruitments').findOne(
-            { slug: recSlug },
-            { projection: { name: 1, year: 1, stages: { name: 1, slug: 1, status: 1 } } }
-        );
+        const [recruitment, pastRecruitmentInfos] = await Promise.all([
+            db.collection('recruitments').findOne(
+                { slug: recSlug },
+                { projection: { name: 1, year: 1, stages: { name: 1, slug: 1, status: 1 } } }
+            ),
+            db.collection('archives').find({ recruitmentSlug: recSlug }).sort({ year: -1 }).project({ year: 1 }).toArray()
+        ])
         if (!recruitment)
             return null;
 
-        const pastRecruitmentInfos = await db.collection('archives').find({ recruitmentSlug: recruitment.slug }).project({ year: 1 }).toArray();
         const sidebarDetails = {
             stages: recruitment.stages,
             years: [
@@ -415,7 +430,7 @@ export async function getRecruitmentSidebarDetails(recSlug) {
 };
 
 //For Orgs Page
-export async function getOrgs({ search, sector, page = 1 }) {
+export async function getOrgs({ search, sector, type, page = 1 }) {
 
     let query = {};
     if (search) {
@@ -428,6 +443,8 @@ export async function getOrgs({ search, sector, page = 1 }) {
     }
     if (sector)
         query.sector = { $regex: sector.replace('-', ' '), $options: "i" };
+    if (type)
+        query.isRecruitmentBody = type === 'rBody'
 
     try {
         const db = await connectDB();
@@ -440,10 +457,9 @@ export async function getOrgs({ search, sector, page = 1 }) {
                     ],
                     data: [
                         { $sort: { name: 1 } },
-                        ...(page ? [
-                            { $skip: (page - 1) * ITEM_PER_PAGE },
-                            { $limit: ITEM_PER_PAGE }
-                        ] : [])
+                        { $skip: (page - 1) * ITEM_PER_PAGE },
+                        { $limit: ITEM_PER_PAGE },
+                        { $project: { name: 1, slug: 1, isRecruitmentBody: 1, description: 1, sector: 1, logoSrc: 1 } }
                     ]
                 }
             }
@@ -459,6 +475,62 @@ export async function getOrgs({ search, sector, page = 1 }) {
     }
 };
 
+//For Orgs Page Sidebar
+export async function getOrgsFilters() {
+    try {
+        const db = await connectDB()
+
+        const orgs = await db.collection("orgs").find({}).project({ sector: 1 }).toArray();
+
+        const sectors = [...new Set(orgs.flatMap(org => org.sector))].sort();
+
+        return sectors;
+
+    } catch (error) {
+        console.error("getJobsFilters failed: ", error)
+        return null
+    }
+}
+
+//For Orgs Page Metadata
+export async function getOrgsMetadata({ sector } = {}) {
+    try {
+        const db = await connectDB()
+
+        const activeParams = sector ? ["sector"] : []
+
+        const meta = await db.collection("metadata").findOne(
+            { page: "orgs", params: activeParams },
+            { projection: { title: 1, description: 1, _id: 0 } }
+        )
+
+        if (!meta)
+            return {
+                title: `Government Organisations | ${process.env.NEXT_PUBLIC_NAME}`,
+                description: "Browse government organisations in India. Find PSUs, banks, defence, railways, and other govt organisations with their jobs and recruitments."
+            }
+
+        const displayParams = {
+            sector: deslugify(sector),
+            siteName: process.env.NEXT_PUBLIC_NAME
+        }
+
+        const replace = (template) =>
+            template.replace(/{{(\w+)}}/g, (_, key) => displayParams[key] ?? "")
+
+        return {
+            title: replace(meta.title),
+            description: replace(meta.description)
+        }
+
+    } catch (error) {
+        return {
+            title: `Government Organisations | ${process.env.NEXT_PUBLIC_NAME}`,
+            description: "Browse government organisations in India. Find PSUs, banks, defence, railways, and other govt organisations with their jobs and recruitments."
+        }
+    }
+}
+
 //For Org Page
 export async function getOrgDetails(orgSlug) {
 
@@ -467,9 +539,51 @@ export async function getOrgDetails(orgSlug) {
         const org = await db.collection('orgs').findOne({ slug: orgSlug });
         if (!org)
             return null;
-        const ongoingRecruitments = await getOngoingRecruitments('org', orgSlug);
-        const { jobs: popularJobs } = await getJobs({ orgSlug: org.slug });
-        const orgDetails = ongoingRecruitments.length > 0 ? { ...org, popularJobs, ongoingRecruitments } : { ...org, popularJobs };
+        const [tempRecruitments, ongoingRecruitments, tempJobs] = await Promise.all([
+            db.collection("recruitments")
+                .find({ recruiterId: org._id.toString() })
+                .sort({ popularityScore: -1 })
+                .limit(3)
+                .project({ name: 1, fullName: 1, slug: 1, location: 1, vacancies: 1, registrationDeadline: 1, status: 1, stageStatus: 1 })
+                .toArray(),
+            getOngoingRecruitments('org', orgSlug),
+            db.collection("jobs")
+                .find({ orgId: org._id.toString() })
+                .sort({ popularityScore: -1 })
+                .limit(3)
+                .project({ orgId: 1, name: 1, categories: 1, location: 1, experience: 1, payScale: 1 })
+                .toArray()
+        ]);
+
+        const tempRecruitmentIds = tempRecruitments.map(rec => rec._id.toString());
+        const jobs = await db.collection("jobs")
+            .find({ recruitmentId: { $in: tempRecruitmentIds } })
+            .project({ orgId: 1, recruitmentId: 1, categories: 1, experience: 1 })
+            .toArray();
+
+        const jobOrgIds = jobs.map(job => new ObjectId(job.orgId));
+        const orgs = await db.collection("orgs")
+            .find({ _id: { $in: jobOrgIds } })
+            .project({ name: 1, abbr: 1, sector: 1, logoSrc: 1 })
+            .toArray();
+
+        const popularJobs = tempJobs.map(job => {
+            const jobOrg = orgs.find(org => org._id.toString() === job.orgId);
+            const { name: orgName, abbr: orgAbbr, logoSrc: orgLogo, sector: orgSectors } = jobOrg;
+            return { ...job, orgName, orgAbbr, orgSectors, orgLogo }
+        })
+
+        const topRecruitments = tempRecruitments.map(recruitment => {
+            const recruitmentJobs = jobs.filter(job => job.recruitmentId === recruitment._id.toString());
+            const recruitmentOrgIds = recruitmentJobs.map(job => job.orgId);
+            const recruitmentOrgs = orgs.filter(org => recruitmentOrgIds.includes(org._id.toString()));
+            const sectors = [...new Set(recruitmentOrgs.flatMap(org => org.sector))].sort();
+            const categories = [...new Set(recruitmentJobs.flatMap(job => job.categories))].sort();
+            const minYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.minYears)]) || 0;
+            const maxYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.maxYears)]) || 0;
+            return { ...recruitment, experienceRange: { minYears, maxYears }, sectors, categories };
+        })
+        const orgDetails = { ...org, popularJobs, topRecruitments, ongoingRecruitments };
         return JSON.parse(JSON.stringify(orgDetails));
 
     } catch (error) {
@@ -478,117 +592,8 @@ export async function getOrgDetails(orgSlug) {
     }
 };
 
-//For Recruitment bodies page
-export async function getRecruitmentBodies({ search, sector, page = 1 }) {
-
-    let query = {};
-    if (search) {
-        query.$or = [
-            { name: { $regex: search, $options: "i" } },
-            { slug: { $regex: search, $options: "i" } },
-            { abbr: { $regex: search, $options: "i" } }
-        ];
-    }
-    if (sector)
-        query.sector = { $regex: sector.replace('-', ' '), $options: "i" };
-
-    try {
-        const db = await connectDB();
-        const res = await db.collection('recruitment-bodies').aggregate([
-            { $match: query },
-            {
-                $facet: {
-                    metadata: [
-                        { $count: "total" }
-                    ],
-                    data: [
-                        { $sort: { name: 1 } },
-                        { $skip: (page - 1) * ITEM_PER_PAGE },
-                        { $limit: ITEM_PER_PAGE }
-                    ]
-                }
-            }
-        ]).next();
-
-        const details = { itemCount: res.metadata[0]?.total ?? 0, recruitmentBodies: res.data };
-
-        return JSON.parse(JSON.stringify(details));
-
-    } catch (error) {
-        console.error('getRecruitmentBodies error:', error);
-        throw error;
-    }
-};
-
-//For Recruitment body page
-export async function getRecruitmentBodyDetails(rBodySlug) {
-
-    try {
-        const db = await connectDB();
-        const rBody = await db.collection('recruitment-bodies').findOne({ slug: rBodySlug });
-        if (!rBody)
-            return null;
-
-        const recruiter = await db.collection('recruiters').findOne({ refId: rBody._id.toString() });
-        const [topRecruitments, ongoingRecruitments] = await Promise.all([
-            db.collection('recruitments').find({ recruiterId: recruiter._id.toString() }).toArray(),
-            getOngoingRecruitments('rBody', null, rBodySlug)
-        ])
-
-        const topRecruitmentIds = topRecruitments.map((r) => r._id.toString());
-        const ongoingRecruitmentIds = ongoingRecruitments.map((r) => r._id.toString());
-
-        const jobs = await db.collection('jobs').find({
-            recruitmentId: { $in: [...topRecruitmentIds, ...ongoingRecruitmentIds] },
-        }).project({ orgId: 1, recruitmentId: 1, categories: 1, experience: 1 }).toArray();
-
-        const jobOrgIds = [...new Set(jobs.map(job => new ObjectId(job.orgId)))];
-
-        const orgs = await db.collection('orgs')
-            .find({ _id: { $in: jobOrgIds } })
-            .project({ sector: 1 })
-            .toArray();
-
-        const finalTopRecruitmentsList = topRecruitments.map(recruitment => {
-            const recruitmentJobs = jobs.filter(job => job.recruitmentId === recruitment._id.toString());
-            const recruitmentOrgIds = recruitmentJobs.map(job => job.orgId);
-            const recruitmentOrgs = orgs.filter(org => recruitmentOrgIds.includes(org._id.toString()));
-            const sectors = [...new Set(recruitmentOrgs.flatMap(org => org.sector))].sort();
-            const categories = [...new Set(recruitmentJobs.flatMap(job => job.categories))].sort();
-            const minYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.minYears)]) || 0;
-            const maxYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.maxYears)]) || 0;
-            return { ...recruitment, experienceRange: { minYears, maxYears }, sectors, categories };
-        });
-        const finalOngoingRecruitmentsList = topRecruitments.map(recruitment => {
-            const recruitmentJobs = jobs.filter(job => job.recruitmentId === recruitment._id.toString());
-            const recruitmentOrgIds = recruitmentJobs.map(job => job.orgId);
-            const recruitmentOrgs = orgs.filter(org => recruitmentOrgIds.includes(org._id.toString()));
-            const sectors = [...new Set(recruitmentOrgs.flatMap(org => org.sector))].sort();
-            const categories = [...new Set(recruitmentJobs.flatMap(job => job.categories))].sort();
-            const minYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.minYears)]) || 0;
-            const maxYears = Math.min([...recruitmentJobs.map(recJob => recJob.experience.maxYears)]) || 0;
-            return { ...recruitment, experienceRange: { minYears, maxYears }, sectors, categories };
-        });
-        const rBodyDetails = ongoingRecruitments.length > 0 ?
-            {
-                ...rBody,
-                topRecruitments: finalTopRecruitmentsList,
-                ongoingRecruitments: finalOngoingRecruitmentsList
-            } :
-            {
-                ...rBody,
-                topRecruitments: finalTopRecruitmentsList
-            };
-        return JSON.parse(JSON.stringify(rBodyDetails));
-
-    } catch (error) {
-        console.error("getOrgs failed:", error);
-        throw error;
-    }
-};
-
 //For Jobs Page
-export async function getJobs({ search, orgSlug, rStatus, cat, qualification, expLvl, location, page = 1 } = {}) {
+export async function getJobs({ search, org, rStatus, sector, cat, qualification, expLvl, location, page = 1 } = {}) {
 
     let query = {};
     if (search) {
@@ -603,7 +608,7 @@ export async function getJobs({ search, orgSlug, rStatus, cat, qualification, ex
         query.categories = { $regex: modifiedCat, $options: "i" };
     }
     if (qualification)
-        query['education.level'] = new RegExp(qualification, 'i');
+        query['education.level'] = new RegExp(qualification.replace(/-/g, " "), 'i');
     if (expLvl) {
         query['experience.minYears'] = expLvl === 'experienced' ? { $gt: 0 } : 0;
     }
@@ -613,6 +618,8 @@ export async function getJobs({ search, orgSlug, rStatus, cat, qualification, ex
         if (location) {
             if (location === 'all-india')
                 query = { ...query, 'location.scope': 'all_india' };
+            else if (location === 'worldwide')
+                query = { ...query, 'location.scope': 'international' };
             else {
                 const state = await db.collection('states').findOne({ slug: location });
                 if (!state) {
@@ -624,11 +631,19 @@ export async function getJobs({ search, orgSlug, rStatus, cat, qualification, ex
         }
 
 
-        if (orgSlug) {
-            const org = await db.collection('orgs').findOne({ slug: orgSlug }, { projection: { _id: 1 } });
-            if (!org)
+        if (org) {
+            const orgDetails = await db.collection('orgs').findOne({ slug: org }, { projection: { _id: 1 } });
+            if (!orgDetails)
                 return [];
-            query.orgId = org._id.toString();
+            query.orgId = orgDetails._id.toString();
+        }
+        else if (sector) {
+            const orgs = await db.collection("orgs")
+                .find({ sector: { $regex: sector.replace("-", " "), $options: "i" } })
+                .project({ _id: 1 })
+                .toArray();
+            const orgIds = orgs.map(org => org._id.toString());
+            query.orgId = { $in: orgIds };
         }
 
         const recruitmentFilter = { _id: 1, slug: 1, status: 1 };
@@ -665,7 +680,7 @@ export async function getJobs({ search, orgSlug, rStatus, cat, qualification, ex
 
         const orgs = await db.collection('orgs')
             .find({ _id: { $in: orgIds.map(id => ObjectId.createFromHexString(id)) } })
-            .project({ name: 1, abbr: 1, logoSrc: 1 })
+            .project({ name: 1, abbr: 1, sector: 1, logoSrc: 1 })
             .toArray();
 
         const jobs = res.data.map(job => {
@@ -673,12 +688,12 @@ export async function getJobs({ search, orgSlug, rStatus, cat, qualification, ex
             const orgDetails = orgs.find(org => org._id.toString() === job.orgId);
             if (!orgDetails)
                 return null;
-            const { name: orgName, abbr: orgAbbr, logoSrc: orgLogo } = orgDetails;
+            const { name: orgName, abbr: orgAbbr, logoSrc: orgLogo, sector: orgSectors } = orgDetails;
             const recruitmentDetails = recruitments.find(recruitment => recruitment._id.toString() === job.recruitmentId);
             if (!recruitmentDetails)
                 return null;
             const { slug: recruitmentSlug, status: recruitmentStatus } = recruitmentDetails;
-            return { ...rest, orgName, orgAbbr, orgLogo, recruitmentSlug, recruitmentStatus: rStatus || recruitmentStatus };
+            return { ...rest, orgName, orgAbbr, orgSectors, orgLogo, recruitmentSlug, recruitmentStatus: rStatus || recruitmentStatus };
         }).filter(Boolean);
 
         const details = { itemCount: res.metadata[0].total, jobs };
@@ -690,6 +705,106 @@ export async function getJobs({ search, orgSlug, rStatus, cat, qualification, ex
         throw error;
     }
 };
+
+//For Jobs Page Sidebar
+export async function getJobsFilters() {
+
+    try {
+        const db = await connectDB()
+
+        const [orgs, categories, qualifications, expLvls, states, rStatuses] = await Promise.all([
+            db.collection("orgs").find({}).project({ name: 1, slug: 1, sector: 1 }).toArray(),
+            db.collection("jobs").distinct("categories"),
+            db.collection("jobs").distinct("education.level"),
+            db.collection("jobs").distinct("experience.level"),
+            db.collection("jobs").distinct("location.state", { "location.scope": "state" }),
+            db.collection("recruitments").distinct("status")
+        ])
+
+        const sectors = [...new Set(orgs.flatMap(org => org.sector))].sort();
+
+        const details = {
+            orgs,
+            sectors,
+            categories,
+            qualifications,
+            expLvls,
+            states: states.filter(Boolean).sort(),
+            rStatuses
+        }
+
+        return JSON.parse(JSON.stringify(details));
+
+    } catch (error) {
+        console.error("getJobsFilters failed: ", error)
+        return null
+    }
+}
+
+//For Jobs Page Metadata
+export async function getJobsMetadata({ org, rStatus, sector, cat, qualification, expLvl, location } = {}) {
+    try {
+        const db = await connectDB()
+
+        const allParams = { org, rStatus, sector, cat, qualification, expLvl, location }
+
+        // Build active params array — sorted alphabetically
+        const activeParams = Object.entries(allParams)
+            .filter(([_, value]) => value)
+            .map(([key]) => key)
+            .sort()
+
+        const meta = await db.collection("metadata").findOne(
+            { page: "jobs", params: activeParams },
+            { projection: { title: 1, description: 1, _id: 0 } }
+        )
+
+        if (!meta)
+            return {
+                title: `Government Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
+                description: "Browse all government job roles across central, state, PSU, banking, defence, railways, and more. Find eligibility, responsibilities, and perks for every govt post."
+            }
+
+        // Prepare display-ready values
+        const orgName = org ? await getNameFromSlug("orgs", org) : null
+        const rStatusLabel = {
+            "ongoing": "Ongoing",
+            "pending": "Upcoming",
+            "completed": "Completed"
+        }[rStatus] ?? null
+
+        const displayParams = {
+            org: orgName,
+            sector: deslugify(sector),
+            cat: deslugify(cat),
+            rStatus: rStatusLabel,
+            qualification: {
+                "10th": "10th Pass",
+                "12th": "10th Pass",
+                "graduation": "Graduates",
+                "post-graduation": "Post-Graduates",
+                "phd": "PhD Holders"
+            }[qualification],
+            expLvl: deslugify(expLvl),
+            location: deslugify(location),
+            siteName: process.env.NEXT_PUBLIC_NAME
+        }
+
+        const replace = (template) =>
+            template.replace(/{{(\w+)}}/g, (_, key) => displayParams[key] ?? "")
+
+        return {
+            title: replace(meta.title),
+            description: replace(meta.description)
+        }
+
+    } catch (error) {
+        return {
+            title: `Government Jobs | ${process.env.NEXT_PUBLIC_NAME}`,
+            description: "Browse all government job roles across central, state, PSU, banking, defence, railways, and more. Find eligibility, responsibilities, and perks for every govt post."
+        }
+    }
+}
 
 //For Home Page
 export async function getPopularJobs() {
@@ -723,14 +838,14 @@ export async function getPopularJobs() {
         const orgIds = [...new Set(jobsList.map(j => j.orgId))];
         const orgs = await db.collection('orgs')
             .find({ _id: { $in: orgIds.map(id => new ObjectId(id)) } })
-            .project({ name: 1, logoSrc: 1 })
+            .project({ name: 1, sector: 1, logoSrc: 1 })
             .toArray();
 
         const allPopularJobs = jobsList.map(job => {
             const { _id, ...rest } = job;
             const org = orgs.find(o => o._id.toString() === job.orgId);
-            const { name: orgName, logoSrc: orgLogo } = org;
-            return { ...rest, orgName, orgLogo };
+            const { name: orgName, logoSrc: orgLogo, sector } = org;
+            return { ...rest, orgName, orgLogo, orgSectors: sector };
         });
         return allPopularJobs;
     } catch (error) {
@@ -738,17 +853,6 @@ export async function getPopularJobs() {
         throw error;
     }
 };
-
-export function formatEducation(education) {
-    const required = education.filter(e => e.isRequired)
-    const levels = [...new Set(required.map(e => e.level))]
-
-    if (levels.length === 0) return null
-    if (levels.length === 1) return levels[0]  // "Graduation"
-
-    // e.g. "Graduation / PG" or "10th / ITI / Diploma"
-    return levels.join(" / ")
-}
 
 //For Job and JobNav page's metadata and for Job page's JSON-LD
 export async function getJobDetails(jobSlug) {
@@ -758,13 +862,14 @@ export async function getJobDetails(jobSlug) {
         const jobDetails = await db.collection('jobs')
             .findOne(
                 { slug: jobSlug },
-                { projection: { name: 1, description: 1, categories: 1, location: 1, education: 1, payScale: 1 } }
+                { projection: { orgId: 1, name: 1, description: 1, categories: 1, location: 1, education: 1, payScale: 1 } }
             );
         if (!jobDetails)
             return null;
+        const org = await db.collection("orgs").findOne({ _id: new ObjectId(jobDetails.orgId) }, { projection: { name: 1, sector: 1 } });
         let formattedEducation = formatEducation(jobDetails.education)
         let formattedLocation = formatLocation(jobDetails.location);
-        return JSON.parse(JSON.stringify({ ...jobDetails, location: formattedLocation, education: formattedEducation }));
+        return JSON.parse(JSON.stringify({ ...jobDetails, org: org.name, location: formattedLocation, education: formattedEducation, sectors: org.sector }));
 
     } catch (error) {
         console.error(error);
@@ -812,15 +917,12 @@ export async function getJobRecruitmentDetails(jobSlug) {
         const recruitmentDetails = await db.collection('recruitments')
             .findOne({ _id: new ObjectId(jobDetails.recruitmentId) }, { projection: { recruiterId: 1, name: 1, slug: 1, year: 1, registrationDeadline: 1, status: 1 } });
 
-        const { recruiterId, name, slug, year, status } = recruitmentDetails;
+        const { recruiterId, name, slug, year, registrationDeadline, status } = recruitmentDetails;
 
-        const recruiter = await db.collection('recruiters').findOne({ _id: new ObjectId(recruiterId) });
+        const orgDetails = await db.collection('orgs')
+            .findOne({ _id: new ObjectId(recruiterId) }, { projection: { name: 1, abbr: 1 } })
 
-        const recruiterDetails = recruiter.recruiterType === 'org' ?
-            await db.collection('orgs').findOne({ _id: new ObjectId(recruiter.refId) }, { projection: { name: 1, abbr: 1 } }) :
-            await db.collection('recruitment-bodies').findOne({ _id: new ObjectId(recruiter.refId) }, { projection: { name: 1, abbr: 1 } });
-
-        const recruiterName = `${recruiterDetails.name}${recruiterDetails.abbr ? ` (${recruiterDetails.abbr})` : ''}`;
+        const recruiterName = `${orgDetails.name}${orgDetails.abbr ? ` (${orgDetails.abbr})` : ''}`;
 
         const pastCycles = await db.collection('archives')
             .find({ recruitmentSlug: slug })
@@ -828,11 +930,11 @@ export async function getJobRecruitmentDetails(jobSlug) {
             .limit(5)
             .toArray();
 
-        const finalJobDetails = { ...jobDetails, location, recruiterName, recName: name, recSlug: slug, recYear: year, registrationDeadline, recStatus: status, pastCycles }
-        return finalJobDetails;
+        const finalJobDetails = { ...jobDetails, location: formatLocation(jobDetails.location), recruiterName, recName: name, recSlug: slug, recYear: year, registrationDeadline, recStatus: status, pastCycles }
+        return JSON.parse(JSON.stringify(finalJobDetails));
 
     } catch (error) {
-
+        console.error("getJobRecruitmentDetails failed: ", error);
     }
 }
 
@@ -922,10 +1024,7 @@ export async function getQuickLinks(search) {
     }
 };
 
-export async function getAllSlugs(collectionName) {
-
-
-
+export async function getDetailsForSitemap(collectionName) {
 
     let projection;
 
@@ -938,10 +1037,10 @@ export async function getAllSlugs(collectionName) {
             projection = { slug: 1, sector: 1, updatedAt: 1, _id: 0 };
             break;
         case 'recruitments':
-            projection = { recruiterId: 1, slug: 1, updatedAt: 1, year: 1, status: 1, stages: { slug: 1 }, _id: 0 };
+            projection = { recruiterId: 1, slug: 1, updatedAt: 1, year: 1, status: 1, stages: { slug: 1, status: 1 }, _id: 0 };
             break;
         case 'archives':
-            projection = { recruitmentSlug: 1, updatedAt: 1, _id: 0 };
+            projection = { recruitmentSlug: 1, year: 1, updatedAt: 1, _id: 0 };
             break;
     }
 
@@ -955,9 +1054,6 @@ export async function getAllSlugs(collectionName) {
 }
 
 export async function getNameFromSlug(collectionName, slug) {
-
-
-
 
     try {
         const db = await connectDB();

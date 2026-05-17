@@ -13,8 +13,8 @@ export const generateMetadata = async ({ params }) => {
 
     return {
         title: orgDetails.abbr
-            ? `${orgDetails.name} (${orgDetails.abbr}) | ${orgDetails.sector.join(" / ")}`
-            : `${orgDetails.name} | ${orgDetails.sector.join(" / ")}`,
+            ? `${orgDetails.name} (${orgDetails.abbr}) | ${orgDetails.sector[0]}`
+            : `${orgDetails.name} | ${orgDetails.sector[0]}`,
         description: orgDetails.shortDescription,
         alternates: {
             canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/orgs/${org}`
@@ -25,7 +25,7 @@ export const generateMetadata = async ({ params }) => {
 
 export default function OrgPage({ params }) {
     return (
-        <Suspense fallback={<OrgsPageSkeleton type={'org'} />}>
+        <Suspense fallback={<OrgsPageSkeleton />}>
             <MainContent params={params} />
         </Suspense>
     )
@@ -33,7 +33,7 @@ export default function OrgPage({ params }) {
 
 async function MainContent({ params }) {
     const { org } = await params;
-    const orgDetails = await getOrgDetails(org)
+    const orgDetails = await getOrgDetails(org);
 
     if (!orgDetails) notFound();
 
@@ -42,8 +42,6 @@ async function MainContent({ params }) {
         "@type": "Organization",
         "name": orgDetails.name,
         "description": orgDetails.description,
-        "url": orgDetails.homeUrl,
-        "sameAs": orgDetails.homeUrl,
         ...(orgDetails.logoSrc && {
             "logo": orgDetails.logoSrc
         }),
