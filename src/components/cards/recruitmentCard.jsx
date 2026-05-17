@@ -60,7 +60,7 @@ export default function RecruitmentCard({ recruitment, icon }) {
                         </span>
                     </div>
                     <h3 className="font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
-                        {recruitment.name}
+                        {recruitment.name} {recruitment.year}
                     </h3>
                     <div className="grow flex flex-col gap-3">
                         <p className="text-xs text-muted-foreground leading-relaxed truncate">{recruitment.fullName}</p>

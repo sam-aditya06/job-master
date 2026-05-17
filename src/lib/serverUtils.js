@@ -81,7 +81,7 @@ export async function getRecruitments({ search, org, recruiter, status, cat, sec
 
             if (expLvl) {
                 if (expLvl === 'fresher')
-                    jobQuery = { ...jobQuery, 'experience.maxYears': 0 };
+                    jobQuery = { ...jobQuery, 'experience.minYears': 0 };
                 else if (expLvl === 'experienced')
                     jobQuery = { ...jobQuery, 'experience.minYears': { $gt: 0 } };
                 else
@@ -140,7 +140,7 @@ export async function getRecruitments({ search, org, recruiter, status, cat, sec
                         { $sort: { statusOrder: 1, updatedAt: -1 } },
                         { $skip: (page - 1) * ITEM_PER_PAGE },
                         { $limit: ITEM_PER_PAGE },
-                        { $project: { name: 1, fullName: 1, slug: 1, location: 1, vacancies: 1, registrationDeadline: 1, status: 1, stageStatus: 1 } }
+                        { $project: { name: 1, fullName: 1, slug: 1, location: 1, year: 1, vacancies: 1, registrationDeadline: 1, status: 1, stageStatus: 1 } }
                     ]
                 }
             }
