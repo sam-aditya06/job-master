@@ -22,71 +22,50 @@ export function deslugify(str) {
   if (str === 'psu' || str === 'it')
     return str.toUpperCase();
 
+  if(str === 'all-india')
+    return 'All India';
+
   return str?.split('-')
     .map(([first, ...rest]) => first.toUpperCase() + rest.join(''))
     .join(' ');
 }
 
-export function formatEducation(education) {
-  const required = education.filter(e => e.isRequired)
-  const levels = [...new Set(required.map(e => e.level))]
-
-  if (levels.length === 0) return null
-  if (levels.length === 1) return levels[0]  // "Graduation"
-
-  // e.g. "Graduation / PG" or "10th / ITI / Diploma"
-  return levels.join(" / ")
-}
-
 export function formatLocation(location) {
-  const { scope, state, distribution } = location;
-  const distLabel = {
-    none: '',
-    state_wise: ' (State-wise)',
-    circle_wise: ' (Circle-wise)',
-    zone_wise: ' (Zone-wise)',
-    rrb_wise: ' (RRB-wise)',
-  }[distribution];
+  const { scope, states, uts, districts, municipalities, panchayats } = location;
   let formattedLocation = '';
-  if (scope === 'state')
-    formattedLocation = capitalize(state);
-  else if (scope === 'international')
-    formattedLocation = 'Worldwide';
-  else
-    formattedLocation = distribution === 'none' ? `All India` : `All India${distLabel}`;
+  if (scope === 'all-india')
+    formattedLocation = 'All India'
+  else if(scope === 'state')
+    formattedLocation = `${states[0]}${states.length > 1 ? ` +${states.length - 1}` : ''}`;
+  else if(scope === 'ut')
+    formattedLocation = `${uts[0]}${uts.length > 1 ? ` +${uts.length - 1}` : ''}`;
+  else if(scope === 'district')
+    formattedLocation = `${districts[0]}${districts.length > 1 ? ` +${districts.length - 1}` : ''}`;
+  else if(scope === 'municipality')
+    formattedLocation = `${municipalities[0]}${municipalities.length > 1 ? ` +${municipalities.length - 1}` : ''}`;
+  else if(scope === 'panchayat')
+    formattedLocation = `${panchayats[0]}${panchayats.length > 1 ? ` +${panchayats.length - 1}` : ''}`;
   return formattedLocation;
 }
 
-export function formatLocationJsonLd(location) {
-  if (location.scope === 'all_india') return { "@type": "Country", "name": "India" }
-  if (location.state) return { "@type": "AdministrativeArea", "name": capitalize(location.state) }
-  if (location.scope === 'international') return { "@type": "AdministrativeArea", "name": "Worldwide" }
-  return null
-}
-
-export function getLogoStyles(name, forCard) {
-  let styles = {};
-
-  switch (name) {
-    case "Jammu and Kashmir Services Selection Board":
-      styles.containerStyles = { padding: forCard ? "6px" : "8px" };
-      styles.imgStyles = {};
-      break;
-    case "Punjab Subordinate Services Selection Board":
-    case "Haryana Staff Selection Commission":
-      styles.containerStyles = { padding: forCard ? "8px" : "10px" };
-      styles.imgStyles = {};
-      break;
-    case "Delhi Subordinate Services Selection Board":
-      styles.containerStyles = { padding: forCard ? "6px" : "10px" };
-      styles.imgStyles = { marginBottom: "8px" }
-      break;
-    default:
-      styles.containerStyles = {};
-      styles.imgStyles = {};
+export function formatAmount(amount) {
+  if (amount >= 100000) {
+    const lakhs = amount / 100000;
+    return `${parseFloat(lakhs.toFixed(1))}L`;
   }
 
-  return styles;
+  if (amount >= 1000) {
+    const thousands = amount / 1000;
+    return `${parseFloat(thousands.toFixed(1))}K`;
+  }
+
+  return `${amount}`;
+}
+
+export function formatLocationJsonLd(location) {
+  if (location.scope === 'all-india') return { "@type": "Country", "name": "India" }
+  if (location.state) return { "@type": "AdministrativeArea", "name": capitalize(location.state) }
+  return null
 }
 
 export function validateFY(fy) {
@@ -105,4 +84,30 @@ export function validateFY(fy) {
   const expectedEnd = (startYear + 1) % 100;
 
   return endYearShort === expectedEnd;
+}
+
+export async function getMessages(lang) {
+  return (await import(`@/lib/messages/${lang}.json`)).default;
+}
+
+export function buildJobPosting(lang, job, base, year) {
+  const { name, description, orgName, vacancies, jobType } = job;
+  const employmentTypeMap = {
+    "permanent": "FULL_TIME",
+    "contractual": "CONTRACTOR",
+    "deputation": "TEMPORARY",
+    "apprenticeship": "PART_TIME",
+    "internship": "INTERN"
+  }
+  const filledDescription = description[lang]
+    .replace(/\(\(year\)\)/g, year)
+    .replace(/\(\(vacancies\)\)/g, vacancies);
+  return {
+    ...base,
+    "title": name,
+    "description": filledDescription,
+    "hiringOrganization": { "@type": "Organization", "name": orgName },
+    ...(vacancies > 0 && { "totalJobOpenings": vacancies }),
+    "employmentType": employmentTypeMap[jobType]
+  };
 }

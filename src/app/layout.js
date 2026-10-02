@@ -1,17 +1,14 @@
 import "./globals.css";
 
-import { Suspense } from "react";
 import Script from 'next/script';
 
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from "@/components/ui/sonner";
-
-import Footer from "@/components/footer";
-import Header from "@/components/header";
+import { Suspense } from "react";
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html suppressHydrationWarning>
       <head>
         <meta name="google-adsense-account" content="ca-pub-9977184400515586" />
         {
@@ -20,12 +17,12 @@ export default function RootLayout({ children }) {
               <Script async src="https://www.googletagmanager.com/gtag/js?id=G-B4KT3L5PV3" />
               <Script id="google-analytics" strategy="afterInteractive">
                 {`
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
 
-        gtag('config', 'G-B4KT3L5PV3');
-        `}
+                  gtag('config', 'G-B4KT3L5PV3');
+                `}
               </Script>
             </>
           )}
@@ -40,12 +37,8 @@ export default function RootLayout({ children }) {
           disableTransitionOnChange
         >
           <Suspense>
-            <Header />
-          </Suspense>
-          <main className="flex-1 bg-neutral-100 dark:bg-black pt-14">
             {children}
-          </main>
-          <Footer />
+          </Suspense>
           <Toaster position='top-center' />
         </ThemeProvider>
       </body>

@@ -20,7 +20,7 @@ export default function NotFound() {
           </h1>
 
           <p className="text-muted-foreground text-sm">
-            The page you're looking for either doesn't exist or may not have been added yet.
+            The page you're looking for could not be found.
           </p>
 
           <div className="flex gap-3 mt-4">

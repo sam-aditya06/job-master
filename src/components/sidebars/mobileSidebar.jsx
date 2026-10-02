@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, usePathname, useSearchParams } from "next/navigation"
 
-import { List } from "lucide-react"
+import { Funnel, List } from "lucide-react";
 
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 
@@ -11,9 +11,8 @@ import RecruitmentSidebar from "./recruitmentSidebar"
 import RecruitmentsSidebar from "./recruitmentsSidebar"
 import JobsSidebar from "./jobsSidebar"
 import JobSidebar from "./jobSidebar"
-import OrgsSidebar from "./orgsSidebar";
 
-export default function MobileSidebar({ jobsFilters, recruitmentsFilters, sectors, fields, details }) {
+export default function MobileSidebar({ jobsFilters, recruitmentsFilters, fields, details }) {
     const { recruitment } = useParams();
     const sp = useSearchParams();
     const pathName = usePathname()
@@ -25,14 +24,15 @@ export default function MobileSidebar({ jobsFilters, recruitmentsFilters, sector
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger className='flex justify-center items-center border rounded-md h-8 w-8'><List /></SheetTrigger>
+            <SheetTrigger className='flex justify-center items-center h-8 w-8'>
+                {pathName.includes('/jobs/') ? <Funnel /> : <List />}
+            </SheetTrigger>
             <SheetContent side='left'>
                 <SheetTitle className='hidden'>Menu</SheetTitle>
                 {recruitment && <RecruitmentSidebar details={details} />}
                 {pathName === '/recruitments' && <RecruitmentsSidebar recruitmentsFilters={recruitmentsFilters} />}
                 {pathName === '/jobs' && <JobsSidebar jobsFilters={jobsFilters} />}
                 {pathName.includes('/jobs/') && <JobSidebar fields={fields} />}
-                {pathName === '/orgs' && <OrgsSidebar sectors={sectors} />}
             </SheetContent>
         </Sheet>
     )

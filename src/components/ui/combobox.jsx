@@ -91,10 +91,11 @@ function ComboboxContent({
   align = "start",
   alignOffset = 0,
   anchor,
+  container,
   ...props
-}) {
+}, ref) {
   return (
-    <ComboboxPrimitive.Portal>
+    <ComboboxPrimitive.Portal container={container}>
       <ComboboxPrimitive.Positioner
         side={side}
         sideOffset={sideOffset}
@@ -103,6 +104,7 @@ function ComboboxContent({
         anchor={anchor}
         className="isolate z-50">
         <ComboboxPrimitive.Popup
+          ref={ref}
           data-slot="combobox-content"
           data-chips={!!anchor}
           className={cn(

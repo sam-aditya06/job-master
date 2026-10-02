@@ -147,19 +147,23 @@
   }
 
   .cms-content h1 {
-    @apply text-3xl font-bold font-sans;
+    @apply text-3xl text-brand font-bold font-sans;
   }
 
   .cms-content h2 {
-    @apply text-2xl font-bold;
+    @apply text-2xl text-brand font-bold;
   }
 
   .cms-content h3 {
-    @apply text-xl font-bold;
+    @apply text-xl text-brand font-bold;
+  }
+
+  .cms-content h4 {
+    @apply text-lg text-brand font-bold;
   }
 
   .cms-content p {
-    @apply text-justify lg:text-base/7;
+    @apply text-left lg:text-base/7;
   }
 
   .cms-content p.stage-label {
@@ -176,6 +180,10 @@
 
   .cms-content ol {
     @apply pl-5 list-decimal;
+  }
+
+  .cms-content ol.i {
+    @apply pl-5 list-[lower-roman];
   }
 
   .cms-content ul {
@@ -199,7 +207,12 @@
     @apply border h-8 text-center p-2;
   }
 
-  .cms-content td > ul > li, .cms-content td > p {
+  .cms-content th {
+    @apply whitespace-nowrap;
+  }
+
+  .cms-content td>ul>li,
+  .cms-content td>p {
     @apply text-sm text-center;
   }
 
@@ -209,20 +222,25 @@
   }
 
   .cms-content div.stage-card {
-    @apply flex flex-col items-center gap-2 border rounded-lg shadow-sm dark:bg-neutral-800 mx-auto px-5 py-4 lg:w-xl text-center transition-shadow hover:shadow-md;
+    @apply flex flex-col items-center gap-2 border rounded-lg shadow-sm dark:bg-neutral-800 mx-auto px-5 py-4 w-9/10 md:w-lg text-center transition-shadow hover:shadow-md;
   }
 
   .cms-content div.link-btn-disabled {
-    @apply border rounded-md bg-neutral-300 dark:bg-neutral-600 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed
+    @apply border rounded-md bg-neutral-300 dark:bg-neutral-600 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed;
+  }
+
+  .cms-content div.link-disabled {
+    @apply text-sm text-muted-foreground underline cursor-not-allowed;
   }
 
   .cms-content a.link-btn {
     @apply mx-auto mt-2 text-sm;
   }
 
-  .cms-content p > a, .cms-content td > a {
-    text-decoration: underline;
-    color: var(--brand);
+  .cms-content p a,
+  .cms-content li a,
+  .cms-content td a {
+    @apply text-brand underline;
   }
 
 }
@@ -230,7 +248,7 @@
 /* Custom Styling (General) */
 
 .link-btn {
-  @apply flex items-center gap-1 border rounded-md !bg-brand dark:hover:bg-brand/70 px-3 py-2 w-fit text-sm text-white leading-none cursor-pointer
+  @apply flex justify-center items-center gap-1 border rounded-md !bg-brand dark:hover:bg-brand/70 px-3 py-2 w-fit text-sm text-white leading-none cursor-pointer
 }
 
 

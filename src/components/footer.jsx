@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { Icon } from "@iconify/react";
+// import { Icon } from "@iconify/react";
 import Link from "next/link";
 
 export default function Footer() {
@@ -13,7 +13,8 @@ export default function Footer() {
 
     return (
         <footer className="shrink-0 border-t bg-white dark:bg-neutral-800 text-sm sm:h-[3.5rem]">
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mx-auto max-[1281px]:px-2 h-full max-w-7xl py-1 px-4">
+            {/* <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mx-auto max-[1281px]:px-2 h-full max-w-7xl py-1 px-4"> */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mx-auto px-2 sm:px-4 h-full max-w-7xl py-1">
 
                 {/* Left — nav links */}
                 <div className="flex flex-wrap justify-between sm:justify-start gap-x-4 gap-y-1 max-sm:px-2">

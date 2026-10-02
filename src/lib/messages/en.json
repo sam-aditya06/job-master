@@ -1,0 +1,110 @@
+{
+    "header": {
+        "quickLinks": "Quick Links",
+        "jobs": "Jobs",
+        "recruitments": "Recruitments",
+        "feedback": "Feedback"
+    },
+    "home": {
+        "hero": {
+            "headingPartOne": "Your recruitment tracker for",
+            "headingPartTwo": "Government Jobs",
+            "intro": "Discover your dream government job and stay updated on its recruitment in real time.",
+            "ctaBtnTxt": "Explore Recruitments"
+        },
+        "ongoingRecruitments": {
+            "heading": "Onoing Recruitments",
+            "intro": "Track all your government recruitments in real-time.",
+            "ctaBtnTxt": "View all"
+        },
+        "popularJobs": {
+            "heading": "Popular Jobs",
+            "intro": "Learn about responsibilities, perks & career growth of your dream jobs.",
+            "ctaBtnTxt": "View all"
+        }
+    },
+    "quickLinks": {
+        "heading": "Quick Links",
+        "description": "This page helps you quickly find latest government recruitment updates. Browse the latest recruitments based on your qualification, and the recently released admit cards, results and scorecards.",
+        "tenthPassRecruitmentHeading": "Recruitments for 10th Pass",
+        "twelfthPassRecruitmentHeading": "Recruitments for 12th Pass",
+        "graduateRecruitmentHeading": "Recruitments for Graduates",
+        "admitCardHeading": "Latest Admit Cards",
+        "resultHeading": "Latest Results",
+        "scorecardHeading": "Latest Scorecards"
+    },
+    "jobs": {
+        "heading": "Jobs",
+        "search": "search",
+        "filterLabels": {
+            "hiringOrg": "Hiring Organization",
+            "rStatus": "Recruitment Status",
+            "category": "Job Category",
+            "location": "Location",
+            "qualification": "Qualification",
+            "experience": "Experience"
+        },
+        "filters": {
+            "rStatuses": {
+                "upcoming": "Upcoming",
+                "ongoing": "Ongoing"
+            },
+            "categories": {
+                "banking": "Banking",
+                "civil-services": "Civil Services",
+                "railway": "Railway",
+                "it": "IT",
+                "taxation": "Taxation"
+            },
+            "locations": {
+                "all-india": "All India"
+            },
+            "qualifications": {
+                "graduate": "Graduate",
+                "post-graduate": "Post Graduate"
+            },
+            "expLvls": {
+                "fresher": "Fresher",
+                "experienced": "Experienced"
+            }
+        },
+        "filtersText": "Filters",
+        "displayedFilters": {
+            "rStatuses": {
+                "upcoming": "Upcoming Recruitment",
+                "ongoing": "Ongoing Recruitment"
+            }
+        }
+    },
+    "job": {
+        "overview": "Overview",
+        "eligibilityCriteria": "Eligibility Criteria",
+        "selectionProcess": "Selection Process",
+        "recruitments": "Recruitments"
+    },
+    "recruitments": {
+        "heading": "Recruitments",
+        "filterLabels": {
+            "recruiter": "Recruiter",
+            "status": "Status"
+        }
+    },
+    "recruitment": {
+        "overview": "Overview",
+        "timeline": "Timeline"
+    },
+    "feedback": {
+        "heading": "Feedback",
+        "introFirstLine": "Found something wrong? Missing a job or recruitment? Or just want to share your thoughts?",
+        "introSecondLine": "We read every submission and use it to improve",
+        "formLabels": {
+            "formTitle": "Feedback Form",
+            "name": "Name",
+            "email": "Email",
+            "category": "Category",
+            "message": "Message",
+            "submitBtn": "Submit Feedback",
+            "submitBtnActive": "Submitting..."
+        }
+    }
+}

@@ -3,7 +3,7 @@
 export async function GET() {
   const base = process.env.NEXT_PUBLIC_DOMAIN
 
-  const ids = ["jobs", "orgs", "recruitments", "recruitment-bodies", "static"]
+  const ids = ["jobs", "recruitments", "static"]
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

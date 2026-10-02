@@ -15,7 +15,7 @@ import { useFilter } from "@/lib/context/filterContext";
 
 export default function PaginationComponent({ itemCount, currentPage }) {
 
-    const totalPages = Math.ceil(itemCount / 8);
+    const totalPages = Math.ceil(itemCount / 12);
 
     const { setIsPaginating } = useFilter();
 

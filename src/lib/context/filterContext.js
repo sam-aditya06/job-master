@@ -1,12 +1,14 @@
 'use client'
 
 import { createContext, useContext, useOptimistic, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 const FilterContext = createContext(null)
 
-export function FilterProvider({ children, initialParams = {} }) {
+export function FilterProvider({ children }) {
     const router = useRouter()
+    const searchParams = useSearchParams();
+    const initialParams = Object.fromEntries(searchParams.entries());
     const [isPending, startTransition] = useTransition()
     const [optimisticParams, setOptimisticParams] = useOptimistic(initialParams);
     const [isPaginating, setIsPaginating] = useState(false);
@@ -25,7 +27,7 @@ export function FilterProvider({ children, initialParams = {} }) {
         }
         else
             merged = { ...rest, ...newParams };
-        
+
         const cleaned = Object.fromEntries(
             Object.entries(merged).filter(([_, v]) => v != null && v !== '')
         )

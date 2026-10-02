@@ -1,66 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { ArrowRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import JobCard from "@/components/cards/jobCard";
-import { slugify } from "@/lib/utils";
-
-const categories = ["All", "Central Govt", "State Govt", "PSU", "Banking", "Defence", "Railways", "Judiciary", "Police"];
+import { JobCardV2 } from "@/components/cards/jobCard";
+import { useMessages } from "../messageProvider";
 
 export default function JobsSection({ popularJobs = [] }) {
-  const [displayedJobs, setDisplayedJobs] = useState(popularJobs);
-  const [currentCategory, setCurrentCategory] = useState('All');
 
-  useEffect(() => {
-    currentCategory === 'All' ?
-      setDisplayedJobs(popularJobs.sort((a, b) => b.popularityScore - a.popularityScore)) :
-      setDisplayedJobs(popularJobs.filter(job => job.sector === slugify(currentCategory)).sort((a, b) => b.popularityScore - a.popularityScore));
-  }, [currentCategory]);
+  const { lang, messages } = useMessages();
 
   return (
     <section>
       <div className="max-w-6xl mx-auto px-4">
         {/* Section header */}
-        <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 mb-10">
-          <div>
-            <h2 className="text-3xl font-bold text-brand" style={{ fontFamily: "'Syne', sans-serif" }}>
-              Popular Jobs
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-10">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-2xl font-bold text-brand" style={{ fontFamily: "'Syne', sans-serif" }}>
+              {messages.home.popularJobs.heading}
             </h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Detailed breakdowns of roles, responsibilities, pay scales, perks & career growth — before you prepare.
+            <p className="text-muted-foreground text-sm">
+              {messages.home.popularJobs.intro}
             </p>
           </div>
-          <Link href="/jobs" className="link-btn group">
-            All Job Profiles <ArrowRight className="w-4 h-4 transition-all duration-150 group-hover:translate-x-1" />
+          <Link href={`/${lang}/jobs`} className="max-sm:!hidden flex items-center gap-1 border border-brand rounded-md hover:bg-brand px-3 py-2 text-sm text-brand hover:text-white leading-none transition duration-150">
+            {messages.home.popularJobs.ctaBtnTxt}
           </Link>
         </div>
-
-        {/* Category filter pills */}
-        {/* <div className="flex flex-wrap gap-2 mb-8">
-          {categories.map((cat, i) => (
-            <button
-              key={cat}
-              className={`text-sm px-4 py-1.5 rounded-full border transition-colors font-medium ${cat === currentCategory
-                ? "bg-brand text-white"
-                : "border hover:border-black dark:hover:border-white bg-white dark:bg-transparent text-black dark:text-white"
-                }`}
-                onClick={() => setCurrentCategory(cat)}
-            >
-              {cat}
-            </button>
-          ))}
-        </div> */}
-
-        {/* Job profile cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {displayedJobs.map((job) => (
-            <JobCard key={job.slug} job={job} page={'home'} />
+          {popularJobs.map((job) => (
+            <JobCardV2 key={job.slug} job={job} />
           ))}
         </div>
+        <Link href={`/${lang}/jobs`} className="sm:!hidden flex items-center gap-1 border border-brand rounded-md hover:bg-brand mt-5 mx-auto px-3 py-2 w-fit text-sm text-brand hover:text-white leading-none transition duration-150">
+            {messages.home.popularJobs.ctaBtnTxt}
+          </Link>
       </div>
     </section>
   );

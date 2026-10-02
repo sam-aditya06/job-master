@@ -6,23 +6,9 @@ export default function robots() {
       disallow: [
         // jobs
         "/jobs?search=",
-        "/jobs?rStatus=",
-        "/jobs?expLvl=",
-        "/jobs?location=",
-        "/jobs?qualification=",
 
         // recruitments
-        "/recruitments?search=",
-        "/recruitments?status=",
-        "/recruitments?expLvl=",
-        "/recruitments?location=",
-        "/recruitments?qualification=",
-
-        // orgs
-        "/orgs?search=",
-
-        // quick-links
-        "/quick-links?search="
+        "/recruitments?search="
       ]
     },
     sitemap: `${process.env.NEXT_PUBLIC_DOMAIN}/sitemap-index.xml`
