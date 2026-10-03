@@ -10,7 +10,7 @@ export const generateMetadata = async ({ params }) => {
     const recruitmentDetails = await getRecruitmentMetadata(lang, recruitment, year);
 
     if (!recruitmentDetails)
-        return {};
+        notFound();
 
     const { title, description } = recruitmentDetails;
     return {

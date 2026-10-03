@@ -2400,7 +2400,7 @@ export async function getQuickLinks({ lang }) {
                             { $group: { _id: "$recruitments.recruitmentId" } }
                         ],
                         graduateRecruitmentIds: [
-                            { $match: { allowedQualificationLevels: "Graduate" } },
+                            { $match: { allowedQualificationLevels: "graduate" } },
                             { $unwind: "$recruitments" },
                             { $group: { _id: "$recruitments.recruitmentId" } }
                         ]
