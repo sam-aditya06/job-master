@@ -2640,10 +2640,9 @@ export async function getLocationNameFromSlug(slug, lang) {
 
 export function generateLastUpdated(updatedAt) {
     const date = new Date(updatedAt);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = date.toLocaleDateString("en-IN", {
-        month: "short"
-    });
-    const year = date.getFullYear();
+    const [day, month, year] = date.toLocaleDateString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: 'numeric', month: 'short', year: 'numeric'
+    }).split(' ');
     return `<p class="text-sm text-gray-500 dark:text-gray-400 italic">Last Updated: ${day} ${month}, ${year}</p>`;
 }

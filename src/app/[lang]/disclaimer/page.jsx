@@ -103,11 +103,10 @@ export default async function DisclaimerPage({ params }) {
                     <section className="flex flex-col gap-3">
                         <h2>5. Advertising</h2>
                         <p>
-                            {process.env.NEXT_PUBLIC_NAME} displays advertisements served by Ezoic, a
-                            Google Certified Publishing Partner. These advertisements help us keep the
-                            platform free for all users. We do not endorse any product, service, or
-                            organisation advertised on our platform. The advertisers are solely
-                            responsible for the content of their advertisements.
+                            {process.env.NEXT_PUBLIC_NAME} displays advertisements served by Google ads. 
+                            These advertisements help us keep the platform free for all users. We do not 
+                            endorse any product, service, or organisation advertised on our platform. 
+                            The advertisers are solely responsible for the content of their advertisements.
                         </p>
                     </section>
 
