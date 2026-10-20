@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
 import { SearchMainSectionSkeleton } from "@/components/skeletons";
-import { getJobs, getJobsMetadata, getLocationNameFromSlug, getNameFromSlug } from "@/lib/serverUtils";
+import { getJobCount, getJobs, getJobsMetadata, getLocationNameFromSlug, getNameFromSlug } from "@/lib/serverUtils";
 import JobsHeader from "./jobsHeader";
 import JobsList from "./jobsList";
 import { getMessages } from "@/lib/utils";
@@ -13,9 +13,9 @@ export async function generateMetadata({ params, searchParams }) {
         searchParams
     ]);
 
-    const [meta, { itemCount }] = await Promise.all([
+    const [meta, itemCount] = await Promise.all([
         getJobsMetadata({ org, rStatus, cat, qualification, expLvl, location, lang }),
-        getJobs({ org, rStatus, cat, qualification, expLvl, location, lang })
+        !search ? getJobCount({ org, rStatus, cat, qualification, expLvl, location, lang }) : 0
     ]);
 
     const buildCanonical = () => {

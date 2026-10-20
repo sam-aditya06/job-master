@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: false,
-    cacheComponents: true
+    htmlLimitedBots: /.*/
 };
 
 export default nextConfig;

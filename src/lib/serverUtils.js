@@ -171,6 +171,30 @@ async function createRecruitmentsSearchQuery({ search, org, recruiter, status, c
 
 }
 
+//For Recruitments Page Metadata
+export async function getRecruitmentCount({
+    org,
+    recruiter,
+    status,
+    cat,
+    qualification,
+    expLvl,
+    location,
+    lang
+
+} = {}) {
+    let { query } = await createRecruitmentsSearchQuery({ org, recruiter, status, cat, qualification, expLvl, location, lang });
+
+    try {
+        const db = await connectDB();
+        const count = await db.collection('recruitments').countDocuments(query);
+        return count;
+    } catch (error) {
+        console.error("getRecruitmentCount failed:", error);
+        throw error;
+    }
+}
+
 //For Recruitments Page
 export async function getRecruitments({
     search,
@@ -1347,7 +1371,7 @@ export async function getJobsMetadata({ org, rStatus, cat, qualification, expLvl
 }
 
 //For Jobs Page
-async function createJobsSearchQuery({ search, org, rStatus, cat, qualification, expLvl, location } = {}) {
+async function createJobsSearchQuery({ search, org, rStatus, cat, qualification, expLvl, location, lang } = {}) {
     let query = {
         $and: [{ hidden: false }]
     };
@@ -1356,7 +1380,7 @@ async function createJobsSearchQuery({ search, org, rStatus, cat, qualification,
         const searchRegex = { $regex: search, $options: "i" };
         query.$and.push({
             $or: [
-                { name: searchRegex },
+                { name: { [lang]: searchRegex } },
                 { slug: searchRegex }
             ]
         });
@@ -1425,10 +1449,28 @@ async function createJobsSearchQuery({ search, org, rStatus, cat, qualification,
     return query;
 }
 
+//For Jobs Page Metadata
+export async function getJobCount({ org, rStatus, cat, qualification, expLvl, location, lang } = {}) {
+
+    let query = await createJobsSearchQuery({ org, rStatus, cat, qualification, expLvl, location, lang });
+
+    try {
+        const db = await connectDB();
+
+        const count = await db.collection('jobs').countDocuments(query);
+
+        return count;
+
+    } catch (error) {
+        console.error("getJobCount failed:", error);
+        throw error;
+    }
+};
+
 //For Jobs Page
 export async function getJobs({ search, org, rStatus, cat, qualification, expLvl, location, lang, page = 1 } = {}) {
 
-    let query = await createJobsSearchQuery({ search, org, rStatus, cat, qualification, expLvl, location });
+    let query = await createJobsSearchQuery({ search, org, rStatus, cat, qualification, expLvl, location, lang });
 
     try {
         const db = await connectDB();
@@ -1556,7 +1598,7 @@ export async function getJobs({ search, org, rStatus, cat, qualification, expLvl
 
     } catch (error) {
         console.error(error);
-        // throw error;
+        throw error;
     }
 };
 

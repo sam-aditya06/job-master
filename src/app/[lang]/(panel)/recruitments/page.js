@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
-import { getLocationNameFromSlug, getNameFromSlug, getRecruitments, getRecruitmentsMetadata } from "@/lib/serverUtils";
+import { getLocationNameFromSlug, getNameFromSlug, getRecruitmentCount, getRecruitments, getRecruitmentsMetadata } from "@/lib/serverUtils";
 import { SearchMainSectionSkeleton } from "@/components/skeletons";
 
 import RecruitmentsHeader from "./recruitmentsHeader";
@@ -18,9 +18,10 @@ export async function generateMetadata({ params, searchParams }) {
         searchParams
     ])
 
-    const meta = await getRecruitmentsMetadata({ org, recruiter, status, cat, qualification, expLvl, location, lang });
-
-    const isIndexed = !search;
+    const [meta, itemCount] = await Promise.all([
+        getRecruitmentsMetadata({ org, recruiter, status, cat, qualification, expLvl, location, lang }),
+        !search ? getRecruitmentCount({ org, recruiter, status, cat, qualification, expLvl, location, lang }) : 0
+    ]);
 
     const buildCanonical = () => {
         const url = new URL(`${process.env.NEXT_PUBLIC_DOMAIN}/recruitments`);
@@ -36,7 +37,7 @@ export async function generateMetadata({ params, searchParams }) {
         alternates: {
             canonical: buildCanonical()
         },
-        robots: { index: isIndexed, follow: true }
+        robots: { index: !search && itemCount > 0, follow: true }
     }
 }
 
