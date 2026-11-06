@@ -6,8 +6,8 @@ import { format } from "date-fns";
 
 const ITEM_PER_PAGE = 12;
 
-//For Recruitments Page Metadata
-export async function getRecruitmentsMetadata({ recruiter, status, cat, location, qualification, expLvl, lang } = {}) {
+//For Recruitments Page's Metadata
+export async function getRecruitmentsMetadata({ recruiter, status, cat, location, qualification, expLvl, lang, page = 1 } = {}) {
     try {
         const db = await connectDB()
 
@@ -79,7 +79,8 @@ export async function getRecruitmentsMetadata({ recruiter, status, cat, location
             expLvl: expLvlName,
             expLvlLower: expLvlName.toLowerCase(),
             location: locationName,
-            siteName: process.env.NEXT_PUBLIC_NAME
+            siteName: process.env.NEXT_PUBLIC_NAME,
+            page
         }
 
         const replace = (template) =>
@@ -98,6 +99,7 @@ export async function getRecruitmentsMetadata({ recruiter, status, cat, location
     }
 }
 
+//For Recruitments Page
 async function createRecruitmentsSearchQuery({ search, recruiter, status, cat, location, qualification, expLvl, lang } = {}) {
     let query = {
         $and: [{ status: { $ne: 'inactive' } }]
@@ -155,13 +157,21 @@ async function createRecruitmentsSearchQuery({ search, recruiter, status, cat, l
 
 }
 
-//For Recruitments Page Metadata
-export async function getRecruitmentCount({ recruiter, status, cat, qualification, expLvl, location, lang } = {}) {
-    let { query } = await createRecruitmentsSearchQuery({ recruiter, status, cat, qualification, expLvl, location, lang });
+//For Recruitments Page's Metadata
+export async function getRecruitmentCount({ recruiter, status, cat, qualification, expLvl, location, lang, page = 1 } = {}) {
+    let query = await createRecruitmentsSearchQuery({ recruiter, status, cat, qualification, expLvl, location, lang });
 
     try {
         const db = await connectDB();
-        const count = await db.collection('recruitments').countDocuments(query);
+        const result = await db.collection('recruitments').aggregate([
+            { $match: query },
+            { $skip: (page - 1) * ITEM_PER_PAGE },
+            { $limit: ITEM_PER_PAGE },
+            { $count: "total" }
+        ]).next();
+
+        const count = result?.total ?? 0;
+
         return count;
     } catch (error) {
         console.error("getRecruitmentCount failed:", error);
@@ -737,7 +747,7 @@ export async function getOngoingRecruitments({ lang }) {
     }
 };
 
-//For Recruitment Page Metadata
+//For Recruitment Page's Metadata
 export async function getRecruitmentMetadata(lang, recSlug) {
     const year = recSlug.substring(recSlug.lastIndexOf('-') + 1);
 
@@ -985,8 +995,8 @@ export async function getRecruitmentSidebarDetails(lang, recSlug) {
     }
 };
 
-//For Jobs Page Metadata
-export async function getJobsMetadata({ org, rStatus, cat, qualification, expLvl, location, lang } = {}) {
+//For Jobs Page's Metadata
+export async function getJobsMetadata({ org, rStatus, cat, qualification, expLvl, location, lang, page = 1 } = {}) {
     try {
         const db = await connectDB()
 
@@ -1054,14 +1064,15 @@ export async function getJobsMetadata({ org, rStatus, cat, qualification, expLvl
         const displayParams = {
             org: orgName,
             rStatus: statusName,
-            rStatusLower: statusName.toLowerCase(),
+            rStatusLower: statusName?.toLowerCase(),
             cat: categoryName,
-            catLower: categoryName.toLowerCase(),
+            catLower: categoryName?.toLowerCase(),
             qualification: qualificationName,
             expLvl: expLvlName,
-            expLvlLower: expLvlName.toLowerCase(),
+            expLvlLower: expLvlName?.toLowerCase(),
             location: locationName,
-            siteName: process.env.NEXT_PUBLIC_NAME
+            siteName: process.env.NEXT_PUBLIC_NAME,
+            page
         }
 
         const replace = (template) =>
@@ -1144,15 +1155,22 @@ async function createJobsSearchQuery({ search, org, rStatus, cat, qualification,
     return query;
 }
 
-//For Jobs Page Metadata
-export async function getJobCount({ org, rStatus, cat, qualification, expLvl, location, lang } = {}) {
+//For Jobs Page's Metadata
+export async function getJobCount({ org, rStatus, cat, qualification, expLvl, location, lang, page = 1 } = {}) {
 
-    let query = await createJobsSearchQuery({ org, rStatus, cat, qualification, expLvl, location, lang });
+    let query = await createJobsSearchQuery({ org, rStatus, cat, qualification, expLvl, location, lang, page });
 
     try {
         const db = await connectDB();
 
-        const count = await db.collection('jobs').countDocuments(query);
+        const result = await db.collection('jobs').aggregate([
+            { $match: query },
+            { $skip: (page - 1) * ITEM_PER_PAGE },
+            { $limit: ITEM_PER_PAGE },
+            { $count: "total" }
+        ]).next();
+
+        const count = result?.total ?? 0;
 
         return count;
 
@@ -1607,7 +1625,7 @@ export async function getPopularJobs({ lang }) {
     }
 };
 
-//For Job JobNav and Job Recruitment Details page's metadata
+//For Job Page's metadata
 export async function getJobMetadata(lang, jobSlug) {
     try {
         const db = await connectDB();
@@ -1632,6 +1650,7 @@ export async function getJobMetadata(lang, jobSlug) {
     }
 }
 
+//For Job Page's content
 export async function getJobContent(lang, jobSlug) {
 
     let projection = { minimumSalary: 1, maximumSalary: 1, content: `$content.${lang}`, updatedAt: 1 };
@@ -1769,6 +1788,7 @@ export async function getJobContent(lang, jobSlug) {
     }
 }
 
+//For Job Page's sidebar
 export async function getJobSidebarFields(lang, jobSlug) {
     try {
         const db = await connectDB();
@@ -1800,6 +1820,7 @@ export async function getJobSidebarFields(lang, jobSlug) {
     }
 }
 
+//For Quick Links Page
 export async function getQuickLinks({ lang }) {
 
     try {
@@ -1945,6 +1966,7 @@ export async function getQuickLinks({ lang }) {
     }
 };
 
+//For Sitemaps
 export async function getDetailsForSitemap(collectionName) {
 
     let projection;
@@ -1973,6 +1995,7 @@ export async function getDetailsForSitemap(collectionName) {
     }
 }
 
+//For Sitemaps
 export async function getFiltersForSitemap(collectionName) {
     try {
         const db = await connectDB();
@@ -2006,6 +2029,7 @@ export async function getFiltersForSitemap(collectionName) {
     }
 }
 
+//For displayed filters in the search pages
 export async function getNameFromSlug(collectionName, slug, lang) {
 
     try {
@@ -2022,22 +2046,7 @@ export async function getNameFromSlug(collectionName, slug, lang) {
     }
 }
 
-export async function getLocationNameFromSlug(slug, lang) {
-
-    try {
-        const db = await connectDB();
-        const location = await db.collection('locations').findOne(
-            { slug: slug },
-            { projection: { name: `$name.${lang}` } }
-        );
-        if (!location)
-            return null;
-        return location.name;
-    } catch (error) {
-
-    }
-}
-
+//For Job and Recruitment page's "Last Updated" date
 export function generateLastUpdated(updatedAt) {
     const date = new Date(updatedAt);
     const [day, month, year] = date.toLocaleDateString('en-IN', {
@@ -2045,9 +2054,4 @@ export function generateLastUpdated(updatedAt) {
         day: 'numeric', month: 'short', year: 'numeric'
     }).split(' ');
     return `<p class="text-sm text-gray-500 dark:text-gray-400 italic">Last Updated: ${day} ${month}, ${year}</p>`;
-}
-
-export function validatePath(url) {
-    const pathName = url.substring(1).split('/');
-
 }

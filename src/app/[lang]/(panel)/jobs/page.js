@@ -2,20 +2,20 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
 import { SearchMainSectionSkeleton } from "@/components/skeletons";
-import { getJobCount, getJobs, getJobsMetadata, getLocationNameFromSlug, getNameFromSlug } from "@/lib/serverUtils";
+import { getJobCount, getJobs, getJobsMetadata, getNameFromSlug } from "@/lib/serverUtils";
 import JobsHeader from "./jobsHeader";
 import JobsList from "./jobsList";
 import { getMessages } from "@/lib/utils";
 
 export async function generateMetadata({ params, searchParams }) {
-    const [{ lang }, { search, org, rStatus, cat, qualification, expLvl, location }] = await Promise.all([
+    const [{ lang }, { search, org, rStatus, cat, qualification, expLvl, location, page }] = await Promise.all([
         params,
         searchParams
     ]);
 
     const [meta, itemCount] = await Promise.all([
-        getJobsMetadata({ org, rStatus, cat, qualification, expLvl, location, lang }),
-        !search ? getJobCount({ org, rStatus, cat, qualification, expLvl, location, lang }) : 0
+        getJobsMetadata({ org, rStatus, cat, qualification, expLvl, location, lang, page }),
+        !search ? getJobCount({ org, rStatus, cat, qualification, expLvl, location, lang, page }) : 0
     ]);
 
     const buildCanonical = () => {
@@ -65,7 +65,7 @@ async function MainContentWrapper({ lang, sp }) {
     const [{ itemCount, jobs }, orgName, locationName, qualificationName, messages] = await Promise.all([
         getJobs({ search, org, rStatus, cat, location, qualification, expLvl, page, lang }),
         org ? getNameFromSlug('orgs', org, lang) : undefined,
-        location && location !== 'all-india' ? getLocationNameFromSlug(location, lang) : undefined,
+        location ? getNameFromSlug('locations', location, lang) : undefined,
         qualification && qualification !== 'graduate' ? getNameFromSlug('qualifications', qualification, lang) : undefined,
         getMessages(lang)
     ]);

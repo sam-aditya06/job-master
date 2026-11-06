@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
-import { getLocationNameFromSlug, getNameFromSlug, getRecruitmentCount, getRecruitments, getRecruitmentsMetadata } from "@/lib/serverUtils";
+import { getNameFromSlug, getRecruitmentCount, getRecruitments, getRecruitmentsMetadata } from "@/lib/serverUtils";
 import { SearchMainSectionSkeleton } from "@/components/skeletons";
 
 import RecruitmentsHeader from "./recruitmentsHeader";
@@ -12,15 +12,15 @@ import { getMessages } from "@/lib/utils";
 export async function generateMetadata({ params, searchParams }) {
     const [
         { lang },
-        { search, recruiter, status, cat, qualification, expLvl, location }
+        { search, recruiter, status, cat, qualification, expLvl, location, page }
     ] = await Promise.all([
         params,
         searchParams
     ])
 
     const [meta, itemCount] = await Promise.all([
-        getRecruitmentsMetadata({ recruiter, status, cat, qualification, expLvl, location, lang }),
-        !search ? getRecruitmentCount({ recruiter, status, cat, qualification, expLvl, location, lang }) : 0
+        getRecruitmentsMetadata({ recruiter, status, cat, qualification, expLvl, location, lang, page }),
+        !search ? getRecruitmentCount({ recruiter, status, cat, qualification, expLvl, location, lang, page }) : 0
     ]);
 
     const buildCanonical = () => {
@@ -65,7 +65,7 @@ async function MainContent({ lang, sp }) {
     const [{ itemCount, recruitments }, recruiterName, locationName, qualificationName, messages] = await Promise.all([
         getRecruitments({ search, recruiter, status, cat, qualification, expLvl, location, lang, page }),
         recruiter ? getNameFromSlug("orgs", recruiter, lang) : undefined,
-        location ? getLocationNameFromSlug(location, lang) : undefined,
+        location ? getNameFromSlug('locations', location, lang) : undefined,
         qualification ? getNameFromSlug('qualifications', qualification, lang) : undefined,
         getMessages(lang)
     ]);
