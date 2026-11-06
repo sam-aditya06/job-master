@@ -125,7 +125,7 @@
 
 @layer base {
   * {
-    @apply box-border border-border outline-ring/50;
+    @apply box-border border-border outline-ring/50 font-sans;
   }
 
   body {
@@ -135,11 +135,15 @@
   /* Custom Styling (CMS Content) */
 
   .cms-content article {
-    @apply flex flex-col gap-6 w-full;
+    @apply flex flex-col gap-10 w-full;
   }
 
-  .cms-content article> :is(section, header) {
-    @apply flex flex-col gap-4;
+  .cms-content article > header {
+    @apply flex flex-col gap-3;
+  }
+
+  .cms-content article > section {
+    @apply flex flex-col gap-5;
   }
 
   .cms-content article section section {
@@ -147,7 +151,7 @@
   }
 
   .cms-content h1 {
-    @apply text-3xl text-brand font-bold font-sans;
+    @apply text-3xl text-brand font-bold;
   }
 
   .cms-content h2 {
@@ -155,11 +159,15 @@
   }
 
   .cms-content h3 {
-    @apply text-xl text-brand font-bold;
+    @apply text-xl font-bold;
+  }
+
+  .cms-content h3[id] {
+    @apply text-brand;
   }
 
   .cms-content h4 {
-    @apply text-lg text-brand font-bold;
+    @apply text-lg font-medium;
   }
 
   .cms-content p {

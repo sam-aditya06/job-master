@@ -3,10 +3,11 @@
 import Sidebar from "@/components/sidebars/sidebar";
 import { ContentSkeleton } from "@/components/skeletons";
 import { useContentLoader } from "@/lib/context/paginateContext";
+import scrollToHash from "@/lib/hashScroll";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
-export default function RecruitmentStage({ content }) {
+export default function Recruitment({ content }) {
     const sp = useSearchParams();
     const stage = sp.get('stage');
     const year = sp.get('year');
@@ -16,7 +17,11 @@ export default function RecruitmentStage({ content }) {
     useEffect(() => {
         if (isLoading)
             setIsLoading(false);
-    }, [stage, year])
+    }, [stage, year]);
+
+    useEffect(() => {
+        scrollToHash();
+    }, []);
 
     return (
         <>

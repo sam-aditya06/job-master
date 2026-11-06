@@ -12,20 +12,20 @@ import { getMessages } from "@/lib/utils";
 export async function generateMetadata({ params, searchParams }) {
     const [
         { lang },
-        { search, org, recruiter, status, cat, qualification, expLvl, location }
+        { search, recruiter, status, cat, qualification, expLvl, location }
     ] = await Promise.all([
         params,
         searchParams
     ])
 
     const [meta, itemCount] = await Promise.all([
-        getRecruitmentsMetadata({ org, recruiter, status, cat, qualification, expLvl, location, lang }),
-        !search ? getRecruitmentCount({ org, recruiter, status, cat, qualification, expLvl, location, lang }) : 0
+        getRecruitmentsMetadata({ recruiter, status, cat, qualification, expLvl, location, lang }),
+        !search ? getRecruitmentCount({ recruiter, status, cat, qualification, expLvl, location, lang }) : 0
     ]);
 
     const buildCanonical = () => {
         const url = new URL(`${process.env.NEXT_PUBLIC_DOMAIN}/recruitments`);
-        const indexableParams = { org, recruiter, status, cat, qualification, expLvl, location };
+        const indexableParams = { recruiter, status, cat, qualification, expLvl, location };
         Object.entries(indexableParams).forEach(([key, value]) => {
             if (value) url.searchParams.set(key, value)
         })
@@ -60,25 +60,23 @@ export default async function RecruitmentsPage({ params, searchParams }) {
 }
 
 async function MainContent({ lang, sp }) {
-    const { search, org, recruiter, status, cat, location, qualification, expLvl, page } = sp;
+    const { search, recruiter, status, cat, location, qualification, expLvl, page } = sp;
 
-    const [{ itemCount, recruitments }, orgName, recruiterName, locationName, qualificationName, messages] = await Promise.all([
-        getRecruitments({ search, org, recruiter, status, cat, qualification, expLvl, location, lang, page }),
-        org ? getNameFromSlug("orgs", org, lang) : undefined,
+    const [{ itemCount, recruitments }, recruiterName, locationName, qualificationName, messages] = await Promise.all([
+        getRecruitments({ search, recruiter, status, cat, qualification, expLvl, location, lang, page }),
         recruiter ? getNameFromSlug("orgs", recruiter, lang) : undefined,
-        location && location !== 'all-india' ? getLocationNameFromSlug(location, lang) : undefined,
-        qualification && qualification !== 'graduate' ? getNameFromSlug('qualifications', qualification, lang) : undefined,
+        location ? getLocationNameFromSlug(location, lang) : undefined,
+        qualification ? getNameFromSlug('qualifications', qualification, lang) : undefined,
         getMessages(lang)
     ]);
 
     const displayedParams = {
         search: search ? { value: `${messages.jobs.search}: ${search}`, slug: search } : undefined,
-        org: org ? { value: orgName, slug: org } : undefined,
-        recruiter: recruiter ? { value: recruiterName, slug: org } : undefined,
+        recruiter: recruiter ? { value: recruiterName, slug: recruiter } : undefined,
         status: status ? { value: messages.jobs.filters.rStatuses[status], slug: status } : undefined,
         cat: cat ? { value: messages.jobs.filters.categories[cat], slug: cat } : undefined,
         location: location ? { value: locationName || messages.jobs.filters.locations[location], slug: location } : undefined,
-        qualification: qualification ? { value: qualificationName || messages.jobs.filters.qualifications[qualification], slug: location } : undefined,
+        qualification: qualification ? { value: qualificationName, slug: qualification } : undefined,
         expLvl: expLvl ? { value: messages.jobs.filters.expLvls[expLvl], slug: expLvl } : undefined,
     }
 

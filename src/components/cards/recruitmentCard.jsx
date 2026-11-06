@@ -139,6 +139,8 @@ export function RecruitmentCardV2({ recruitment }) {
         setOpen((prev) => !prev);
     };
 
+    console.log({ date: recruitment.registrationEndDate });
+
     return (
         <Link className="group" href={`/${lang}/recruitments/${recruitment.slug}`}>
             <Card
@@ -204,7 +206,7 @@ export function RecruitmentCardV2({ recruitment }) {
                                     <div className="border-r border-r-muted-foreground h-4"></div>
                                     <div className="flex items-center gap-1">
                                         <span className="flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400">
-                                            <Clock className="w-3 h-3" /> {format(parseISO(recruitment.registrationEndDate), "dd MMM, yyyy")}
+                                            <Clock className="w-3 h-3" /> {recruitment.registrationEndDate}
                                         </span>
                                         <Tooltip open={open} onOpenChange={setOpen}>
                                             <TooltipTrigger asChild>

@@ -1,13 +1,16 @@
 'use client';
 
-import { useContentLoader } from "@/lib/context/paginateContext";
+import { useEffect, useState } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { useMessages } from "../messageProvider";
+
+import { useContentLoader } from "@/lib/context/paginateContext";
+import { useMessages } from "@/components/messageProvider";
+import { JobSidebarSkeleton } from "../skeletons";
+import Link from "next/link";
 
 export default function JobSidebar({ screen, handleSheetClose }) {
 
-    const { job, jobNavSlug } = useParams();
+    const { job, jobNavSlug, lang } = useParams();
     const router = useRouter();
     const pathName = usePathname();
     const { messages } = useMessages();
@@ -15,6 +18,32 @@ export default function JobSidebar({ screen, handleSheetClose }) {
     const { setIsLoading } = useContentLoader();
 
     const [selected, setSelected] = useState(() => jobNavSlug || (pathName.includes('/recruitments') && 'recruitments') || 'overview');
+    const [linkHeadings, setLinkHeadings] = useState(undefined);
+
+    useEffect(() => {
+        const fetchSidebar = async () => {
+            try {
+                const res = await fetch(`/api/sidebar/${lang}/jobs/${job}`);
+
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        setLinkHeadings(null);
+                        return;
+                    }
+
+                    throw new Error(`Failed to fetch sidebar: ${res.status}`);
+                }
+
+                const data = await res.json();
+                if (data)
+                    setLinkHeadings(data);
+            } catch (error) {
+                console.error("Failed to fetch sidebar:", error);
+            }
+        };
+
+        fetchSidebar();
+    }, []);
 
     const handleSelect = (slug) => {
         screen === 'mobile' && handleSheetClose();
@@ -24,19 +53,26 @@ export default function JobSidebar({ screen, handleSheetClose }) {
     }
 
     return (
-        <div className="flex flex-col gap-5 mt-12 xl:mt-5 p-2 h-full overflow-y-auto">
-            <p className={`flex justify-center border border-transparent rounded-md py-1 w-full${selected === 'overview' ? ' bg-brand text-white' : ' hover:border-brand hover:text-brand'} cursor-pointer`} onClick={() => handleSelect('overview')}>
-                {messages.job.overview}
-            </p>
-            <p className={`flex justify-center border border-transparent rounded-md py-1 w-full${selected === 'eligibility-criteria' ? ' bg-brand text-white' : ' hover:border-brand hover:text-brand'} cursor-pointer`} onClick={() => handleSelect('eligibility-criteria')}>
-                {messages.job.eligibilityCriteria}
-            </p>
-            <p className={`flex justify-center border border-transparent rounded-md py-1 w-full${selected === 'selection-process' ? ' bg-brand text-white' : ' hover:border-brand hover:text-brand'} cursor-pointer`} onClick={() => handleSelect('selection-process')}>
-                {messages.job.selectionProcess}
-            </p>
-            <p className={`flex justify-center border border-transparent rounded-md py-1 w-full${selected === 'recruitments' ? ' bg-brand text-white' : ' hover:border-brand hover:text-brand'} cursor-pointer`} onClick={() => handleSelect('recruitments')}>
-                {messages.job.recruitments}
-            </p>
-        </div>
+        <>
+            {
+                linkHeadings ?
+                    <div className="flex flex-col gap-5 mt-12 xl:mt-0 p-2 h-full overflow-y-auto">
+                        <p className="text-lg text-muted-foreground">{messages.recruitment.heading}</p>
+                        <div className="flex flex-col gap-5 pl-5">
+                            {
+                                linkHeadings.map(lh => (
+                                    <Link key={lh.slug} href={`/${lang}/jobs/${job}#${lh.slug}`} className="font-semibold hover:text-brand cursor-pointer">
+                                        {lh.headingName}
+                                    </Link>
+
+                                ))
+                            }
+                            <Link href={`/${lang}/jobs/${job}#recruitments`} className="font-semibold hover:text-brand cursor-pointer">
+                                {messages.job.recruitments.heading}
+                            </Link>
+                        </div>
+                    </div> : <JobSidebarSkeleton />
+            }
+        </>
     )
 }

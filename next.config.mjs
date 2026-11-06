@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: false,
-    htmlLimitedBots: /.*/
+    htmlLimitedBots: /.*/   
 };
 
 export default nextConfig;

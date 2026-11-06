@@ -17,7 +17,6 @@ export default function RecruitmentsSidebar({ containerRef }) {
     const { optimisticParams, applyFilter, removeFilter } = useFilter();
 
     const paramsCat = optimisticParams.cat;
-    const paramsOrg = optimisticParams.org;
     const paramsRecruiter = optimisticParams.recruiter;
     const paramsLocation = optimisticParams.location;
     const paramsQualification = optimisticParams.qualification;
@@ -25,7 +24,6 @@ export default function RecruitmentsSidebar({ containerRef }) {
     const status = optimisticParams.status;
 
     const [recruitmentsFilters, setRecruitmentFilters] = useState(undefined);
-    const [org, setOrg] = useState(null);
     const [recruiter, setRecruiter] = useState(null);
     const [qualification, setQualification] = useState(null);
     const [location, setLocation] = useState(null);
@@ -69,17 +67,6 @@ export default function RecruitmentsSidebar({ containerRef }) {
     }, [paramsLocation, recruitmentsFilters]);
 
     useEffect(() => {
-        if (!paramsOrg)
-            setOrg(null);
-
-        if (!recruitmentsFilters?.orgs) return;
-
-        const orgObj = recruitmentsFilters.orgs.find(org => org.slug === paramsOrg);
-        setOrg(orgObj);
-
-    }, [paramsOrg, recruitmentsFilters]);
-
-    useEffect(() => {
         if (!paramsRecruiter)
             setRecruiter(null);
 
@@ -120,27 +107,6 @@ export default function RecruitmentsSidebar({ containerRef }) {
                 recruitmentsFilters ?
                     <div className="grow flex flex-col gap-5 mt-12 lg:mt-0 h-full p-2 overflow-y-auto">
                         <div className="flex flex-col gap-3">
-                            <Label htmlFor='hiringOrg'>{messages.jobs.filterLabels.hiringOrg}</Label>
-                            <Combobox
-                                items={recruitmentsFilters.orgs}
-                                value={org ?? ""}
-                                itemToStringLabel={(org) => org.name}
-                                onValueChange={(value) => value ? applyFilter({ org: value.slug }) : removeFilter('org')}
-                            >
-                                <ComboboxInput id='hiringOrg' className='hover:border-ring hover:ring-[3px] hover:ring-ring/50' placeholder='Employer (e.g., PNB)' showClear={org} />
-                                <ComboboxContent container={containerRef}>
-                                    <ComboboxEmpty>No items found.</ComboboxEmpty>
-                                    <ComboboxList>
-                                        {
-                                            (org) => (
-                                                <ComboboxItem key={org.slug} value={org} disabled={org.isDisabled}>{org.name}</ComboboxItem>
-                                            )
-                                        }
-                                    </ComboboxList>
-                                </ComboboxContent>
-                            </Combobox>
-                        </div>
-                        <div className="flex flex-col gap-3">
                             <Label htmlFor='recruiter'>{messages.recruitments.filterLabels.recruiter}</Label>
                             <Combobox
                                 items={recruitmentsFilters.recruiters}
@@ -148,7 +114,7 @@ export default function RecruitmentsSidebar({ containerRef }) {
                                 itemToStringLabel={(recruiter) => recruiter.name}
                                 onValueChange={(value) => value ? applyFilter({ recruiter: value.slug }) : removeFilter('recruiter')}
                             >
-                                <ComboboxInput id='recruiter' className='hover:border-ring hover:ring-[3px] hover:ring-ring/50' placeholder='e.g., IBPS, RRB, UPSC' showClear={org} />
+                                <ComboboxInput id='recruiter' className='hover:border-ring hover:ring-[3px] hover:ring-ring/50' placeholder='e.g., IBPS, RRB, UPSC' showClear={recruiter} />
                                 <ComboboxContent container={containerRef}>
                                     <ComboboxEmpty>No items found.</ComboboxEmpty>
                                     <ComboboxList>

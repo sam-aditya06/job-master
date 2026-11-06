@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import Overview from "./overview";
+import Job from "./job";
 import { getJobContent, getJobMetadata } from "@/lib/serverUtils";
 import { ContentSkeleton } from "@/components/skeletons";
 import { notFound } from "next/navigation";
@@ -10,7 +10,10 @@ export const generateMetadata = async ({ params }) => {
     const jobDetails = await getJobMetadata(lang, job);
 
     if (!jobDetails)
-        return null;
+        return {
+            title: "Job not found",
+            robots: { index: false, follow: false }
+        };
 
     const { title, description } = jobDetails;
 
@@ -35,10 +38,12 @@ export default function JobPage({ params }) {
 
 async function MainContent({ params }) {
     const { job, lang } = await params;
-    const content = await getJobContent(lang, job);
+    const jobDetails = await getJobContent(lang, job);
 
-    if (!content)
+    if (!jobDetails)
         notFound();
 
-    return <Overview content={content} />
+    const { content, recruitments } = jobDetails;
+
+    return <Job content={content} recruitments={recruitments} />
 }

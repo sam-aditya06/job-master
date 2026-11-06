@@ -2,23 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { Check, Clock, Hourglass } from "lucide-react";
 
-import { useContentLoader } from "@/lib/context/paginateContext";
 import { RecruitmentSidebarSkeleton } from "../skeletons";
 import { useMessages } from "../messageProvider";
 
-export default function RecruitmentSidebar({ screen, handleSheetClose }) {
+export default function RecruitmentSidebar() {
 
-    const { lang, recruitment, stage } = useParams();
+    const { lang, recruitment } = useParams();
     const { messages } = useMessages();
     const router = useRouter();
 
-    const { setIsLoading } = useContentLoader();
-
     const [stages, setStages] = useState(undefined);
-    const [selected, setSelected] = useState('');
 
     useEffect(() => {
         const fetchSidebar = async () => {
@@ -27,7 +24,7 @@ export default function RecruitmentSidebar({ screen, handleSheetClose }) {
 
                 if (!res.ok) {
                     if (res.status === 404) {
-                        setSidebarData(null);
+                        setStages(null);
                         return;
                     }
 
@@ -45,75 +42,68 @@ export default function RecruitmentSidebar({ screen, handleSheetClose }) {
         fetchSidebar();
     }, []);
 
-    useEffect(() => {
-        stage && setSelected(stage);
-    }, [stage]);
-
     const handleSelect = (slug) => {
-        screen === 'mobile' && handleSheetClose();
-        setIsLoading(true);
-        setSelected(slug);
         slug ?
-            router.replace(`/${lang}/recruitments/${recruitment}/${slug}`) :
-            router.replace(`/${lang}/recruitments/${recruitment}`);
-
+            router.push(`/${lang}/recruitments/${recruitment}#${slug}`) :
+            router.push(`/${lang}/recruitments/${recruitment}#overview`)
     }
 
     return (
         <>
             {
                 stages ?
-                    <div className="grow flex flex-col gap-5 mt-12 lg:mt-0 h-full p-2 overflow-y-auto">
-                        <div className={`flex justify-center border rounded-md mt-5 pl-2 py-1 w-full cursor-pointer${!selected ? ' bg-brand text-white' : ' hover:bg-brand hover:text-white'}`} onClick={() => handleSelect(undefined)}>
-                            {messages.recruitment.overview}
+                    <div className="grow flex flex-col gap-4 mt-12 lg:mt-0 h-full p-2 overflow-y-auto">
+                        <p className="text-lg text-muted-foreground">{messages.recruitment.heading}</p>
+                        <div className="flex items-center gap-2">
+                            <div className="flex justify-center items-center h-4 w-4 border border-brand rounded-full bg-brand p-[0.1rem]">
+                                <Check className="stroke-white stroke-3" />
+                            </div>
+                            <Link href={`/${lang}/recruitments/${recruitment}#overview`} className="flex text-sm font-semibold hover:text-brand cursor-pointer" onClick={() => handleSelect(undefined)}>
+                                {messages.recruitment.overview}
+                            </Link>
                         </div>
-                        <p className="text-muted-foreground">{messages.recruitment.timeline}</p>
-                        <div className="flex flex-col">
-                            {
-                                stages.map((stage, i) => (
-                                    <div key={stage.slug} className="flex flex-col text-sm">
+                        {
+                            stages.map((stage) => (
+                                <div key={stage.slug} className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2">
                                         {
                                             stage.status === 'upcoming' &&
-
-                                            <div className="flex gap-2 items-center">
-                                                <div className="flex gap-2 justify-center items-center h-5 w-5 border border-brand rounded-full p-[0.2rem]">
-                                                    <Hourglass size={15} className="stroke-brand" />
-                                                </div>
-                                                <p className={`${selected === stage.slug ? 'text-brand font-bold' : 'hover:text-brand hover:font-bold'} cursor-pointer`} href={`/recruitments/${recruitment}?stage=${stage.slug}`} onClick={() => handleSelect(stage.slug)}>
-                                                    {stage.name}
-                                                </p>
+                                            <div className="flex gap-2 justify-center items-center h-4 w-4 border border-brand rounded-full p-[0.2rem]">
+                                                <Hourglass className="stroke-brand" />
                                             </div>
                                         }
                                         {
                                             stage.status === 'ongoing' &&
-
-                                            <div className="flex gap-2 items-center">
-                                                <div className="flex justify-center items-center h-5 w-5 border border-brand rounded-full p-[0.1rem]">
-                                                    <Clock className="rounded-full w-full h-full stroke-brand" />
-                                                </div>
-                                                <p className={`${selected === stage.slug ? 'text-brand font-bold' : 'hover:text-brand hover:font-bold'} cursor-pointer`} href={`/recruitments/${recruitment}?stage=${stage.slug}`} onClick={() => handleSelect(stage.slug)}>
-                                                    {stage.name}
-                                                </p>
+                                            <div className="flex justify-center items-center h-4 w-4 border border-brand rounded-full p-[0.1rem]">
+                                                <Clock className="rounded-full w-full h-full stroke-brand" />
                                             </div>
                                         }
                                         {
                                             stage.status === 'completed' &&
-                                            <div className="flex gap-2 items-center">
-                                                <div className="flex justify-center items-center h-5 w-5 border border-brand rounded-full bg-brand p-[0.1rem]">
-                                                    <Check size={18} className="stroke-white stroke-3" />
-                                                </div>
-                                                <p className={`${selected === stage.slug ? 'text-brand font-bold' : 'hover:text-brand hover:font-bold'} cursor-pointer`} href={`/recruitments/${recruitment}?stage=${stage.slug}`} onClick={() => handleSelect(stage.slug)}>
-                                                    {stage.name}
-                                                </p>
+                                            <div className="flex justify-center items-center h-4 w-4 border border-brand rounded-full bg-brand p-[0.1rem]">
+                                                <Check className="stroke-white stroke-3" />
                                             </div>
                                         }
-                                        {i !== stages.length - 1 && stages[i + 1].status === 'upcoming' && <div className="border border-dashed border-brand ml-[0.6rem] w-0 h-6"></div>}
-                                        {i !== stages.length - 1 && stages[i + 1].status === 'ongoing' && <div className="border border-brand ml-[0.6rem] w-0 h-6"></div>}
-                                        {i !== stages.length - 1 && stages[i + 1].status === 'completed' && <div className="border border-brand ml-[0.6rem] w-0 h-6"></div>}
+                                        <Link href={`/${lang}/recruitments/${recruitment}#${stage.slug}`} className="text-sm font-semibold hover:text-brand cursor-pointer" onClick={() => handleSelect(stage.slug)}>
+                                            {stage.name}
+                                        </Link>
                                     </div>
-                                ))
-                            }
-                        </div>
+                                    {
+                                        stage.linkHeadings?.length > 0 &&
+                                        <div className="flex flex-col gap-2 pl-10">
+                                            {
+                                                stage.linkHeadings?.map(lh => (
+                                                    <Link key={lh.slug} href={`/${lang}/recruitments/${recruitment}#${lh.slug}`} className="text-sm hover:text-brand cursor-pointer">
+                                                        {lh.headingName}
+                                                    </Link>
+                                                ))
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            ))
+                        }
+
                     </div> :
                     <RecruitmentSidebarSkeleton />
             }

@@ -18,62 +18,65 @@ export default function QuickLinks({ quickLinks }) {
                 <h1 className="text-4xl text-brand">{messages.quickLinks.heading}</h1>
                 <p className="text-justify mt-5">{messages.quickLinks.description}</p>
             </section>
-            {
-                tenthPassRecruitments?.length > 0 &&
-                <section>
-                    <h2 className="text-lg font-bold">{messages.quickLinks.tenthPassRecruitmentHeading}</h2>
-                    <ul className="flex-flex-col gap-1 mt-2 pl-6 !list-disc">
-                        {
-                            tenthPassRecruitments.map(rec => (
-                                <li key={rec.slug}>
-                                    <Link className="text-brand underline" href={`/${lang}/recruitments/${rec.slug}`} target="_blank">
-                                        {rec.name}
-                                    </Link>
-                                    {" " + `(${rec.stageStatus})`}
-                                </li>
-                            ))
-                        }
-                    </ul>
-                </section>
-            }
-            {
-                twelfthPassRecruitments?.length > 0 &&
-                <section>
-                    <h2 className="text-lg font-bold">{messages.quickLinks.twelfthPassRecruitmentHeading}</h2>
-                    <ul className="flex-flex-col gap-1 mt-2 pl-6 !list-disc">
-                        {
-                            twelfthPassRecruitments.map(rec => (
-                                <li key={rec.slug}>
-                                    <Link className="text-brand underline" href={`/${lang}/recruitments/${rec.slug}`} target="_blank">
-                                        {rec.name}
-                                    </Link>
-                                    {" " + `(${rec.stageStatus})`}
-                                </li>
-                            ))
-                        }
-                    </ul>
-                </section>
-            }
-            {
-                graduateRecruitments?.length > 0 &&
-                <section>
-                    <h2 className="text-lg font-bold">{messages.quickLinks.graduateRecruitmentHeading}</h2>
-                    <ul className="flex-flex-col gap-1 mt-2 pl-6 !list-disc">
-                        {
-                            graduateRecruitments.map(rec => (
-                                <li key={rec.slug}>
-                                    <Link className="text-brand underline" href={`/${lang}/recruitments/${rec.slug}`} target="_blank">
-                                        {rec.name}
-                                    </Link>
-                                    {" " + `(${rec.stageStatus})`}
-                                </li>
-                            ))
-                        }
-                    </ul>
-                </section>
-            }
             <section>
-                <h2 className="text-lg font-bold">{messages.quickLinks.admitCardHeading}</h2>
+                <h2 className="text-lg font-bold">{messages.quickLinks.tenthPassRecruitmentHeading}</h2>
+                {
+                    tenthPassRecruitments?.length > 0 ?
+                        <ul className="flex-flex-col gap-1 mt-2 pl-6 !list-disc">
+                            {
+                                tenthPassRecruitments.map(rec => (
+                                    <li key={rec.slug}>
+                                        <Link className="text-brand underline" href={`/${lang}/recruitments/${rec.slug}`} target="_blank">
+                                            {rec.name}
+                                        </Link>
+                                        {" " + `(${rec.stageStatus})`}
+                                    </li>
+                                ))
+                            }
+                        </ul> :
+                        <p className="ml-2 mt-2 text-muted-foreground">{messages.quickLinks.tenthPassRecruitmentNotFound}</p>
+                }
+            </section>
+            <section>
+                <h2 className="text-lg font-bold">{messages.quickLinks.twelfthPassRecruitmentHeading}</h2>
+                {
+                    twelfthPassRecruitments?.length > 0 ?
+                        <ul className="flex-flex-col gap-1 mt-2 pl-6 !list-disc">
+                            {
+                                twelfthPassRecruitments.map(rec => (
+                                    <li key={rec.slug}>
+                                        <Link className="text-brand underline" href={`/${lang}/recruitments/${rec.slug}`} target="_blank">
+                                            {rec.name}
+                                        </Link>
+                                        {" " + `(${rec.stageStatus})`}
+                                    </li>
+                                ))
+                            }
+                        </ul> :
+                        <p className="ml-2 mt-2 text-muted-foreground">{messages.quickLinks.twelfthPassRecruitmentNotFound}</p>
+                }
+            </section>
+            <section>
+                <h2 className="text-lg font-bold">{messages.quickLinks.graduateRecruitmentHeading}</h2>
+                {
+                    graduateRecruitments?.length > 0 ?
+                        <ul className="flex-flex-col gap-1 mt-2 pl-6 !list-disc">
+                            {
+                                graduateRecruitments.map(rec => (
+                                    <li key={rec.slug}>
+                                        <Link className="text-brand underline" href={`/${lang}/recruitments/${rec.slug}`} target="_blank">
+                                            {rec.name}
+                                        </Link>
+                                        {" " + `(${rec.stageStatus})`}
+                                    </li>
+                                ))
+                            }
+                        </ul> :
+                        <p className="ml-2 mt-2 text-muted-foreground">{messages.quickLinks.graduateRecruitmentNotFound}</p>
+                }
+            </section>
+            <section>
+                <h2 className="text-lg font-bold">{messages.quickLinks.admitCardsHeading}</h2>
                 {
                     latestAdmitCards?.length > 0 ?
                         <ul className="flex-flex-col gap-1 mt-2 pl-6 !list-disc">
@@ -88,11 +91,11 @@ export default function QuickLinks({ quickLinks }) {
                                 ))
                             }
                         </ul> :
-                        <p className="ml-2 mt-2 text-muted-foreground">No admit cards found</p>
+                        <p className="ml-2 mt-2 text-muted-foreground">{messages.quickLinks.admitCardsNotFound}</p>
                 }
             </section>
             <section>
-                <h2 className="text-lg font-bold">{messages.quickLinks.resultHeading}</h2>
+                <h2 className="text-lg font-bold">{messages.quickLinks.resultsHeading}</h2>
                 {
                     latestResults?.length > 0 ?
                         <ul className="flex-flex-col gap-1 mt-2 pl-6 !list-disc">
@@ -107,11 +110,11 @@ export default function QuickLinks({ quickLinks }) {
                                 ))
                             }
                         </ul> :
-                        <p className="ml-2 mt-2 text-muted-foreground">No results found</p>
+                        <p className="ml-2 mt-2 text-muted-foreground">{messages.quickLinks.resultsNotFound}</p>
                 }
             </section>
             <section>
-                <h2 className="text-lg font-bold">{messages.quickLinks.scorecardHeading}</h2>
+                <h2 className="text-lg font-bold">{messages.quickLinks.scorecardsHeading}</h2>
                 {
                     latestScorecards?.length > 0 ?
                         <ul className="flex-flex-col gap-1 mt-2 pl-6 !list-disc">
@@ -126,7 +129,7 @@ export default function QuickLinks({ quickLinks }) {
                                 ))
                             }
                         </ul> :
-                        <p className="ml-2 mt-2 text-muted-foreground">No scorecards found</p>
+                        <p className="ml-2 mt-2 text-muted-foreground">{messages.quickLinks.scorecardsNotFound}</p>
                 }
             </section>
         </div>

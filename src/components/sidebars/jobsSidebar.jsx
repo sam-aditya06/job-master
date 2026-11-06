@@ -11,7 +11,7 @@ import { capitalize, slugify } from "@/lib/utils";
 import { JobsSidebarSkeleton } from "../skeletons";
 import { useMessages } from "../messageProvider";
 
-export default function JobsSidebar() {
+export default function JobsSidebar({ containerRef }) {
 
     const { lang, messages } = useMessages();
     const { optimisticParams, applyFilter, removeFilter } = useFilter();
@@ -108,7 +108,7 @@ export default function JobsSidebar() {
                             <Label htmlFor='hiringOrg'>{messages.jobs.filterLabels.hiringOrg}</Label>
                             <Combobox items={jobsFilters.orgs} itemToStringLabel={(org) => org.name} value={org ?? ""} onValueChange={(value) => value ? applyFilter({ org: value.slug }) : removeFilter('org')} >
                                 <ComboboxInput id='hiringOrg' className='hover:border-ring hover:ring-[3px] hover:ring-ring/50' placeholder='Employer (e.g., PNB)' showClear={org} />
-                                <ComboboxContent>
+                                <ComboboxContent container={containerRef}>
                                     <ComboboxEmpty>No items found.</ComboboxEmpty>
                                     <ComboboxList>
                                         {
@@ -150,7 +150,7 @@ export default function JobsSidebar() {
                                 onValueChange={(value) => value ? applyFilter({ cat: value.slug }) : removeFilter('cat')}
                             >
                                 <ComboboxInput id='jobCategory' className='hover:border-ring hover:ring-[3px] hover:ring-ring/50' placeholder='e.g., Banking, IT' showClear={cat} />
-                                <ComboboxContent>
+                                <ComboboxContent container={containerRef}>
                                     <ComboboxEmpty>No items found.</ComboboxEmpty>
                                     <ComboboxList>
                                         {
@@ -171,7 +171,7 @@ export default function JobsSidebar() {
                                 onValueChange={(value) => value ? applyFilter({ location: value.slug }) : removeFilter('location')}
                             >
                                 <ComboboxInput id='location' className='hover:border-ring hover:ring-[3px] hover:ring-ring/50' placeholder='Select a location' showClear />
-                                <ComboboxContent>
+                                <ComboboxContent container={containerRef}>
                                     <ComboboxEmpty>No items found.</ComboboxEmpty>
                                     <ComboboxList>
                                         {
@@ -192,7 +192,7 @@ export default function JobsSidebar() {
                                 onValueChange={(value) => value ? applyFilter({ qualification: value.slug }) : removeFilter('qualification')}
                             >
                                 <ComboboxInput className='hover:border-ring hover:ring-[3px] hover:ring-ring/50' placeholder='Select Qualification' showClear={qualification} />
-                                <ComboboxContent>
+                                <ComboboxContent container={containerRef}>
                                     <ComboboxEmpty>No items found.</ComboboxEmpty>
                                     <ComboboxList>
                                         {

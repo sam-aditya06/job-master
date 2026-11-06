@@ -12,7 +12,7 @@ export async function GET(req, { params }) {
     let data = {};
     if (slug[1] === 'jobs') {
         if (slug.length > 2) {
-            data = await getJobSidebarFields(slug[2]);
+            data = await getJobSidebarFields(lang, slug[2]);
         }
         else {
             data = await getJobsFilters({ lang, sp });

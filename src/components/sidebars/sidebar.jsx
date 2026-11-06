@@ -71,7 +71,7 @@ export default function Sidebar({ screen }) {
                     <>
                         {pathName === `/${lang}/jobs` && <JobsSidebar jobsFilters={sidebarData} />}
                         {pathName.includes('/jobs/') && <JobSidebar />}
-                        {pathName === `/${lang}/recruitments` && <RecruitmentsSidebar recruitmentsFilters={sidebarData} />}
+                        {pathName === `/${lang}/recruitments` && <RecruitmentsSidebar />}
                         {pathName.includes('/recruitments/') && <RecruitmentSidebar details={sidebarData} />}
                     </> :
                     <Sheet open={open} onOpenChange={setOpen}>
@@ -87,7 +87,7 @@ export default function Sidebar({ screen }) {
                         </SheetTrigger>
                         <SheetContent side='left' className='px-3' ref={containerRef}>
                             <SheetTitle className='hidden'>Menu</SheetTitle>
-                            {pathName === `/${lang}/jobs` && <JobsSidebar jobsFilters={sidebarData} />}
+                            {pathName === `/${lang}/jobs` && <JobsSidebar containerRef={containerRef} />}
                             {pathName.includes('/jobs/') && <JobSidebar screen={screen} handleSheetClose={handleSheetClose} />}
                             {pathName === `/${lang}/recruitments` && <RecruitmentsSidebar containerRef={containerRef} />}
                             {pathName.includes('/recruitments/') && <RecruitmentSidebar screen={screen} details={sidebarData} handleSheetClose={handleSheetClose} />}

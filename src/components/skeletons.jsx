@@ -111,53 +111,14 @@ export function SearchListSkeleton({ type }) {
 
 export function JobSidebarSkeleton() {
     return (
-        <div className="p-2 space-y-6 animate-pulse">
-
-            <div className="space-y-2">
-                <div className="h-6 w-24 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-                <div className="h-9 w-full rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-            </div>
-
-            <div className="space-y-2">
-                <div className="h-6 w-20 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-                <div className="h-9 w-full rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-            </div>
-
-            <div className="space-y-3">
-                <div className="h-6 w-32 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-
-                <div className="space-y-2">
-                    <div className="flex justify-between items-center gap-3">
-                        <div className="h-4 w-32 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-                        <div className="h-4 w-4 rounded-full bg-neutral-300 dark:bg-neutral-800"></div>
-                    </div>
-
-                    <div className="flex justify-between items-center gap-3">
-                        <div className="h-4 w-28 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-                        <div className="h-4 w-4 rounded-full bg-neutral-300 dark:bg-neutral-800"></div>
-                    </div>
-
-                    <div className="flex justify-between items-center gap-3">
-                        <div className="h-4 w-36 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-                        <div className="h-4 w-4 rounded-full bg-neutral-300 dark:bg-neutral-800"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="space-y-3">
-                <div className="h-5 w-28 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-
-                <div className="space-y-2">
-                    <div className="flex justify-between items-center gap-3">
-                        <div className="h-4 w-24 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-                        <div className="h-4 w-4 rounded-full bg-neutral-300 dark:bg-neutral-800"></div>
-                    </div>
-
-                    <div className="flex justify-between items-center gap-3">
-                        <div className="h-4 w-32 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-                        <div className="h-4 w-4 rounded-full bg-neutral-300 dark:bg-neutral-800"></div>
-                    </div>
-                </div>
+        <div className="p-2 space-y-5 animate-pulse">
+            <div className="w-fit rounded-md bg-neutral-300 dark:bg-neutral-800 text-lg text-transparent">Table of Content</div>
+            <div className="flex flex-col gap-5 pl-5">
+                {
+                    Array.from({ length: 9 }).map((_, i) => (
+                        <div key={i} className="h-6 w-2/3 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
+                    ))
+                }
             </div>
         </div>
     )
@@ -222,23 +183,29 @@ export function JobsSidebarSkeleton() {
 
 export function RecruitmentSidebarSkeleton() {
     return (
-        <div className="p-2 space-y-5 animate-pulse">
-            <div className="mt-5 h-8 w-full rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-            <div className="h-6 w-1/3 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-
-            <div className="flex flex-col">
-                {
-                    Array.from({ length: 10 }).map((_, i) => (
-                        <div key={i} className="flex flex-col">
-                            <div className="flex gap-2 items-center w-full">
-                                <div className="h-5 w-5 rounded-full bg-neutral-300 dark:bg-neutral-800"></div>
-                                <div className="h-5 w-2/3 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
-                            </div>
-                            {i !== 9 && <div className="border border-neutral-300 dark:border-neutral-800 ml-[0.6rem] w-0 h-6"></div>}
-                        </div>
-                    ))
-                }
+        <div className="mt-12 lg:mt-0 p-2 space-y-4 animate-pulse">
+            <div className="w-fit rounded-md bg-neutral-300 dark:bg-neutral-800 text-lg text-transparent">Table of Content</div>
+            <div className="flex gap-2 items-center w-full">
+                <div className="h-5 w-5 rounded-full bg-neutral-300 dark:bg-neutral-800"></div>
+                <div className="w-fit rounded-md bg-neutral-300 dark:bg-neutral-800 text-sm text-transparent">Overview</div>
             </div>
+            {
+                Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="flex flex-col gap-2">
+                        <div className="flex gap-2 items-center w-full">
+                            <div className="h-5 w-5 rounded-full bg-neutral-300 dark:bg-neutral-800"></div>
+                            <div className="h-5 w-1/2 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
+                        </div>
+                        <div className="flex flex-col gap-2 pl-10">
+                            {
+                                Array.from({ length: 3 }).map((_, i) => (
+                                    <div key={i} className="h-5 w-3/4 rounded-md bg-neutral-300 dark:bg-neutral-800"></div>
+                                ))
+                            }
+                        </div>
+                    </div>
+                ))
+            }
         </div>
     )
 }

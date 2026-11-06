@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { getRecruitmentContent, getRecruitmentMetadata } from "@/lib/serverUtils";
 
-import RecruitmentOverview from "./overview";
+import Recruitment from "./recruitment";
 
 export const generateMetadata = async ({ params }) => {
     const { lang, recruitment, year } = await params;
@@ -10,7 +10,10 @@ export const generateMetadata = async ({ params }) => {
     const recruitmentDetails = await getRecruitmentMetadata(lang, recruitment, year);
 
     if (!recruitmentDetails)
-        notFound();
+        return {
+            title: 'Recruitment not found',
+            robots: { index: false, follow: false }
+        };
 
     const { title, description } = recruitmentDetails;
     return {
@@ -30,7 +33,7 @@ export default async function RecruitmentPage({ params }) {
 
     if (content)
         return (
-            <RecruitmentOverview content={content} />
+            <Recruitment content={content} />
         )
     else
         notFound();

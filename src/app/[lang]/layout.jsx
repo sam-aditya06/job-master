@@ -15,7 +15,7 @@ export default async function langLayout({ children, params }) {
             <Suspense>
                 <Header />
             </Suspense>
-            <main className="flex-1 bg-neutral-100 dark:bg-black pt-14">
+            <main className="flex-1 bg-neutral-100 dark:bg-black mt-14">
                 {children}
             </main>
             <Footer />

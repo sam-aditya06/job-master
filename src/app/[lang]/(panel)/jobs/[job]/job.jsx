@@ -1,24 +1,49 @@
+'use client';
+
+import { useEffect } from "react";
+import { useParams } from "next/navigation";
+
+import parse from 'html-react-parser';
+
+import { useContentLoader } from "@/lib/context/paginateContext"
+import { ContentSkeleton } from "@/components/skeletons";
+import { PanelLeftOpen } from "lucide-react";
 import Sidebar from "@/components/sidebars/sidebar";
+import { useMessages } from "@/components/messageProvider";
+import scrollToHash from "@/lib/hashScroll";
 import { capitalize } from "@/lib/utils";
 
-export default function Recruitments({ details }) {
-    const { pageHeading, recruitments } = details;
-    const intro = recruitments.length > 0 ?
-        "Browse the latest recruitments for this job below:" :
-        "There are currently no recruitments available for this job."
+export default function Job({ content, recruitments = [] }) {
+    const { isLoading, setIsLoading } = useContentLoader();
+    const { messages } = useMessages();
+    const { jobNavSlug } = useParams();
+
+    useEffect(() => {
+        if (!jobNavSlug)
+            setIsLoading(false);
+    }, [jobNavSlug]);
+
+    useEffect(() => {
+        scrollToHash()
+    }, []);
+
     return (
         <>
             <div className="lg:hidden">
                 <Sidebar screen={'mobile'} />
             </div>
             <div className="cms-content mt-14 lg:mt-0 sm:pr-3">
-                <article id="recruitments">
-                    <header>
-                        <h1>{pageHeading}</h1>
-                        <p>{intro}</p>
-                    </header>
-
+                <article>
+                        {parse(content)}
                     <section>
+                        <h2 id="recruitments">{messages.job.recruitments.heading}</h2>
+                        <p>
+                            {
+                                recruitments.length > 0 ?
+                                    messages.job.recruitments.haveRecruitmentsIntro :
+                                    messages.job.recruitments.noRecruitmentsIntro
+                            }
+                        </p>
                         {
                             recruitments.map(rec => {
                                 const textColor = rec.status === 'upcoming' ?
@@ -31,17 +56,17 @@ export default function Recruitments({ details }) {
                                         <p className="font-bold text-xl">{rec.name}</p>
                                         <div className="flex flex-col gap-1 mt-3">
                                             <div className="flex items-center gap-1">
-                                                <b>Status:</b>
+                                                <b>{messages.job.recruitments.statusLabel}:</b>
                                                 <p className={textColor}>{capitalize(rec.status)}</p>
                                             </div>
                                             <div className="flex flex-col sm:flex-row items-start md:gap-1">
-                                                <p className="min-w-fit"><b>Current Status:</b></p>
+                                                <p className="min-w-fit"><b>{messages.job.recruitments.currentStatusLabel}:</b></p>
                                                 <p className="leading-relaxed" dangerouslySetInnerHTML={{ __html: rec.currentStatus }} />
                                             </div>
                                             {
                                                 rec.whatsNext &&
                                                 <div className="flex flex-col sm:flex-row items-start md:gap-1">
-                                                    <p className="min-w-fit"><b>What's Next:</b></p>
+                                                    <p className="min-w-fit"><b>{messages.job.recruitments.whatsNextLabel}:</b></p>
                                                     <p className="leading-relaxed" dangerouslySetInnerHTML={{ __html: rec.whatsNext }} />
                                                 </div>
                                             }
@@ -57,7 +82,7 @@ export default function Recruitments({ details }) {
                         }
                     </section>
                 </article>
-            </div >
+            </div>
         </>
     )
 }

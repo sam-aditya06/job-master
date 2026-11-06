@@ -28,7 +28,7 @@ export default function ScrollProvider({ children }) {
     }, [page]);
 
     return (
-        <div className="px-2 h-full overflow-y-auto" ref={scrollRef}>
+        <div className="px-2 h-full overflow-y-auto scroll-smooth" ref={scrollRef}>
             {children}
         </div>
     )

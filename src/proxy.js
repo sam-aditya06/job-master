@@ -5,8 +5,6 @@ const PARAM_RENAMES = { for: "org", by: "recruiter" };
 
 const REMOVED_PARAMS = ["sector"];
 
-const GONE_PREFIXES = ["/orgs", "/recruitment-bodies"];
-
 const MERGED_SUFFIXES = [
     { pattern: /^\/jobs\/([^/]+)\/responsibilities\/?$/, target: (m) => `/jobs/${m[1]}` },
 ];
@@ -14,16 +12,25 @@ const MERGED_SUFFIXES = [
 export function proxy(request) {
     const { pathname } = request.nextUrl;
 
+    const pathArr = pathname.substring(1).split('/');
+
     const lang = langs.find(
-        (l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`)
+        (l) => l === pathArr[0]
     );
 
     const pathNoLang = lang ? pathname.slice(lang.length + 1) || "/" : pathname;
 
-    if (GONE_PREFIXES.some((p) => pathNoLang === p || pathNoLang.startsWith(`${p}/`))) {
+    if (pathArr.includes("orgs") || pathArr.includes("recruitment-bodies")) {
         return new NextResponse("Gone", { status: 410 });
     }
 
+    
+    if ((pathArr[1] === 'recruitments' || pathArr[1] === 'jobs') && pathArr.length === 4) {
+        const newPathName = pathArr.slice(0, 3).join('/') + "#" + pathArr[3];
+        const newUrl = new URL(newPathName, request.nextUrl.origin);
+        return NextResponse.redirect(newUrl, 301);
+    }
+    
     const url = request.nextUrl.clone();
     const cleaned = new URLSearchParams();
     let dirty = false;

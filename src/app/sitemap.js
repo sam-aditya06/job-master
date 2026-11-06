@@ -61,24 +61,6 @@ async function getJobsSitemap() {
       lastModified: updatedAt,
       changeFrequency: "monthly",
       priority: 0.8
-    },
-    {
-      url: `${BASE_URL}/${lang}/jobs/${slug}/eligibility-criteria`,
-      lastModified: updatedAt,
-      changeFrequency: "monthly",
-      priority: 0.6
-    },
-    {
-      url: `${BASE_URL}/${lang}/jobs/${slug}/selection-process`,
-      lastModified: updatedAt,
-      changeFrequency: "monthly",
-      priority: 0.6
-    },
-    {
-      url: `${BASE_URL}/${lang}/jobs/${slug}/recruitments`,
-      lastModified: updatedAt,
-      changeFrequency: "daily",
-      priority: 0.7
     }
   ]));
 
@@ -112,19 +94,13 @@ async function getRecruitmentsSitemap() {
   })));
 
   // /recruitments/[recruitment] — current cycle overview
-  const recruitmentEntries = langs.flatMap(lang => recruitmentDetails.flatMap(({ slug, stages, updatedAt }) => ([
+  const recruitmentEntries = langs.flatMap(lang => recruitmentDetails.flatMap(({ slug, updatedAt }) => ([
     {
       url: `${BASE_URL}/${lang}/recruitments/${slug}`,
       lastModified: updatedAt,
       changeFrequency: "daily",
       priority: 0.9
-    },
-    ...stages.map(stage => ({
-      url: `${BASE_URL}/${lang}/recruitments/${slug}/${stage.slug}`,
-      lastModified: stage.updatedAt,
-      changeFrequency: "daily",
-      priority: 0.8
-    }))
+    }
   ])));
 
   return [

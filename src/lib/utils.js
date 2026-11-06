@@ -30,24 +30,6 @@ export function deslugify(str) {
     .join(' ');
 }
 
-export function formatLocation(location) {
-  const { scope, states, uts, districts, municipalities, panchayats } = location;
-  let formattedLocation = '';
-  if (scope === 'all-india')
-    formattedLocation = 'All India'
-  else if(scope === 'state')
-    formattedLocation = `${states[0]}${states.length > 1 ? ` +${states.length - 1}` : ''}`;
-  else if(scope === 'ut')
-    formattedLocation = `${uts[0]}${uts.length > 1 ? ` +${uts.length - 1}` : ''}`;
-  else if(scope === 'district')
-    formattedLocation = `${districts[0]}${districts.length > 1 ? ` +${districts.length - 1}` : ''}`;
-  else if(scope === 'municipality')
-    formattedLocation = `${municipalities[0]}${municipalities.length > 1 ? ` +${municipalities.length - 1}` : ''}`;
-  else if(scope === 'panchayat')
-    formattedLocation = `${panchayats[0]}${panchayats.length > 1 ? ` +${panchayats.length - 1}` : ''}`;
-  return formattedLocation;
-}
-
 export function formatAmount(amount) {
   if (amount >= 100000) {
     const lakhs = amount / 100000;
@@ -62,10 +44,16 @@ export function formatAmount(amount) {
   return `${amount}`;
 }
 
-export function formatLocationJsonLd(location) {
-  if (location.scope === 'all-india') return { "@type": "Country", "name": "India" }
-  if (location.state) return { "@type": "AdministrativeArea", "name": capitalize(location.state) }
-  return null
+export function formatLocationJsonLd(locations = []) {
+  let jobLocations = [];
+
+  locations.forEach(loc => {
+    loc.slug === 'india' ? 
+      jobLocations.push({"@type": "Place", "address": { "@type": "Country", "name": "India" }}) :
+      jobLocations.push({"@type": "Place", "address": { "@type": "administrativeArea", "name": location.name }})
+  });
+
+  return jobLocations;
 }
 
 export function validateFY(fy) {
