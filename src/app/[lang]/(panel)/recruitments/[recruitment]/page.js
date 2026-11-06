@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { getRecruitmentContent, getRecruitmentMetadata } from "@/lib/serverUtils";
+import { getRecruitmentContent, getRecruitmentJsonLd, getRecruitmentMetadata } from "@/lib/serverUtils";
 
 import Recruitment from "./recruitment";
 
@@ -29,11 +29,20 @@ export const generateMetadata = async ({ params }) => {
 
 export default async function RecruitmentPage({ params }) {
     const { lang, recruitment } = await params;
-    const content = await getRecruitmentContent(lang, recruitment);
+    const [jsonLd, content] = await Promise.all([
+        getRecruitmentJsonLd(lang, recruitment),
+        getRecruitmentContent(lang, recruitment)
+    ]);
 
     if (content)
         return (
-            <Recruitment content={content} />
+            <>
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                />
+                <Recruitment content={content} />
+            </>
         )
     else
         notFound();
